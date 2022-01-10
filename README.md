@@ -27,3 +27,6 @@ On Mac:
 ```
 
 On Linux, replace brew with `apt-get`.
+
+# How to run
+See [exp.py](exp.py) for example usage.
