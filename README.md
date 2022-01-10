@@ -1,4 +1,18 @@
 
+# Dependencies
+- [direnv](https://direnv.net/)
+
+# Set up
+Set up `venv`:
+```bash
+❯ ./venv.sh setup
+```
+
+Configure `direnv`:
+```bash
+❯ direnv allow
+```
+
 # Steps to install TeX for matplotlib
 On Mac:
 
