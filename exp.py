@@ -115,7 +115,7 @@ def checking_plausible_regular_balanced_dchoice_wxors():
   m, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
   log(INFO, f"G= \n{pprint.pformat(list(G))}", m=m, obj_bucket_m=obj_bucket_m)
   C = 1
-  ss = storage<.StorageSystem(m, C, G, obj_to_node_map)
+  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
   ss.plot_cap_2d_when_k_g_2()
   
 if __name__ == "__main__":
