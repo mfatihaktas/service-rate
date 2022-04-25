@@ -1,6 +1,4 @@
-import bucket_conf
-from bucket_utils import get_m_G__obj_bucket_m
-
+import storage
 from debug_utils import *
 
 
@@ -72,15 +70,15 @@ def example(k):
     #   [((2, 1),), ((0, 1), (1, 1)) ],
     #   [((0, 1), (1, 1), (2, 1)) ] ]
   
-  m, G, obj_bucket_m = get_m_G__obj_bucket_m(k, bucket__objdesc_l_l)
+  m, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
   log(INFO, "", k=k, m=m, G=G, obj_bucket_m=obj_bucket_m)
   C = 1
-  # cf = bucket_conf.BucketConfInspector_wCode(m, C, G, obj_bucket_m)
+  # cf = storage.BucketConfInspector_wCode(m, C, G, obj_bucket_m)
   # log(DEBUG, "", cf=cf, to_sysrepr=cf.to_sysrepr())
   # cf.plot_cap(d)
 
   obj_to_node_map = obj_bucket_m
-  ss = bucket_conf.StorageSystem(m, C, G, obj_to_node_map)
+  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
   ss.plot_cap_2d(d)
 
 
@@ -95,10 +93,10 @@ def plot_capregion_reed_muller():
      [((0, 1), (2, 1), (3, 1)) ],
      [((0, 1), (1, 1), (3, 1)) ],
      [((0, 1), (1, 1), (2, 1), (3, 1)) ] ]
-  n, G, obj_bucket_m = get_m_G__obj_bucket_m(k, bucket__objdesc_l_l)
+  n, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
   log(INFO, f"G= \n{pprint.pformat(list(G))}", n=n, obj_bucket_m=obj_bucket_m)
   C = 1
-  ss = bucket_conf.StorageSystem(m, C, G, obj_to_node_map)
+  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
   ss.plot_cap_2d_when_k_g_2()
   
   log(INFO, "done.")
@@ -114,10 +112,10 @@ def checking_plausible_regular_balanced_dchoice_wxors():
      [((5, 1),), ((2, 1), (6, 1)) ],
      [((6, 1),), ((4, 1), (5, 1)) ],
      [((7, 1),), ((1, 1), (4, 1)) ] ]
-  m, G, obj_bucket_m = get_m_G__obj_bucket_m(k, bucket__objdesc_l_l)
+  m, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
   log(INFO, f"G= \n{pprint.pformat(list(G))}", m=m, obj_bucket_m=obj_bucket_m)
   C = 1
-  ss = bucket_conf.StorageSystem(m, C, G, obj_to_node_map)
+  ss = storage<.StorageSystem(m, C, G, obj_to_node_map)
   ss.plot_cap_2d_when_k_g_2()
   
 if __name__ == "__main__":
