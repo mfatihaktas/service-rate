@@ -1,6 +1,6 @@
 *.log
 *.out
-checkpoint/
+.direnv/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
