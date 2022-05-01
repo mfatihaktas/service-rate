@@ -19,4 +19,6 @@ def run(node_objs_list: list[list[Obj]]):
 
 
 if __name__ == "__main__":
-    run(name_to_node_objs_list_map["a_b_a+b"])
+    # run(name_to_node_objs_list_map["a_b_a+b"])
+    # run(name_to_node_objs_list_map["a_a_b_b"])
+    run(name_to_node_objs_list_map["a_a_a_b_a+b_a+2b"])
