@@ -44,6 +44,8 @@ class ServiceRateInspector:
         ## Map from object id's to node id's
         self.obj_to_node_id_map = obj_to_node_id_map
 
+        log(DEBUG, "", m=self.m, C=self.C, G=self.G, obj_to_node_id_map=self.obj_to_node_id_map)
+
         self.k = G.shape[0]
         self.n = G.shape[1]
 
@@ -202,7 +204,7 @@ class ServiceRateInspector:
         plot.title(title, fontsize=fontsize, y=1.05)
         plot.savefig("plot_cap_2d.png", bbox_inches="tight")
         plot.gcf().clear()
-        log(INFO, "done.")
+        log(INFO, "Done.")
 
     def plot_cap_2d_when_k_g_2(self):
         fontsize = 18

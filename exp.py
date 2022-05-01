@@ -4,14 +4,18 @@ from storage_scheme import Obj, StorageScheme, name_to_node_objs_list_map
 
 
 def run(node_objs_list: list[list[Obj]]):
+    log(DEBUG, "Started;", node_objs_list=node_objs_list)
+
     scheme = StorageScheme(node_objs_list)
+    log(DEBUG, "", storage_scheme=scheme)
+
     inspector = ServiceRateInspector(
         m=len(node_objs_list),
         C=1,
-        G=scheme.plain_obj_to_orig_index_map,
-        obj_to_node_id_map=scheme.obj_to_node_id_map,
+        G=scheme.obj_encoding_matrix,
+        obj_to_node_id_map=scheme.obj_id_to_node_id_map,
     )
-    inspector.plot_cap_2d(d)
+    inspector.plot_cap_2d()
 
 
 if __name__ == "__main__":

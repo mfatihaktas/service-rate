@@ -12,13 +12,14 @@ ERROR = 3
 CRITICAL = 4
 
 
-# LOGGING_FORMAT = '%(levelname)s] %(func_name)s: %(msg)s'
-LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
+# LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
+LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(func_name)s: %(message)s"
+# LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
 formatter = logging.Formatter(LOGGING_FORMAT)
 
 
 LOGGER_NAME = "serv_rate"
-logging.basicConfig(format=LOGGING_FORMAT, level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(LOGGER_NAME)
 # logger.setLevel(logging.INFO)
 logger.setLevel(logging.DEBUG)

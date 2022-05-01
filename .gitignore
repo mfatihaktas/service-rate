@@ -1,5 +1,6 @@
 *.log
 *.out
+*.png
 .direnv/
 
 # Byte-compiled / optimized / DLL files
