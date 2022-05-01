@@ -76,6 +76,7 @@ obj_to_node_map = {
   1: 1,
   2: 2
 }
+
 ```
 implies that
 - `obj-0` (`a`) is stored on `node-0`

@@ -1,125 +1,18 @@
-import storage
 from debug_utils import *
+from service_rate import ServiceRateInspector
+from storage_scheme import Obj, StorageScheme, name_to_node_objs_list_map
 
 
-def example(k):
-  if k == 2:
-    bucket__objdesc_l_l = [
-      [((0, 1),)],
-      [((1, 1),)],
-      [((0, 1),(1, 1))]
-    ]
-    # bucket__objdesc_l_l = \
-    # [[((0, 1),), ((1, 1),) ],
-    #   [((1, 1),), ((0, 1),) ] ]
-    # bucket__objdesc_l_l = \
-    #  [[((0, 1),), ((1, 1),) ],
-    #   [((0, 1), (1, 1)), ((0, 1), (1, 2)) ] ]
-    
-    ## Example with Caroline
-    d = 2
-    # bucket__objdesc_l_l = \
-    #   [[((0, 1),) ],
-    #    [((0, 1),) ],
-    #    [((0, 1),) ],
-    #    [((0, 1),) ],
-    #    [((0, 1),) ],
-    #    [((1, 1),) ],
-    #    [((1, 1),) ],
-    #    [((1, 1),) ],
-    #    [((1, 1),) ],
-    #    [((0, 1), (1, 1)) ],
-    #    [((0, 1), (1, 2)) ] ]
-
-  elif k == 3:
-    d = 2
-    # if d == 1:
-    #   bucket__objdesc_l_l = \
-    #   [[((0, 1),)],
-    #     [((1, 1),)],
-    #     [((2, 1),)] ]
-    # elif d == 2:
-    #   bucket__objdesc_l_l = \
-    #   [[((0, 1),), ((2, 1),) ],
-    #     [((1, 1),), ((0, 1),) ],
-    #     [((2, 1),), ((1, 1),) ] ]
-    # elif d == 3:
-    #   bucket__objdesc_l_l = \
-    #   [[((0, 1),), ((2, 1),), ((1, 1),) ],
-    #     [((1, 1),), ((0, 1),), ((2, 1),) ],
-    #     [((2, 1),), ((1, 1),), ((0, 1),) ] ]
-    ## Balanced coding
-    # bucket__objdesc_l_l = \
-    #   [[((0, 1),), ((1, 1), (2, 1)) ],
-    #     [((1, 1),), ((0, 1), (2, 1)) ],
-    #     [((2, 1),), ((0, 1), (1, 1)) ] ]
-    ## Unbalanced coding
-    # bucket__objdesc_l_l = \
-    # [[((0, 1),), ((1, 1),) ],
-    #   [((2, 1),), ((0, 1), (1, 1)) ],
-    #   [((1, 1), (2, 1)), ((0, 1), (2, 1)) ] ]
-    ## Simplex over 4 nodes
-    # bucket__objdesc_l_l = \
-    # [[((0, 1),), ((1, 1),) ],
-    #   [((2, 1),), ((0, 1), (1, 1)) ],
-    #   [((1, 1), (2, 1)), ((0, 1), (2, 1)) ],
-    #   [((0, 1), (1, 1), (2, 1)) ] ]
-    # bucket__objdesc_l_l = \
-    # [[((0, 1),), ((1, 1), (2, 1)) ],
-    #   [((1, 1),), ((0, 1), (2, 1)) ],
-    #   [((2, 1),), ((0, 1), (1, 1)) ],
-    #   [((0, 1), (1, 1), (2, 1)) ] ]
-  
-  m, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
-  log(INFO, "", k=k, m=m, G=G, obj_bucket_m=obj_bucket_m)
-  C = 1
-  # cf = storage.BucketConfInspector_wCode(m, C, G, obj_bucket_m)
-  # log(DEBUG, "", cf=cf, to_sysrepr=cf.to_sysrepr())
-  # cf.plot_cap(d)
-
-  obj_to_node_map = obj_bucket_m
-  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
-  ss.plot_cap_2d(d)
+def run(node_objs_list: list[list[Obj]]):
+    scheme = StorageScheme(node_objs_list)
+    inspector = ServiceRateInspector(
+        m=len(node_objs_list),
+        C=1,
+        G=scheme.plain_obj_to_orig_index_map,
+        obj_to_node_id_map=scheme.obj_to_node_id_map,
+    )
+    inspector.plot_cap_2d(d)
 
 
-def plot_capregion_reed_muller():
-  k = 4
-  bucket__objdesc_l_l = \
-    [[((3, 1),) ],
-     [((2, 1), (3, 1)) ],
-     [((1, 1), (3, 1)) ],
-     [((1, 1), (2, 1), (3, 1)) ],
-     [((0, 1), (3, 1)) ],
-     [((0, 1), (2, 1), (3, 1)) ],
-     [((0, 1), (1, 1), (3, 1)) ],
-     [((0, 1), (1, 1), (2, 1), (3, 1)) ] ]
-  n, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
-  log(INFO, f"G= \n{pprint.pformat(list(G))}", n=n, obj_bucket_m=obj_bucket_m)
-  C = 1
-  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
-  ss.plot_cap_2d_when_k_g_2()
-  
-  log(INFO, "done.")
-
-def checking_plausible_regular_balanced_dchoice_wxors():
-  k = 8
-  bucket__objdesc_l_l = \
-    [[((0, 1),), ((6, 1), (7, 1)) ],
-     [((1, 1),), ((3, 1), (7, 1)) ],
-     [((2, 1),), ((0, 1), (1, 1)) ],
-     [((3, 1),), ((0, 1), (5, 1)) ],
-     [((4, 1),), ((2, 1), (3, 1)) ],
-     [((5, 1),), ((2, 1), (6, 1)) ],
-     [((6, 1),), ((4, 1), (5, 1)) ],
-     [((7, 1),), ((1, 1), (4, 1)) ] ]
-  m, G, obj_bucket_m = storage.get_m_G_obj_to_node_map(k, bucket__objdesc_l_l)
-  log(INFO, f"G= \n{pprint.pformat(list(G))}", m=m, obj_bucket_m=obj_bucket_m)
-  C = 1
-  ss = storage.StorageSystem(m, C, G, obj_to_node_map)
-  ss.plot_cap_2d_when_k_g_2()
-  
 if __name__ == "__main__":
-  example(k = 2)
-  
-  # checking_plausible_regular_balanced_dchoice_wxors()
-  # plot_capregion_reed_muller()
+    run(name_to_node_objs_list_map["a_b_a+b"])
