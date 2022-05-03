@@ -45,14 +45,14 @@ class ServiceRateInspector:
         self.obj_to_node_id_map = obj_to_node_id_map
 
         numpy.set_printoptions(threshold=sys.maxsize)
-        log(
-            DEBUG,
-            "",
-            m=self.m,
-            C=self.C,
-            G=self.G,
-            obj_to_node_id_map=self.obj_to_node_id_map,
-        )
+        # log(
+        #     DEBUG,
+        #     "",
+        #     m=self.m,
+        #     C=self.C,
+        #     G=self.G,
+        #     obj_to_node_id_map=self.obj_to_node_id_map,
+        # )
 
         self.k = G.shape[0]
         self.n = G.shape[1]

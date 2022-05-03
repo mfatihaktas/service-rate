@@ -74,11 +74,11 @@ if __name__ == "__main__":
     # run(name_to_node_objs_list_map["a_a_a_b_a+b_a+2b"])
     # run(name_to_node_objs_list_map["a,b_a,b"])
 
-    # csv_file_path_for_node_id_objs_list = "./exp1_rep_12nodes_placement.csv"
-    # csv_file_path_for_obj_demands_list = "./exp1_rep_12nodes_demand.csv"
+    # csv_file_path_for_node_id_objs_list = "csv/exp1_rep_12nodes_placement.csv"
+    # csv_file_path_for_obj_demands_list = "csv/exp1_rep_12nodes_demand.csv"
 
-    csv_file_path_for_node_id_objs_list = "./exp2_ec_9nodes_placement.csv"
-    csv_file_path_for_obj_demands_list = "./exp2_ec_9nodes_demand.csv"
+    csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
+    csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
     
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list,

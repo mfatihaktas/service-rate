@@ -42,7 +42,8 @@ def get_node_id_objs_list_from_oleg_csv_file(csv_file_path: str) -> list[list[Ob
 
     log(DEBUG, "Done;", line_count=line_count)
 
-    return [node_id_to_objs_map[i] for i in range(line_count)]
+    max_node_id = max(node_id for node_id in node_id_to_objs_map)
+    return [node_id_to_objs_map[i] for i in range(max_node_id + 1)]
 
 
 def get_obj_demands_list_from_oleg_csv_file(csv_file_path: str) -> list[list[float]]:
