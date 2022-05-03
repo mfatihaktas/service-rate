@@ -1,7 +1,7 @@
 import itertools
-import logging
 import string
 
+import cvxpy
 import mpl_toolkits
 import numpy
 import scipy.spatial
@@ -44,7 +44,15 @@ class ServiceRateInspector:
         ## Map from object id's to node id's
         self.obj_to_node_id_map = obj_to_node_id_map
 
-        log(DEBUG, "", m=self.m, C=self.C, G=self.G, obj_to_node_id_map=self.obj_to_node_id_map)
+        numpy.set_printoptions(threshold=sys.maxsize)
+        log(
+            DEBUG,
+            "",
+            m=self.m,
+            C=self.C,
+            G=self.G,
+            obj_to_node_id_map=self.obj_to_node_id_map,
+        )
 
         self.k = G.shape[0]
         self.n = G.shape[1]
@@ -90,16 +98,16 @@ class ServiceRateInspector:
         print(f"M= {self.M}")
 
         ## Halfspaces
-        halfspaces = numpy.zeros((self.m + self.l, self.l + 1))
-        for r in range(self.m):
-            halfspaces[r, -1] = -self.C
-        halfspaces[: self.m, :-1] = self.M
-        for r in range(self.m, self.m + self.l):
-            halfspaces[r, r - self.m] = -1
-        # log(INFO, "halfspaces= \n{}".format(halfspaces) )
+        # halfspaces = numpy.zeros((self.m + self.l, self.l + 1))
+        # for r in range(self.m):
+        #     halfspaces[r, -1] = -self.C
+        # halfspaces[: self.m, :-1] = self.M
+        # for r in range(self.m, self.m + self.l):
+        #     halfspaces[r, r - self.m] = -1
+        # # log(INFO, "halfspaces= \n{}".format(halfspaces) )
 
-        feasible_point = numpy.array([self.C / self.l] * self.l)
-        self.hs = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+        # feasible_point = numpy.array([self.C / self.l] * self.l)
+        # self.hs = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
 
     def __repr__(self):
         return (
@@ -138,7 +146,9 @@ class ServiceRateInspector:
                 (self.k, 1)
             )
 
-            for repair_size in range(1, self.k + 1):
+            # TODO (mehmet@overjet.ai): Revert this.
+            # for repair_size in range(1, self.k + 1):
+            for repair_size in range(1, 3):
                 for subset in itertools.combinations(range(self.n), repair_size):
                     subset = set(subset)
 
@@ -165,6 +175,25 @@ class ServiceRateInspector:
             obj_to_repair_sets_map[obj] = repair_set_list
 
         return obj_to_repair_sets_map
+
+    def is_in_cap_region(self, obj_demand_list):
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        # obj = cvxpy.Maximize(numpy.ones((1, self.l))*x)
+        obj = cvxpy.Maximize(0)
+        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+
+        prob = cvxpy.Problem(obj, constraints)
+        try:
+            prob.solve()
+        except cvxpy.SolverError:
+            prob.solve(solver="SCS")
+
+        # log(DEBUG, f"prob.status= {prob.status}")
+        # blog(x_val=x.value)
+        return prob.status == "optimal"
 
     def plot_cap(self):
         if self.k == 2:
