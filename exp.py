@@ -77,8 +77,12 @@ if __name__ == "__main__":
     # csv_file_path_for_node_id_objs_list = "csv/exp1_rep_12nodes_placement.csv"
     # csv_file_path_for_obj_demands_list = "csv/exp1_rep_12nodes_demand.csv"
 
-    csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
-    csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+    # csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
+    # csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+
+    # csv_file_path_for_node_id_objs_list = "csv/exp3_rep_6nodes_placement.csv"
+    csv_file_path_for_node_id_objs_list = "csv/exp3_ec_6nodes_placement.csv"
+    csv_file_path_for_obj_demands_list = "csv/exp3_6nodes_demand.csv"
     
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list,
