@@ -99,7 +99,7 @@ if __name__ == "__main__":
 
     csv_file_path_for_node_id_objs_list_coding = "csv/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT.csv"
     csv_file_path_for_obj_demands_list_coding = "csv/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND.csv"
-    
+
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list_coding,
         csv_file_path_for_obj_demands_list_coding
@@ -111,7 +111,6 @@ if __name__ == "__main__":
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list_replication,
         csv_file_path_for_obj_demands_list_replication
-    )
 
     codingResFile = createResultFilePath(csv_file_path_for_obj_demands_list_coding)
     repResFile = createResultFilePath(csv_file_path_for_obj_demands_list_replication)
