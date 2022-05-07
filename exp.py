@@ -8,8 +8,18 @@ from storage_scheme import Obj, StorageScheme, name_to_node_objs_list_map
 from pathlib import Path
 import pandas as pd
 
-def run(node_id_objs_list: list[list[Obj]]):
-    log(DEBUG, "Started;", node_id_objs_list=node_id_objs_list)
+def run(
+    node_id_objs_list: list[list[Obj]],
+    max_repair_set_size: int = None,
+    compute_halfspace_intersections=False,
+):
+    log(
+        DEBUG,
+        "Started;",
+        node_id_objs_list=node_id_objs_list,
+        max_repair_set_size=max_repair_set_size,
+        compute_halfspace_intersections=compute_halfspace_intersections,
+    )
 
     scheme = StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=scheme)
@@ -19,6 +29,8 @@ def run(node_id_objs_list: list[list[Obj]]):
         C=1,
         G=scheme.obj_encoding_matrix,
         obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        max_repair_set_size=max_repair_set_size,
+        compute_halfspace_intersections=compute_halfspace_intersections,
     )
     inspector.plot_cap_2d()
 
@@ -28,18 +40,22 @@ def run(node_id_objs_list: list[list[Obj]]):
 def run_w_csv_file_path(
     csv_file_path_for_node_id_objs_list: str,
     csv_file_path_for_obj_demands_list: str,
+    max_repair_set_size=None,
+    compute_halfspace_intersections=False,
 ):
     log(
         DEBUG,
         "Started;",
         csv_file_path_for_node_id_objs_list=csv_file_path_for_node_id_objs_list,
         csv_file_path_for_obj_demands_list=csv_file_path_for_obj_demands_list,
+        max_repair_set_size=max_repair_set_size,
+        compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
     node_id_objs_list = get_node_id_objs_list_from_oleg_csv_file(
         csv_file_path_for_node_id_objs_list
     )
-    log(DEBUG, "", node_id_objs_list=node_id_objs_list)
+    # log(DEBUG, "", node_id_objs_list=node_id_objs_list)
 
     scheme = StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=scheme)
@@ -49,6 +65,8 @@ def run_w_csv_file_path(
         C=1,
         G=scheme.obj_encoding_matrix,
         obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        compute_halfspace_intersections=compute_halfspace_intersections,
+        max_repair_set_size=max_repair_set_size,
     )
 
     obj_demands_list = get_obj_demands_list_from_oleg_csv_file(
@@ -89,9 +107,11 @@ if __name__ == "__main__":
 
     # csv_file_path_for_node_id_objs_list = "csv/exp1_rep_12nodes_placement.csv"
     # csv_file_path_for_obj_demands_list = "csv/exp1_rep_12nodes_demand.csv"
+    # max_repair_set_size = 1
 
-    # csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
-    # csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+    csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
+    csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+    max_repair_set_size = 2
 
     # csv_file_path_for_node_id_objs_list = "csv/exp3_rep_6nodes_placement.csv"
     # csv_file_path_for_node_id_objs_list = "csv/exp3_ec_6nodes_placement.csv"
@@ -103,6 +123,7 @@ if __name__ == "__main__":
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list_coding,
         csv_file_path_for_obj_demands_list_coding
+        max_repair_set_size,
     )
 
     csv_file_path_for_node_id_objs_list_replication = "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"

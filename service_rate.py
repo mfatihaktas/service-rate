@@ -10,31 +10,21 @@ import plot_polygon
 from debug_utils import *
 from plot_utils import *
 
-# def get_m_G_obj_to_node_map(
-#   k: int,
-#   node_objdesc_list: list[list[tuple]]
-# ):
-#   num_objs = sum([len(objdesc_list) for objdesc_list in node_objdesc_list] )
-#   G = numpy.zeros((k, num_objs))
-#   obj_to_node_map = {}
-
-#   obj = 0
-#   for node, objdesc_l in enumerate(node_objdesc_list):
-#     for objdesc in objdesc_l:
-#       for part in objdesc:
-#         G[part[0], obj] = part[1]
-#       obj_to_node_map[obj] = node
-#       obj += 1
-
-#   return len(node_objdesc_list), G, obj_to_node_map
-
 
 class ServiceRateInspector:
     """Defines a storage system that distributes n objects across m
     nodes. Input arguments and class variables are described in the README.
     """
 
-    def __init__(self, m: int, C: float, G: numpy.ndarray, obj_to_node_id_map: dict):
+    def __init__(
+        self,
+        m: int,
+        C: float,
+        G: numpy.ndarray,
+        obj_to_node_id_map: dict,
+        compute_halfspace_intersections: bool = False,
+        max_repair_set_size: int = None,
+    ):
         ## Number of buckets
         self.m = m
         ## Capacity of each node
@@ -59,7 +49,7 @@ class ServiceRateInspector:
 
         ## repair sets are given in terms of obj ids,
         ## in the sense of columns of G or keys of obj_to_node_id_map
-        obj_to_repair_sets_map = self.get_obj_to_repair_sets_map()
+        obj_to_repair_sets_map = self.get_obj_to_repair_sets_map(max_repair_set_size)
 
         log(DEBUG, "", obj_to_repair_sets_map=obj_to_repair_sets_map)
 
@@ -87,7 +77,7 @@ class ServiceRateInspector:
             j = i + len(obj_to_repair_sets_map[obj])
             self.T[obj, i:j] = 1
             i = j
-        print(f"T= {self.T}")
+        # print(f"T= {self.T}")
 
         ## M
         self.M = numpy.zeros((m, self.l))
@@ -98,16 +88,17 @@ class ServiceRateInspector:
         print(f"M= {self.M}")
 
         ## Halfspaces
-        # halfspaces = numpy.zeros((self.m + self.l, self.l + 1))
-        # for r in range(self.m):
-        #     halfspaces[r, -1] = -self.C
-        # halfspaces[: self.m, :-1] = self.M
-        # for r in range(self.m, self.m + self.l):
-        #     halfspaces[r, r - self.m] = -1
-        # # log(INFO, "halfspaces= \n{}".format(halfspaces) )
+        if compute_halfspace_intersections:
+            halfspaces = numpy.zeros((self.m + self.l, self.l + 1))
+            for r in range(self.m):
+                halfspaces[r, -1] = -self.C
+            halfspaces[: self.m, :-1] = self.M
+            for r in range(self.m, self.m + self.l):
+                halfspaces[r, r - self.m] = -1
+            # log(INFO, "halfspaces= \n{}".format(halfspaces) )
 
-        # feasible_point = numpy.array([self.C / self.l] * self.l)
-        # self.hs = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+            feasible_point = numpy.array([self.C / self.l] * self.l)
+            self.hs = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
 
     def __repr__(self):
         return (
@@ -115,7 +106,7 @@ class ServiceRateInspector:
             f"\t m= {self.m} \n"
             f"\t C= {self.C} \n"
             f"\t G=\n {self.G}"
-            f"\t obj_to_node_id_map= {self.obj_to_node_id_map} \n"
+            # f"\t obj_to_node_id_map= {self.obj_to_node_id_map} \n"
             f"\t M= {self.M} \n"
             f"\t T= {self.T}"
         )
@@ -137,8 +128,12 @@ class ServiceRateInspector:
             node_list[ni].append("+".join(l))
         return str(node_list)
 
-    def get_obj_to_repair_sets_map(self):
+    def get_obj_to_repair_sets_map(self, max_repair_set_size=None):
         obj_to_repair_sets_map = {}
+
+        if max_repair_set_size is None:
+            max_repair_set_size = self.k
+        log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
         for obj in range(self.k):
             repair_set_list = []
@@ -146,9 +141,7 @@ class ServiceRateInspector:
                 (self.k, 1)
             )
 
-            # TODO (mehmet@overjet.ai): Revert this.
-            # for repair_size in range(1, self.k + 1):
-            for repair_size in range(1, 3):
+            for repair_size in range(1, max_repair_set_size + 1):
                 for subset in itertools.combinations(range(self.n), repair_size):
                     subset = set(subset)
 

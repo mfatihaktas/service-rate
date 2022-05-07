@@ -130,18 +130,27 @@ class StorageScheme:
         self._plain_obj_to_orig_id_map = self.get_plain_obj_to_orig_id_map()
 
         self._obj_id_to_node_id_map = self.get_obj_id_to_node_id_map()
-        log(DEBUG, "", obj_id_to_node_id_map=self.obj_id_to_node_id_map)
+        # log(DEBUG, "", obj_id_to_node_id_map=self.obj_id_to_node_id_map)
 
         # This refers to G
         self._obj_encoding_matrix = self.get_obj_encoding_matrix()
 
     def __repr__(self):
         s = "StorageScheme( \n"
+        # for node_id, obj_list in enumerate(self.node_id_objs_list):
+        #     s += f"node-{node_id}: [\n"
+        #     for obj in obj_list:
+        #         s += f"{obj} \n"
+        #     s += "] \n"
         for node_id, obj_list in enumerate(self.node_id_objs_list):
-            s += f"node-{node_id}: [\n"
+            # s += f"\t node-{node_id}: {len(obj_list)} objs \n"
+            num_plain, num_coded = 0, 0
             for obj in obj_list:
-                s += f"{obj} \n"
-            s += "] \n"
+                if isinstance(obj, PlainObj):
+                    num_plain += 1
+                elif isinstance(obj, CodedObj):
+                    num_coded += 1
+            s += f"\t node-{node_id}: {num_plain} plain, {num_coded} coded objs \n"
         s += ") \n"
 
         return s
@@ -169,7 +178,7 @@ class StorageScheme:
     def get_obj_encoding_matrix(self):
         G = numpy.zeros((self.num_original_objs, self.total_num_objs))
 
-        log(DEBUG, "", _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map)
+        # log(DEBUG, "", _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map)
 
         for node, obj_list in enumerate(self.node_id_objs_list):
             for obj in obj_list:
