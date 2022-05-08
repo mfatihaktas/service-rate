@@ -59,19 +59,19 @@ def get_obj_demands_list_from_oleg_csv_file(csv_file_path: str) -> list[list[flo
     with open(csv_file_path) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=",")
 
-        num_of_objects=0
+        num_of_objects = 0
 
         for row in csv_reader:
             if line_count == 0:
                 for s in row:
                     if s.isdigit():
-                        num_of_objects+=1
+                        num_of_objects += 1
                 line_count += 1
                 continue
 
             dem_list = []
-            for i,s in enumerate(row):
-                if i<num_of_objects:
+            for i, s in enumerate(row):
+                if i < num_of_objects:
                     dem_list.append(s)
             obj_demands_list.append(dem_list)
             # obj_demands_list.append([float(s) for s in row])
