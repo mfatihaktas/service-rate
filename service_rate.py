@@ -1,10 +1,10 @@
-import itertools
-import string
-
+import collections
 import cvxpy
+import itertools
 import mpl_toolkits
 import numpy
 import scipy.spatial
+import string
 
 import plot_polygon
 from debug_utils import *
@@ -49,9 +49,9 @@ class ServiceRateInspector:
 
         ## repair sets are given in terms of obj ids,
         ## in the sense of columns of G or keys of obj_to_node_id_map
-        obj_to_repair_sets_map = self.get_obj_to_repair_sets_map(max_repair_set_size)
+        self.obj_to_repair_sets_map = self.get_obj_to_repair_sets_map(max_repair_set_size)
 
-        log(DEBUG, "", obj_to_repair_sets_map=obj_to_repair_sets_map)
+        log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
         log(DEBUG, "Repair groups in terms of node id's:")
 
@@ -59,7 +59,7 @@ class ServiceRateInspector:
             s = ",".join([f"{obj_to_node_id_map[obj_id]}" for obj_id in repair_set])
             return f"({s})"
 
-        for obj, repair_sets in obj_to_repair_sets_map.items():
+        for obj, repair_sets in self.obj_to_repair_sets_map.items():
             repair_sets_str = ", ".join([repair_set_to_str(rs) for rs in repair_sets])
             print(f"obj= {obj}, [{repair_sets_str}]")
 
@@ -68,13 +68,13 @@ class ServiceRateInspector:
         ## T
         repair_set_list = []
         for obj in range(self.k):
-            repair_set_list.extend(obj_to_repair_sets_map[obj])
+            repair_set_list.extend(self.obj_to_repair_sets_map[obj])
 
         self.l = len(repair_set_list)
         self.T = numpy.zeros((self.k, self.l))
         i = 0
         for obj in range(self.k):
-            j = i + len(obj_to_repair_sets_map[obj])
+            j = i + len(self.obj_to_repair_sets_map[obj])
             self.T[obj, i:j] = 1
             i = j
         # print(f"T= {self.T}")
@@ -105,10 +105,11 @@ class ServiceRateInspector:
             "ServiceRateInspector( \n"
             f"\t m= {self.m} \n"
             f"\t C= {self.C} \n"
-            f"\t G=\n {self.G}"
+            f"\t G=\n {self.G} \n"
             # f"\t obj_to_node_id_map= {self.obj_to_node_id_map} \n"
             f"\t M= {self.M} \n"
-            f"\t T= {self.T}"
+            f"\t T= {self.T} \n"
+            ")"
         )
 
     def to_sysrepr(self):
@@ -187,6 +188,48 @@ class ServiceRateInspector:
         # log(DEBUG, f"prob.status= {prob.status}")
         # blog(x_val=x.value)
         return prob.status == "optimal"
+
+    def get_cap_boundary_point_list(self):
+        return [list(numpy.matmul(self.T, p)) for p in self.hs.intersections]
+
+    def min_cost(self, obj_demand_list):
+        # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)
+
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        cost_coeff_list = []
+        for obj in range(self.k):
+            repair_set_list = self.obj_to_repair_sets_map[obj]
+            for repair_set in repair_set_list:
+                cost_coeff_list.append(len(repair_set))
+        log(DEBUG, "", cost_coeff_list=cost_coeff_list)
+
+        cost_coeff_row_vector = numpy.asarray(cost_coeff_list).reshape((1, self.l))
+        obj = cvxpy.Minimize(cost_coeff_row_vector @ x)
+        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+
+        prob = cvxpy.Problem(obj, constraints)
+        try:
+            prob.solve()
+        except cvxpy.SolverError:
+            prob.solve(solver="SCS")
+
+        allocation_list = []
+        for v_list in x.value.tolist():
+            v = v_list[0]
+            allocation_list.append(
+                v if abs(v) > 0.001 else 0
+            )
+        log(DEBUG, f"allocation_list= {allocation_list}")
+
+        # log(DEBUG, f"prob.status= {prob.status}")
+        if prob.status == cvxpy.OPTIMAL:
+            cost = cost_coeff_row_vector @ x.value
+            return cost.tolist()[0][0]
+        else:
+            return None
 
     def plot_cap(self):
         if self.k == 2:
