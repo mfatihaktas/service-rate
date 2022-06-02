@@ -9,6 +9,7 @@ from csv_utils import (
 from debug_utils import *
 from service_rate import ServiceRateInspector
 from storage_scheme import Obj, StorageScheme, name_to_node_objs_list_map
+from os.path import exists
 
 
 def run(
@@ -104,10 +105,10 @@ def createResultFilePath(filename):
 
 def run_w_sim_result_csv_files():
     csv_file_path_for_node_id_objs_list_replication = (
-        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACEMENT.csv"
+        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"
     )
     csv_file_path_for_obj_demands_list_replication = (
-        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_DEMAND.csv"
+        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv"
     )
     max_repair_set_size = 1
 
@@ -118,11 +119,15 @@ def run_w_sim_result_csv_files():
     )
 
     csv_file_path_for_node_id_objs_list_coding = (
-        "csv/SIMRESULT_SERVICE_RATE_CODING_PLACEMENT.csv"
+        "csv/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT.csv"
     )
     csv_file_path_for_obj_demands_list_coding = (
-        "csv/SIMRESULT_SERVICE_RATE_CODING_DEMAND.csv"
+        "csv/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND.csv"
     )
+
+    csv_file_demand_ec_orbit = "csv/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND_ORBIT.csv"
+    csv_file_demand_rep_orbit = "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND_ORBIT.csv"
+
     max_repair_set_size = 2
 
     run_w_csv_file_path(
@@ -136,8 +141,25 @@ def run_w_sim_result_csv_files():
     codingResFile = createResultFilePath(csv_file_path_for_obj_demands_list_coding)
     df2 = pd.read_csv(codingResFile)
     df = pd.concat([df1, df2])
-    df = df.sort_values(by=list(df.columns[:-3]))
+    df = df.sort_values(by=["iteration","type"])
     df.reset_index(inplace=True, drop=True)
+
+    if exists(csv_file_demand_ec_orbit) and exists(csv_file_demand_rep_orbit):
+        dforb1 = pd.read_csv(csv_file_demand_ec_orbit)
+        dforb2 = pd.read_csv(csv_file_demand_rep_orbit)
+        dforb = pd.concat([dforb1, dforb2])
+        dforb = dforb.sort_values(by=["iteration","type"])
+        dforb.reset_index(inplace=True, drop=True)
+        for row in range(dforb.shape[0]):
+            if not (dforb.iloc[row,0:10] == df.iloc[row,0:10]).all():
+                print("ORBIT csv doesn't equal sim")
+        df["orbit"] = dforb["completed"]
+        df["orbitCost"] = dforb["cost"]
+        df["orbitLatency"] = dforb["latency"]
+        df["adjustedCost"] = dforb["cost"] * dforb["reqsPerUserSec"]
+
+
+
     df.to_csv("csv/experiment_output.csv", index=False)
 
 
@@ -158,9 +180,10 @@ if __name__ == "__main__":
     # csv_file_path_for_node_id_objs_list = "csv/exp3_rep_6nodes_placement.csv"
     # csv_file_path_for_node_id_objs_list = "csv/exp3_ec_6nodes_placement.csv"
     # csv_file_path_for_obj_demands_list = "csv/exp3_6nodes_demand.csv"
+    run_w_sim_result_csv_files()
 
-    run_w_csv_file_path(
-        csv_file_path_for_node_id_objs_list,
-        csv_file_path_for_obj_demands_list,
-        max_repair_set_size,
-    )
+    # run_w_csv_file_path(
+    #     csv_file_path_for_node_id_objs_list,
+    #     csv_file_path_for_obj_demands_list,
+    #     max_repair_set_size,
+    # )
