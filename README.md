@@ -1,17 +1,15 @@
-
 # Dependencies
+- [pyenv](https://github.com/pyenv/pyenv)
 - [direnv](https://direnv.net/)
 
 # Set up
-Set up `venv`:
+Install the required Python version using `pyenv`:
 ```bash
-❯ ./venv.sh setup
+pyenv install 3.9.10
 ```
 
-Configure `direnv`:
-```bash
-❯ direnv allow
-```
+Then run [install.sh](install.sh).
+
 
 # Steps to install TeX for matplotlib
 On Mac:
@@ -82,4 +80,3 @@ implies that
 - `obj-0` (`a`) is stored on `node-0`
 - `obj-1` (`b`) is stored on `node-1`
 - `obj-2` (`a+b`) is stored on `node-2`
-
