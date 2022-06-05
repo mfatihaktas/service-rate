@@ -216,6 +216,15 @@ class ServiceRateInspector:
         except cvxpy.SolverError:
             prob.solve(solver="SCS")
 
+        if prob.status != "optimal":
+            log(WARNING,
+                "Object demand vector is not in the capacity region, "
+                "thus cannot compute the cost.",
+                prob_status=prob.status,
+                obj_demand_list=obj_demand_list,
+            )
+            return None
+
         allocation_list = []
         for v_list in x.value.tolist():
             v = v_list[0]
