@@ -85,8 +85,17 @@ def run_w_csv_file_path(
     for i, obj_demand_list in enumerate(obj_demands_list):
         is_in_cap_region = inspector.is_in_cap_region(obj_demand_list)
         min_cost = inspector.min_cost(obj_demand_list)
+        min_distance = inspector.min_distance_to_boundary(obj_demand_list)
 
-        # log(DEBUG, f"demand-vector-{i}: is_in_cap_region= {is_in_cap_region}")
+        log(
+            DEBUG,
+            f"demand-vector-{i}: \n"
+            f"\t obj_demand_list= {obj_demand_list} \n"
+            f"\t is_in_cap_region= {is_in_cap_region} \n"
+            f"\t min_cost= {min_cost} \n"
+            f"\t min_distance= {min_distance}"
+        )
+
         num_is_in_cap_region += int(is_in_cap_region)
         demDF.loc[i, "inside"] = is_in_cap_region
         demDF.loc[i, "mCost"] = min_cost
@@ -108,14 +117,21 @@ def createResultFilePath(filename):
 
 
 def run_w_sim_result_csv_files(basedir='csv'):
-    csv_file_path_for_node_id_objs_list_replication = (basedir+"/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv")
-    csv_file_path_for_obj_demands_list_replication = (basedir+"/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv")
+    compute_halfspace_intersections = False # True
+
+    csv_file_path_for_node_id_objs_list_replication = (
+        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"
+    )
+    csv_file_path_for_obj_demands_list_replication = (
+        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv"
+    )
     max_repair_set_size = 1
 
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list_replication,
         csv_file_path_for_obj_demands_list_replication,
-        max_repair_set_size,
+        max_repair_set_size=max_repair_set_size,
+        compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
     csv_file_path_for_node_id_objs_list_coding = (basedir+"/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT.csv")
@@ -132,7 +148,8 @@ def run_w_sim_result_csv_files(basedir='csv'):
     run_w_csv_file_path(
         csv_file_path_for_node_id_objs_list_coding,
         csv_file_path_for_obj_demands_list_coding,
-        max_repair_set_size,
+        max_repair_set_size=max_repair_set_size,
+        compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
     repResFile = createResultFilePath(csv_file_path_for_obj_demands_list_replication)
@@ -184,9 +201,9 @@ if __name__ == "__main__":
     # csv_file_path_for_obj_demands_list = "csv/exp1_rep_12nodes_demand.csv"
     # max_repair_set_size = 1
 
-    # csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
-    # csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
-    # max_repair_set_size = 2
+    csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
+    csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+    max_repair_set_size = 2
 
     # csv_file_path_for_node_id_objs_list = "csv/exp3_rep_6nodes_placement.csv"
     # csv_file_path_for_node_id_objs_list = "csv/exp3_ec_6nodes_placement.csv"
