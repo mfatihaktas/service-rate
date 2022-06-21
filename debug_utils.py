@@ -13,7 +13,7 @@ CRITICAL = 4
 
 
 # LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
-LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(func_name)s: %(message)s"
+LOGGING_FORMAT = "%(filename)s:%(lineno)s-%(func_name)s: %(message)s"
 # LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
 formatter = logging.Formatter(LOGGING_FORMAT)
 

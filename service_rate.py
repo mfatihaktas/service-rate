@@ -33,6 +33,7 @@ class ServiceRateInspector:
         self.G = G
         ## Map from object id's to node id's
         self.obj_to_node_id_map = obj_to_node_id_map
+        self.compute_halfspace_intersections = compute_halfspace_intersections
 
         numpy.set_printoptions(threshold=sys.maxsize)
         # log(
@@ -98,7 +99,12 @@ class ServiceRateInspector:
             # log(INFO, "halfspaces= \n{}".format(halfspaces) )
 
             feasible_point = numpy.array([self.C / self.l] * self.l)
-            self.hs = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+            self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+
+            self.boundary_point_list = [list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections]
+            self.boundary_points_in_rows = numpy.array(self.boundary_point_list).reshape((len(self.boundary_point_list), self.k))
+
+            self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
 
     def __repr__(self):
         return (
@@ -189,10 +195,7 @@ class ServiceRateInspector:
         # blog(x_val=x.value)
         return prob.status == "optimal"
 
-    def get_cap_boundary_point_list(self):
-        return [list(numpy.matmul(self.T, p)) for p in self.hs.intersections]
-
-    def min_cost(self, obj_demand_list):
+    def min_cost(self, obj_demand_list: list[float]):
         # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)
 
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
@@ -236,9 +239,49 @@ class ServiceRateInspector:
         # log(DEBUG, f"prob.status= {prob.status}")
         if prob.status == cvxpy.OPTIMAL:
             cost = cost_coeff_row_vector @ x.value
-            return cost.tolist()[0][0]
+            cost = cost.tolist()[0][0]
+            # cost = cost / numpy.sum(x.value)
+            return cost
         else:
             return None
+
+    def min_distance_to_boundary(self, obj_demand_list: list[float]) -> float:
+        """ Returns the min distance from obj_demand_list to the service rate boundary. """
+
+        if self.compute_halfspace_intersections is False:
+            log(WARNING,
+                "Cannot compute min distance to service capacity boundary",
+                compute_halfspace_intersection=self.compute_halfspace_intersections
+            )
+            return None
+
+        # https://stackoverflow.com/questions/42248202/find-the-projection-of-a-point-on-the-convex-hull-with-scipy
+        def min_distance(p, v1, v2):
+          """ Finds projection p' of point p on the closest edge formed by points p1 and p2,
+          and returns the distance from p to p'.
+          """
+
+          # blog(p=p, v1=v1, v2=v2)
+          v2 = v2 - v1
+          l = numpy.sum(v2**2) # compute the squared distance between the 2 vertices
+          # blog(l=l, dot=numpy.dot(p-v1, v2-v1)[0] )
+          t = numpy.max([0., numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l])]) # numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l] )
+          # blog(dot=numpy.dot(p-v1, v2-v1), t=t)
+          proj = v1 + t*(v2 - v1)
+          return numpy.sqrt(numpy.sum((proj - p)**2))
+
+        x = numpy.array(obj_demand_list).reshape((self.k, 1))
+        min_dist = float('Inf')
+        for i in range(len(self.hull.vertices)):
+          m = min_distance(
+              x.T,
+              self.boundary_points_in_rows[self.hull.vertices[i]],
+              self.boundary_points_in_rows[self.hull.vertices[(i+1) % len(self.hull.vertices)]]
+          )
+          if m < min_dist:
+            min_dist = m
+
+        return min_dist
 
     def plot_cap(self):
         if self.k == 2:
