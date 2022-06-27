@@ -100,11 +100,13 @@ class ServiceRateInspector:
 
             feasible_point = numpy.array([self.C / self.l] * self.l)
             self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+            log(DEBUG, "scipy.spatial.HalfspaceIntersection is done.")
 
             self.boundary_point_list = [list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections]
             self.boundary_points_in_rows = numpy.array(self.boundary_point_list).reshape((len(self.boundary_point_list), self.k))
 
             self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
+            log(DEBUG, "scipy.spatial.ConvexHull is done.")
 
     def __repr__(self):
         return (
@@ -176,7 +178,7 @@ class ServiceRateInspector:
 
         return obj_to_repair_sets_map
 
-    def is_in_cap_region(self, obj_demand_list):
+    def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
 
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
@@ -246,7 +248,17 @@ class ServiceRateInspector:
             return None
 
     def min_distance_to_boundary(self, obj_demand_list: list[float]) -> float:
-        """ Returns the min distance from obj_demand_list to the service rate boundary. """
+        """ Returns the min distance from obj_demand_list to the service rate boundary.
+
+        Relies on
+        self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+        self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
+        which take very long to complete when the number of objects > ~30.
+
+        TODO: Investigate why these two functions takes so long to complete,
+        and if we can make them run faster, or if we can find a different faster
+        way to get the same results.
+        """
 
         if self.compute_halfspace_intersections is False:
             log(WARNING,
@@ -262,10 +274,10 @@ class ServiceRateInspector:
           """
 
           # blog(p=p, v1=v1, v2=v2)
-          v2 = v2 - v1
-          l = numpy.sum(v2**2) # compute the squared distance between the 2 vertices
+          # v2 = v2 - v1
+          l = numpy.sum((v2 - v1)**2) # compute the squared distance between the 2 vertices
           # blog(l=l, dot=numpy.dot(p-v1, v2-v1)[0] )
-          t = numpy.max([0., numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l])]) # numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l] )
+          t = numpy.max([0., numpy.min([1., numpy.dot(p - v1, v2 - v1) / l])]) # numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l] )
           # blog(dot=numpy.dot(p-v1, v2-v1), t=t)
           proj = v1 + t*(v2 - v1)
           return numpy.sqrt(numpy.sum((proj - p)**2))
@@ -282,6 +294,41 @@ class ServiceRateInspector:
             min_dist = m
 
         return min_dist
+
+    def approx_min_distance_to_boundary(self, obj_demand_list: list[float]) -> float:
+        """ Returns the approximate min distance from obj_demand_list to the service rate boundary.
+
+        Finds the approximate min distance as follows:
+        - Draws a line L from the point of interest P (obj_demand_list) to origin.
+        - If P is inside the capacity region, scales P by 2 (along L) until P lies
+        outside the capacity region.
+        - Performs binary search between origin and P to find the point at which
+        L intersects with the capacity region boundary.
+
+        Reason to have this approximation is min_distance_to_boundary() relies on computing
+        self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+        self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
+        , which take very long to complete when the number of objects > ~30.
+        """
+
+        def dist(x: numpy.array, y: numpy.array):
+            return numpy.sqrt(numpy.sum(numpy.square(x - y)))
+
+        u = numpy.array(obj_demand_list)
+        while self.is_in_cap_region(u):
+            u *= 2
+
+        l = 0
+        while dist(l, u) > 0.05:
+            m = (l + u) / 2
+            if self.is_in_cap_region(m):
+                l = m
+            else:
+                u = m
+
+        point_on_boundary = (l + u) / 2
+        log(DEBUG, "", point_on_boundary=point_on_boundary)
+        return dist(point_on_boundary, numpy.array(obj_demand_list))
 
     def plot_cap(self):
         if self.k == 2:

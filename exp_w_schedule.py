@@ -40,13 +40,19 @@ def run(
     # inspector.plot_cap_2d()
 
     [k, n] = scheme.obj_encoding_matrix.shape
-    cum_demand = min(len(repair_set_list) for _, repair_set_list in inspector.obj_to_repair_sets_map.items())
+    cum_demand = 1.2*min(len(repair_set_list) for _, repair_set_list in inspector.obj_to_repair_sets_map.items())
     log(DEBUG, "", cum_demand=cum_demand)
     for i in range(10):
         obj_demand_list = sample_obj_demand_list(k, cum_demand)
         min_cost = inspector.min_cost(obj_demand_list)
         min_dist = inspector.min_distance_to_boundary(obj_demand_list)
-        log(DEBUG, f"i= {i}", obj_demand_list=obj_demand_list, min_cost=min_cost, min_dist=min_dist)
+        min_dist_approx = inspector.approx_min_distance_to_boundary(obj_demand_list)
+        log(DEBUG, f"i= {i}",
+            obj_demand_list=obj_demand_list,
+            min_cost=min_cost,
+            min_dist=min_dist,
+            min_dist_approx=min_dist_approx
+        )
 
     # for obj_demand_list in inspector.get_cap_boundary_point_list():
     #     inspector.min_cost(obj_demand_list)
