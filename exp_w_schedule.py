@@ -37,8 +37,9 @@ def run(
         max_repair_set_size=max_repair_set_size,
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
-    # inspector.plot_cap_2d()
+    inspector.plot_cap_2d()
 
+    # Log min cost/dist/dist_approx etc.
     [k, n] = scheme.obj_encoding_matrix.shape
     cum_demand = 1.2*min(len(repair_set_list) for _, repair_set_list in inspector.obj_to_repair_sets_map.items())
     log(DEBUG, "", cum_demand=cum_demand)

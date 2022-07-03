@@ -7,6 +7,8 @@ import scipy.spatial
 import string
 
 import plot_polygon
+import service_rate_utils
+
 from debug_utils import *
 from plot_utils import *
 
@@ -36,71 +38,59 @@ class ServiceRateInspector:
         self.compute_halfspace_intersections = compute_halfspace_intersections
 
         numpy.set_printoptions(threshold=sys.maxsize)
-        # log(
-        #     DEBUG,
-        #     "",
-        #     m=self.m,
-        #     C=self.C,
-        #     G=self.G,
-        #     obj_to_node_id_map=self.obj_to_node_id_map,
-        # )
 
         self.k = G.shape[0]
         self.n = G.shape[1]
 
         ## repair sets are given in terms of obj ids,
         ## in the sense of columns of G or keys of obj_to_node_id_map
-        self.obj_to_repair_sets_map = self.get_obj_to_repair_sets_map(max_repair_set_size)
+        if max_repair_set_size is None:
+            max_repair_set_size = self.k
+        log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
+        self.obj_to_repair_sets_map = (
+            self.get_obj_to_repair_sets_map_for_redundancy_w_two_xors()
+            if max_repair_set_size == 2
+            else
+            self.get_obj_to_repair_sets_map(max_repair_set_size)
+        )
         log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
-        log(DEBUG, "Repair groups in terms of node id's:")
-
-        def repair_set_to_str(repair_set):
-            s = ",".join([f"{obj_to_node_id_map[obj_id]}" for obj_id in repair_set])
-            return f"({s})"
-
-        for obj, repair_sets in self.obj_to_repair_sets_map.items():
-            repair_sets_str = ", ".join([repair_set_to_str(rs) for rs in repair_sets])
-            print(f"obj= {obj}, [{repair_sets_str}]")
-
-        numpy.set_printoptions(threshold=10_000)
-
-        ## T
+        ## Repair set list
         repair_set_list = []
         for obj in range(self.k):
             repair_set_list.extend(self.obj_to_repair_sets_map[obj])
 
         self.l = len(repair_set_list)
-        self.T = numpy.zeros((self.k, self.l))
-        i = 0
-        for obj in range(self.k):
-            j = i + len(self.obj_to_repair_sets_map[obj])
-            self.T[obj, i:j] = 1
-            i = j
-        # print(f"T= {self.T}")
+
+        ## T
+        self.T = service_rate_utils.get_T(
+            num_objects=self.k,
+            num_repair_sets=self.l,
+            obj_to_repair_set_size_map={
+                obj: len(repair_set)
+                for obj, repair_set in self.obj_to_repair_sets_map.items()
+            }
+        )
+        log(DEBUG, f"T= \n{self.T}")
 
         ## M
-        self.M = numpy.zeros((m, self.l))
-        for obj in range(self.n):
-            for repair_set_index, repair_set in enumerate(repair_set_list):
-                if obj in repair_set:
-                    self.M[obj_to_node_id_map[obj], repair_set_index] = 1
-        print(f"M= {self.M}")
+        self.M = service_rate_utils.get_M(
+            num_objects=self.n,
+            num_nodes=self.m,
+            repair_set_list=repair_set_list,
+            obj_to_node_id_map=self.obj_to_node_id_map,
+        )
+        log(DEBUG, f"M= \n{self.M}")
 
         ## Halfspaces
         if compute_halfspace_intersections:
-            halfspaces = numpy.zeros((self.m + self.l, self.l + 1))
-            for r in range(self.m):
-                halfspaces[r, -1] = -self.C
-            halfspaces[: self.m, :-1] = self.M
-            for r in range(self.m, self.m + self.l):
-                halfspaces[r, r - self.m] = -1
-            # log(INFO, "halfspaces= \n{}".format(halfspaces) )
-
-            feasible_point = numpy.array([self.C / self.l] * self.l)
-            self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
-            log(DEBUG, "scipy.spatial.HalfspaceIntersection is done.")
+            self.halfspaces = service_rate_utils.get_halfspaces(
+                num_nodes=self.m,
+                num_repair_sets=self.l,
+                node_capacity=self.C,
+                M=self.M,
+            )
 
             self.boundary_point_list = [list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections]
             self.boundary_points_in_rows = numpy.array(self.boundary_point_list).reshape((len(self.boundary_point_list), self.k))
@@ -120,6 +110,20 @@ class ServiceRateInspector:
             ")"
         )
 
+    def log_obj_to_repair_sets_map(self):
+        log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
+
+        def repair_set_to_str(repair_set):
+            s = ",".join([f"{obj_to_node_id_map[obj_id]}" for obj_id in repair_set])
+            return f"({s})"
+
+        obj_to_repair_set_repr_w_node_ids_map = {
+            obj: ", ".join([repair_set_to_str(rs) for rs in repair_sets])
+            for obj, repair_sets in self.obj_to_repair_sets_map.items()
+        }
+
+        log(DEBUG, "Repair groups in terms of node id's:", obj_to_repair_set_repr_w_node_ids_map=obj_to_repair_set_repr_w_node_ids_map)
+
     def to_sysrepr(self):
         sym_list = string.ascii_lowercase[: self.k]
         node_list = [[] for _ in range(self.m)]
@@ -137,12 +141,11 @@ class ServiceRateInspector:
             node_list[ni].append("+".join(l))
         return str(node_list)
 
-    def get_obj_to_repair_sets_map(self, max_repair_set_size=None):
+    def get_obj_to_repair_sets_map(
+        self,
+        max_repair_set_size,
+    ) -> dict[int, set]:
         obj_to_repair_sets_map = {}
-
-        if max_repair_set_size is None:
-            max_repair_set_size = self.k
-        log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
         for obj in range(self.k):
             repair_set_list = []
@@ -175,6 +178,32 @@ class ServiceRateInspector:
                     ):  # residuals.size > 0 and
                         repair_set_list.append(subset)
             obj_to_repair_sets_map[obj] = repair_set_list
+
+        return obj_to_repair_sets_map
+
+    def get_obj_to_repair_sets_map_for_redundancy_w_two_xors(self) -> dict[int, set]:
+        log(DEBUG, "", G=self.G)
+
+        obj_to_repair_sets_map = collections.defaultdict(list)
+        for i in range(self.n):
+            # nonzero_indices = [a[0] for a in self.G[:, i].nonzero()]
+            nonzero_indices = list(self.G[:, i].nonzero()[0])
+            log(DEBUG, "", nonzero_indices=nonzero_indices)
+
+            if len(nonzero_indices) == 1:
+                obj = nonzero_indices[0]
+                obj_to_repair_sets_map[obj].append({obj})
+
+            elif len(nonzero_indices) == 2:
+                [obj_1, obj_2] = nonzero_indices
+                obj_to_repair_sets_map[obj_1].append({obj_2, i})
+                obj_to_repair_sets_map[obj_2].append({obj_1, i})
+
+            else:
+                raise ValueError(
+                    "Unexpected recovery group size; \n"
+                    f"\t len(nonzero_indices)= {len(nonzero_indices)}"
+                )
 
         return obj_to_repair_sets_map
 
@@ -339,9 +368,12 @@ class ServiceRateInspector:
             log(ERROR, "Not implemented for k= {}".format(self.k))
 
     def plot_cap_2d(self):
+        check(self.compute_halfspace_intersections,
+              "To plot capacity region, `compute_halfspace_intersections` should have been set")
+
         # print("hs.intersections= \n{}".format(self.hs.intersections) )
         x_l, y_l = [], []
-        for x in self.hs.intersections:
+        for x in self.halfspaces.intersections:
             y = numpy.matmul(self.T, x)
             x_l.append(y[0])
             y_l.append(y[1])
