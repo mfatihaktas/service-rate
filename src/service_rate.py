@@ -6,11 +6,10 @@ import numpy
 import scipy.spatial
 import string
 
-import plot_polygon
-import service_rate_utils
+from src import plot_polygon, service_rate_utils
 
-from debug_utils import *
-from plot_utils import *
+from src.debug_utils import *
+from src.plot_utils import *
 
 
 class ServiceRateInspector:
@@ -42,20 +41,22 @@ class ServiceRateInspector:
         self.k = G.shape[0]
         self.n = G.shape[1]
 
-        ## repair sets are given in terms of obj ids,
+        ## Repair sets are given in terms of obj ids,
         ## in the sense of columns of G or keys of obj_to_node_id_map
         if max_repair_set_size is None:
             max_repair_set_size = self.k
         log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
-        self.obj_to_repair_sets_map = (
-            service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
-                k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size
-            )
-            # self.get_obj_to_repair_sets_map_for_redundancy_w_two_xors()
-            # if max_repair_set_size == 2
-            # else
-            # self.get_obj_to_repair_sets_map(max_repair_set_size)
+        # if max_repair_set_size == 2:
+        #     self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
+        #         n=self.n, G=self.G,
+        #     )
+
+        # self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map(
+        #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
+        # )
+        self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
+            k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
         )
         log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
@@ -130,72 +131,6 @@ class ServiceRateInspector:
             node_list[ni].append("+".join(l))
 
         return str(node_list)
-
-    def get_obj_to_repair_sets_map(
-        self,
-        max_repair_set_size,
-    ) -> dict[int, set]:
-        obj_to_repair_sets_map = {}
-
-        for obj in range(self.k):
-            repair_set_list = []
-            y = numpy.array([0] * obj + [1] + [0] * (self.k - obj - 1)).reshape(
-                (self.k, 1)
-            )
-
-            for repair_size in range(1, max_repair_set_size + 1):
-                for subset in itertools.combinations(range(self.n), repair_size):
-                    subset = set(subset)
-
-                    ## Check if subset contains any previously registered smaller repair group
-                    skip_rg = False
-                    for rg in repair_set_list:
-                        if rg.issubset(subset):
-                            skip_rg = True
-                            break
-                    if skip_rg:
-                        continue
-
-                    l = [self.G[:, i] for i in subset]
-                    # A = numpy.array(l).reshape((self.k, len(l) ))
-                    A = numpy.column_stack(l)
-
-                    x, residuals, _, _ = numpy.linalg.lstsq(A, y)
-                    residuals = y - numpy.dot(A, x)
-                    # log(INFO, "", A=A, y=y, x=x, residuals=residuals)
-                    if (
-                        numpy.sum(numpy.absolute(residuals)) < 0.0001
-                    ):  # residuals.size > 0 and
-                        repair_set_list.append(subset)
-            obj_to_repair_sets_map[obj] = repair_set_list
-
-        return obj_to_repair_sets_map
-
-    def get_obj_to_repair_sets_map_for_redundancy_w_two_xors(self) -> dict[int, set]:
-        log(DEBUG, "", G=self.G)
-
-        obj_to_repair_sets_map = collections.defaultdict(list)
-        for i in range(self.n):
-            # nonzero_indices = [a[0] for a in self.G[:, i].nonzero()]
-            nonzero_indices = list(self.G[:, i].nonzero()[0])
-            log(DEBUG, "", nonzero_indices=nonzero_indices)
-
-            if len(nonzero_indices) == 1:
-                obj = nonzero_indices[0]
-                obj_to_repair_sets_map[obj].append({obj})
-
-            elif len(nonzero_indices) == 2:
-                [obj_1, obj_2] = nonzero_indices
-                obj_to_repair_sets_map[obj_1].append({obj_2, i})
-                obj_to_repair_sets_map[obj_2].append({obj_1, i})
-
-            else:
-                raise ValueError(
-                    "Unexpected recovery group size; \n"
-                    f"\t len(nonzero_indices)= {len(nonzero_indices)}"
-                )
-
-        return obj_to_repair_sets_map
 
     def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))

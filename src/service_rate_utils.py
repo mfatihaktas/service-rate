@@ -1,10 +1,11 @@
+import collections
 import itertools
 import joblib
 import math
 import numpy
 import scipy.spatial
 
-from debug_utils import *
+from src.debug_utils import *
 
 
 def get_T(
@@ -79,6 +80,48 @@ def log_obj_to_repair_sets_map(
     }
 
     log(DEBUG, "Repair groups in terms of node id's:", obj_to_repair_set_repr_w_node_ids_map=obj_to_repair_set_repr_w_node_ids_map)
+
+
+def get_obj_to_repair_sets_map(
+    k: int,
+    n: int,
+    G: numpy.array,
+    max_repair_set_size: int,
+) -> dict[int, set]:
+    obj_to_repair_sets_map = {}
+
+    for obj in range(k):
+        repair_set_list = []
+        y = numpy.array([0] * obj + [1] + [0] * (k - obj - 1)).reshape(
+            (k, 1)
+        )
+
+        for repair_size in range(1, max_repair_set_size + 1):
+            for subset in itertools.combinations(range(n), repair_size):
+                subset = set(subset)
+
+                ## Check if subset contains any previously registered smaller repair group
+                skip_rg = False
+                for rg in repair_set_list:
+                    if rg.issubset(subset):
+                        skip_rg = True
+                        break
+                if skip_rg:
+                    continue
+
+                l = [G[:, i] for i in subset]
+                A = numpy.column_stack(l)
+
+                x, residuals, _, _ = numpy.linalg.lstsq(A, y)
+                residuals = y - numpy.dot(A, x)
+                # log(INFO, "", A=A, y=y, x=x, residuals=residuals)
+                if (
+                    numpy.sum(numpy.absolute(residuals)) < 0.0001
+                ):  # residuals.size > 0 and
+                    repair_set_list.append(subset)
+        obj_to_repair_sets_map[obj] = repair_set_list
+
+    return obj_to_repair_sets_map
 
 
 def get_obj_to_repair_sets_map_w_joblib(
@@ -174,3 +217,58 @@ def get_repair_sets_for_obj_w_joblib(
             _repair_set_list.append(repair_set)
 
     return _repair_set_list
+
+
+# TODO: This finds only the repair sets with one XOR'ed copy and one replica.
+# It does not find repair sets with two XOR'ed copies.
+# E.g., for system [a, b, a+b, a+2b], the complete repair sets would be found as
+# obj_to_repair_sets_map= {
+#     0: [{0}, {1, 2}, {1, 3}, {2, 3}],
+#     1: [{1}, {0, 2}, {0, 3}, {2, 3}]
+# }
+# where the repair set contains the node id's.
+# This function would return
+# obj_to_repair_sets_map= {
+#     0: [{0}, {1, 2}, {1, 3}],
+#     1: [{1}, {0, 2}, {0, 3}]
+# }
+def get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
+    n: int,
+    G: numpy.array,
+) -> dict[int, set]:
+    # log(DEBUG, "", G=G)
+
+    # Fill up `obj_to_nodes_w_replica_map`
+    obj_to_nodes_w_replica_map = collections.defaultdict(list)
+    for i in range(n):
+        nonzero_indices = list(G[:, i].nonzero()[0])
+
+        if len(nonzero_indices) == 1:
+            obj = nonzero_indices[0]
+            obj_to_nodes_w_replica_map[obj].append(i)
+
+    # Fill up `obj_to_repair_sets_map`
+    obj_to_repair_sets_map = collections.defaultdict(list)
+    for i in range(n):
+        nonzero_indices = list(G[:, i].nonzero()[0])
+        log(DEBUG, "", nonzero_indices=nonzero_indices)
+
+        if len(nonzero_indices) == 1:
+            obj = nonzero_indices[0]
+            obj_to_repair_sets_map[obj].append({i})
+
+        elif len(nonzero_indices) == 2:
+            [obj_1, obj_2] = nonzero_indices
+
+            for obj_2_node in obj_to_nodes_w_replica_map[obj_2]:
+                obj_to_repair_sets_map[obj_1].append({obj_2_node, i})
+            for obj_1_node in obj_to_nodes_w_replica_map[obj_1]:
+                obj_to_repair_sets_map[obj_2].append({obj_1_node, i})
+
+        else:
+            raise ValueError(
+                "Unexpected recovery group size; \n"
+                f"\t len(nonzero_indices)= {len(nonzero_indices)}"
+            )
+
+    return obj_to_repair_sets_map
