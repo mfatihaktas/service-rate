@@ -49,10 +49,13 @@ class ServiceRateInspector:
         log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
         self.obj_to_repair_sets_map = (
-            self.get_obj_to_repair_sets_map_for_redundancy_w_two_xors()
-            if max_repair_set_size == 2
-            else
-            self.get_obj_to_repair_sets_map(max_repair_set_size)
+            service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
+                k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size
+            )
+            # self.get_obj_to_repair_sets_map_for_redundancy_w_two_xors()
+            # if max_repair_set_size == 2
+            # else
+            # self.get_obj_to_repair_sets_map(max_repair_set_size)
         )
         log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
@@ -110,20 +113,6 @@ class ServiceRateInspector:
             ")"
         )
 
-    def log_obj_to_repair_sets_map(self):
-        log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
-
-        def repair_set_to_str(repair_set):
-            s = ",".join([f"{obj_to_node_id_map[obj_id]}" for obj_id in repair_set])
-            return f"({s})"
-
-        obj_to_repair_set_repr_w_node_ids_map = {
-            obj: ", ".join([repair_set_to_str(rs) for rs in repair_sets])
-            for obj, repair_sets in self.obj_to_repair_sets_map.items()
-        }
-
-        log(DEBUG, "Repair groups in terms of node id's:", obj_to_repair_set_repr_w_node_ids_map=obj_to_repair_set_repr_w_node_ids_map)
-
     def to_sysrepr(self):
         sym_list = string.ascii_lowercase[: self.k]
         node_list = [[] for _ in range(self.m)]
@@ -139,6 +128,7 @@ class ServiceRateInspector:
                         else "{}".format(sym_list[r])
                     )
             node_list[ni].append("+".join(l))
+
         return str(node_list)
 
     def get_obj_to_repair_sets_map(

@@ -1,3 +1,6 @@
+import itertools
+import joblib
+import math
 import numpy
 import scipy.spatial
 
@@ -59,3 +62,115 @@ def get_halfspaces(
 
     feasible_point = numpy.array([node_capacity / num_repair_sets] * num_repair_sets)
     return scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
+
+
+def log_obj_to_repair_sets_map(
+    obj_to_repair_sets_map: dict[int, list[set]],
+):
+    log(DEBUG, "", obj_to_repair_sets_map=obj_to_repair_sets_map)
+
+    def repair_set_to_str(repair_set):
+        s = ",".join([f"{obj_to_node_id_map[obj_id]}" for obj_id in repair_set])
+        return f"({s})"
+
+    obj_to_repair_set_repr_w_node_ids_map = {
+        obj: ", ".join([repair_set_to_str(rs) for rs in repair_sets])
+        for obj, repair_sets in self.obj_to_repair_sets_map.items()
+    }
+
+    log(DEBUG, "Repair groups in terms of node id's:", obj_to_repair_set_repr_w_node_ids_map=obj_to_repair_set_repr_w_node_ids_map)
+
+
+def get_obj_to_repair_sets_map_w_joblib(
+    k: int,
+    n: int,
+    G: numpy.array,
+    max_repair_set_size=None,
+) -> dict[int, list[set[int]]]:
+    return {
+        obj: get_repair_sets_for_obj_w_joblib(
+            obj=obj,
+            k=k,
+            n=n,
+            G=G,
+            max_repair_set_size=max_repair_set_size,
+        )
+        for obj in range(k)
+    }
+
+
+def get_repair_sets_for_obj_w_joblib(
+    obj: int,
+    k: int,
+    n: int,
+    G: numpy.array,
+    max_repair_set_size=None,
+) -> list[set[int]]:
+    log(DEBUG, f"obj= {obj}", k=k, n=n, max_repair_set_size=max_repair_set_size)
+
+    if max_repair_set_size is None:
+        max_repair_set_size = k
+    log(DEBUG, "", max_repair_set_size=max_repair_set_size)
+
+    def is_a_repair_set(comb_set: set[int]) -> bool:
+        l = [G[:, i] for i in comb_set]
+        A = numpy.column_stack(l)
+
+        y = numpy.array(
+            [0] * obj + [1]
+            + [0] * (k - obj - 1)
+        ).reshape((k, 1))
+        x, residuals, _, _ = numpy.linalg.lstsq(A, y)
+        residuals = y - numpy.dot(A, x)
+
+        # log(INFO, "", A=A, y=y, x=x, residuals=residuals)
+        return numpy.sum(numpy.absolute(residuals)) < 0.0001 # residuals.size > 0 and
+
+    def find_repair_sets_w_range(
+        comb_set_list: list[set[int]],
+        index_begin: int,
+        index_end: int,
+        repair_set_list: list[set[int]],
+    ):
+        for comb_set in comb_set_list[index_begin : index_end]:
+            if is_a_repair_set(comb_set):
+                repair_set_list.append(comb_set)
+
+    # Generate all combinations
+    comb_set_list = []
+    for repair_size in range(1, max_repair_set_size + 1):
+        for subset in itertools.combinations(range(n), repair_size):
+            comb_set_list.append(set(subset))
+
+    # Find repair sets with joblib
+    num_sets = len(comb_set_list)
+    num_jobs = min(1000, math.ceil(num_sets / 10))
+    num_sets_per_job = num_sets // num_jobs
+    log(DEBUG, f"num_jobs= {num_jobs}, num_sets_per_job= {num_sets_per_job}")
+
+    repair_set_list = []
+    joblib.Parallel(n_jobs=num_jobs, prefer="threads")(
+        joblib.delayed(find_repair_sets_w_range)(
+            comb_set_list,
+            index_begin=i * num_sets_per_job,
+            index_end=(i + 1) * num_sets_per_job,
+            repair_set_list=repair_set_list,
+        )
+        for i in range(num_jobs)
+    )
+
+    # Remove repari sets which are supersets of a smaller repair set
+    _repair_set_list = []
+    for repair_set in sorted(repair_set_list, key=len):
+        log(DEBUG, f"repair_set= {repair_set}")
+
+        add_as_new_repair_set = True
+        for _repair_set in _repair_set_list:
+            if _repair_set.issubset(repair_set):
+                add_as_new_repair_set = False
+                break
+
+        if add_as_new_repair_set:
+            _repair_set_list.append(repair_set)
+
+    return _repair_set_list

@@ -13,7 +13,7 @@ CRITICAL = 4
 
 
 # LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
-LOGGING_FORMAT = "%(filename)s:%(lineno)s-%(func_name)s: %(message)s"
+LOGGING_FORMAT = "%(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
 # LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
 formatter = logging.Formatter(LOGGING_FORMAT)
 
@@ -55,9 +55,15 @@ def log_to_file(filename, directory=None):
 
 
 def get_extra():
-    frame = inspect.currentframe().f_back.f_back.f_code
+    # frame = inspect.currentframe().f_back.f_back.f_code
+    callerframerecord = inspect.stack()[2]  # 0: this line, 1: line at caller
+    frame = callerframerecord[0]
+    frame_info = inspect.getframeinfo(frame)
     return {
-        "func_name": "{}::{}".format(os.path.split(frame.co_filename)[1], frame.co_name)
+        # "func_name": "{}::{}".format(os.path.split(frame.co_filename)[1], frame.co_name)
+        "file_name": os.path.split(frame_info.filename)[1],
+        "func_name": frame_info.function,
+        "line_number": frame_info.lineno,
     }
 
 
