@@ -4,33 +4,67 @@ import os
 import pprint
 import sys
 
-# #################################  Log  ################################# #
+
+# Ref:
+# - https://stackoverflow.com/questions/384076/how-can-i-color-python-logging-output
+# - https://github.com/herzog0/best_python_logger
+class CustomFormatter(logging.Formatter):
+    grey = "\x1b[0;37m"
+    green = "\x1b[1;32m"
+    yellow = "\x1b[1;33m"
+    red = "\x1b[1;31m"
+    purple = "\x1b[1;35m"
+    blue = "\x1b[1;34m"
+    light_blue = "\x1b[1;36m"
+    reset = "\x1b[0m"
+    blink_red = "\x1b[5m\x1b[1;31m"
+    # format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
+    format = "%(levelname)s] %(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
+
+    FORMATS = {
+        logging.DEBUG: reset + format + reset,
+        logging.INFO: green + format + reset,
+        logging.WARNING: yellow + format + reset,
+        logging.ERROR: red + format + reset,
+        logging.CRITICAL: blink_red + format + reset
+    }
+
+    def format(self, record):
+        log_fmt = self.FORMATS.get(record.levelno)
+        formatter = logging.Formatter(log_fmt)
+        return formatter.format(record)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Log  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+# LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
+LOGGING_FORMAT = "%(levelname)s] %(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
+# LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
+
+# formatter = logging.Formatter(LOGGING_FORMAT)
+formatter = CustomFormatter()
+
+LOGGER_NAME = "serv_rate"
+# logging.basicConfig(level=logging.INFO) #, format=LOGGING_FORMAT)
+logger = logging.getLogger(LOGGER_NAME)
+logger.setLevel(logging.DEBUG)
+
+def log_to_std():
+    logger = logging.getLogger(LOGGER_NAME)
+    # TODO: Not sure why this was needed to silence the
+    # annoying duplicate logging.
+    logger.handlers.clear()
+
+    sh = logging.StreamHandler()
+    sh.setFormatter(formatter)
+    logger.addHandler(sh)
+
+log_to_std()
+
 DEBUG = 0
 INFO = 1
 WARNING = 2
 ERROR = 3
 CRITICAL = 4
-
-
-# LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
-LOGGING_FORMAT = "%(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
-# LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
-formatter = logging.Formatter(LOGGING_FORMAT)
-
-
-LOGGER_NAME = "serv_rate"
-logging.basicConfig(level=logging.INFO, format=LOGGING_FORMAT)
-logger = logging.getLogger(LOGGER_NAME)
-# logger.setLevel(logging.INFO)
-logger.setLevel(logging.DEBUG)
-
-
-def log_to_std():
-    logger = logging.getLogger(LOGGER_NAME)
-    sh = logging.StreamHandler()
-    sh.setFormatter(formatter)
-    logger.addHandler(sh)
-
 
 level_log_m = {
     INFO: logger.info,
@@ -86,7 +120,7 @@ def pstr(**kwargs):
         return s
 
 
-# ###############################  Assert  ############################### #
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Assert  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 def check(condition: bool, _msg_: str, **kwargs):
     if not condition:
         logger.error("{}\n{}".format(_msg_, pstr(**kwargs)), extra=get_extra())
