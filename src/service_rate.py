@@ -25,7 +25,7 @@ class ServiceRateInspector:
         obj_to_node_id_map: dict,
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
-        redundancy_w_two_xors: bool = False,
+        redundancy_w_two_xors: bool = True,
     ):
         ## Number of buckets
         self.m = m
@@ -272,6 +272,7 @@ class ServiceRateInspector:
         def dist(x: numpy.array, y: numpy.array):
             return numpy.sqrt(numpy.sum(numpy.square(x - y)))
 
+        obj_demand_list = [float(i) for i in obj_demand_list]
         u = numpy.array(obj_demand_list)
         while self.is_in_cap_region(u):
             u *= 2

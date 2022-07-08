@@ -2,9 +2,9 @@ from pathlib import Path
 import pandas as pd
 import sys
 
-import csv_utils
-from src import service_rate, storage_scheme
+from src import service_rate, storage_scheme,csv_utils
 from src.debug_utils import *
+from os.path import exists
 
 
 def run(
@@ -79,7 +79,8 @@ def run_w_csv_file_path(
     for i, obj_demand_list in enumerate(obj_demands_list):
         is_in_cap_region = inspector.is_in_cap_region(obj_demand_list)
         min_cost = inspector.min_cost(obj_demand_list)
-        min_distance = inspector.min_distance_to_boundary(obj_demand_list)
+        # min_distance = inspector.min_distance_to_boundary(obj_demand_list)
+        min_distance = inspector.approx_min_distance_to_boundary(obj_demand_list)
 
         log(
             DEBUG,
@@ -93,6 +94,7 @@ def run_w_csv_file_path(
         num_is_in_cap_region += int(is_in_cap_region)
         demDF.loc[i, "inside"] = is_in_cap_region
         demDF.loc[i, "mCost"] = min_cost
+        demDF.loc[i, "distance"] = min_distance
 
     demDF.to_csv(outfile, index=False)
 
@@ -114,10 +116,10 @@ def run_w_sim_result_csv_files(basedir='csv'):
     compute_halfspace_intersections = False # True
 
     csv_file_path_for_node_id_objs_list_replication = (
-        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"
+        basedir + "/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"
     )
     csv_file_path_for_obj_demands_list_replication = (
-        "csv/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv"
+        basedir + "/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv"
     )
     max_repair_set_size = 1
 
@@ -154,9 +156,10 @@ def run_w_sim_result_csv_files(basedir='csv'):
     df = df.sort_values(by=["iteration","type"])
     df.reset_index(inplace=True, drop=True)
 
+
     if exists(csv_file_demand_ec_orbit) and exists(csv_file_demand_rep_orbit):
-        dforb1 = pd.read_csv(csv_file_demand_ec_orbit)
-        dforb2 = pd.read_csv(csv_file_demand_rep_orbit)
+        dforb1 = pd.read_csv(csv_file_demand_ec_orbit,index_col=False)
+        dforb2 = pd.read_csv(csv_file_demand_rep_orbit,index_col=False)
         dforb = pd.concat([dforb1, dforb2])
         dforb = dforb.sort_values(by=["iteration","type"])
         dforb.reset_index(inplace=True, drop=True)
@@ -194,9 +197,9 @@ if __name__ == "__main__":
     # csv_file_path_for_obj_demands_list = "csv/exp1_rep_12nodes_demand.csv"
     # max_repair_set_size = 1
 
-    csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
-    csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
-    max_repair_set_size = 2
+    # csv_file_path_for_node_id_objs_list = "csv/exp2_ec_9nodes_placement.csv"
+    # csv_file_path_for_obj_demands_list = "csv/exp2_ec_9nodes_demand.csv"
+    # max_repair_set_size = 2
 
     # csv_file_path_for_node_id_objs_list = "csv/exp3_rep_6nodes_placement.csv"
     # csv_file_path_for_node_id_objs_list = "csv/exp3_ec_6nodes_placement.csv"
