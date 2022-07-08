@@ -8,7 +8,7 @@ import matplotlib.pyplot as plot
 plot.rcParams.update({"text.usetex": True})
 import itertools
 
-from debug_utils import *
+from src.debug_utils import *
 
 NICE_BLUE = "#66b3ff"
 NICE_RED = "#ff9999"

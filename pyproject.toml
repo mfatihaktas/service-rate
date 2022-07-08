@@ -18,6 +18,7 @@ cvxpy = "^1.2.0"
 pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 pandas = "^1.4.2"
+joblib = "^1.1.0"
 
 [tool.poetry.dev-dependencies]
 
@@ -33,7 +34,7 @@ log_cli_level = "INFO"
 ## logging output to cli.
 # log_cli_level = "NOTSET"
 # log_cli_format = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
-addopts = "--cov"
+addopts = "--cov --show-capture=stderr"
 testpaths = [
     "tests",
 ]

@@ -1,8 +1,7 @@
 import abc
-
 import numpy
 
-from debug_utils import *
+from src.debug_utils import *
 
 
 class Obj(abc.ABC):
@@ -84,12 +83,35 @@ name_to_node_objs_list_map = {
             )
         ],
     ],
+
     "a_a_b_b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
         [PlainObj(id_str="b")],
         [PlainObj(id_str="b")],
     ],
+
+    "a_b_a+b_a+2b": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (1, PlainObj(id_str="b")),
+                ]
+            )
+        ],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (2, PlainObj(id_str="b")),
+                ]
+            )
+        ],
+    ],
+
     "a_a_a_b_a+b_a+2b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
@@ -112,20 +134,51 @@ name_to_node_objs_list_map = {
             )
         ],
     ],
+
     "a,b_a,b": [
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
+    ],
+
+    "a_b_c_a+b_a+c_b+c": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+        [PlainObj(id_str="c")],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (1, PlainObj(id_str="b")),
+                ]
+            )
+        ],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (1, PlainObj(id_str="c")),
+                ]
+            )
+        ],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="b")),
+                    (1, PlainObj(id_str="c")),
+                ]
+            )
+        ],
     ],
 }
 
 
 class StorageScheme:
-    def __init__(self, node_id_objs_list: list[list[Obj]]):
-        self._node_id_objs_list = node_id_objs_list
+    def __init__(self, node_id_to_objs_list: list[list[Obj]]):
+        self._node_id_to_objs_list = node_id_to_objs_list
 
         # This refers to `k`
         self._num_original_objs = self.get_num_original_objs()
-        self._total_num_objs = sum(len(obj_list) for obj_list in node_id_objs_list)
+        self._total_num_objs = sum(len(obj_list) for obj_list in node_id_to_objs_list)
 
         self._plain_obj_to_orig_id_map = self.get_plain_obj_to_orig_id_map()
 
@@ -137,12 +190,12 @@ class StorageScheme:
 
     def __repr__(self):
         s = "StorageScheme( \n"
-        # for node_id, obj_list in enumerate(self.node_id_objs_list):
+        # for node_id, obj_list in enumerate(self.node_id_to_objs_list):
         #     s += f"node-{node_id}: [\n"
         #     for obj in obj_list:
         #         s += f"{obj} \n"
         #     s += "] \n"
-        for node_id, obj_list in enumerate(self.node_id_objs_list):
+        for node_id, obj_list in enumerate(self.node_id_to_objs_list):
             # s += f"\t node-{node_id}: {len(obj_list)} objs \n"
             num_plain, num_coded = 0, 0
             for obj in obj_list:
@@ -156,8 +209,8 @@ class StorageScheme:
         return s
 
     @property
-    def node_id_objs_list(self):
-        return self._node_id_objs_list
+    def node_id_to_objs_list(self):
+        return self._node_id_to_objs_list
 
     @property
     def num_original_objs(self):
@@ -180,7 +233,7 @@ class StorageScheme:
 
         # log(DEBUG, "", _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map)
 
-        for node, obj_list in enumerate(self.node_id_objs_list):
+        for node, obj_list in enumerate(self.node_id_to_objs_list):
             for obj in obj_list:
 
                 if isinstance(obj, PlainObj):
@@ -197,7 +250,7 @@ class StorageScheme:
         obj_id_to_node_id_map = {}
 
         id_ = 0
-        for node_id, obj_list in enumerate(self.node_id_objs_list):
+        for node_id, obj_list in enumerate(self.node_id_to_objs_list):
             for obj in obj_list:
                 obj.id_ = id_
                 obj_id_to_node_id_map[id_] = node_id
@@ -208,7 +261,7 @@ class StorageScheme:
 
     def get_num_original_objs(self):
         original_obj_set = set()
-        for obj_list in self.node_id_objs_list:
+        for obj_list in self.node_id_to_objs_list:
             for obj in obj_list:
                 if isinstance(obj, PlainObj):
                     original_obj_set.add(obj)
@@ -225,7 +278,7 @@ class StorageScheme:
         plain_obj_to_orig_id_map = {}
 
         id_ = 0
-        for obj_list in self.node_id_objs_list:
+        for obj_list in self.node_id_to_objs_list:
             for obj in obj_list:
                 if isinstance(obj, PlainObj) and obj not in plain_obj_to_orig_id_map:
                     plain_obj_to_orig_id_map[obj] = id_

@@ -2,33 +2,27 @@ from pathlib import Path
 import pandas as pd
 import sys
 
-from csv_utils import (
-    get_node_id_objs_list_from_oleg_csv_file,
-    get_obj_demands_list_from_oleg_csv_file,
-)
-from debug_utils import *
-from service_rate import ServiceRateInspector
-from storage_scheme import Obj, StorageScheme, name_to_node_objs_list_map
-from os.path import exists
+import csv_utils
+from src import service_rate, storage_scheme
+from src.debug_utils import *
 
 
 def run(
-    node_id_objs_list: list[list[Obj]],
+    node_id_objs_list: list[list[storage_scheme.Obj]],
     max_repair_set_size: int = None,
     compute_halfspace_intersections=False,
 ):
-    log(
-        DEBUG,
+    log(DEBUG,
         "Started;",
         node_id_objs_list=node_id_objs_list,
         max_repair_set_size=max_repair_set_size,
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
-    scheme = StorageScheme(node_id_objs_list)
+    scheme = storage_scheme.StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=scheme)
 
-    inspector = ServiceRateInspector(
+    inspector = service_rate.ServiceRateInspector(
         m=len(node_id_objs_list),
         C=1,
         G=scheme.obj_encoding_matrix,
@@ -56,15 +50,15 @@ def run_w_csv_file_path(
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
-    node_id_objs_list = get_node_id_objs_list_from_oleg_csv_file(
+    node_id_objs_list = csv_utils.get_node_id_objs_list_from_oleg_csv_file(
         csv_file_path_for_node_id_objs_list
     )
     # log(DEBUG, "", node_id_objs_list=node_id_objs_list)
 
-    scheme = StorageScheme(node_id_objs_list)
+    scheme = storage_scheme.StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=scheme)
 
-    inspector = ServiceRateInspector(
+    inspector = service_rate.ServiceRateInspector(
         m=len(node_id_objs_list),
         C=1,
         G=scheme.obj_encoding_matrix,
@@ -73,7 +67,7 @@ def run_w_csv_file_path(
         max_repair_set_size=max_repair_set_size,
     )
 
-    obj_demands_list = get_obj_demands_list_from_oleg_csv_file(
+    obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(
         csv_file_path_for_obj_demands_list
     )
     outfile = createResultFilePath(csv_file_path_for_obj_demands_list)
@@ -160,10 +154,9 @@ def run_w_sim_result_csv_files(basedir='csv'):
     df = df.sort_values(by=["iteration","type"])
     df.reset_index(inplace=True, drop=True)
 
-
     if exists(csv_file_demand_ec_orbit) and exists(csv_file_demand_rep_orbit):
-        dforb1 = pd.read_csv(csv_file_demand_ec_orbit,index_col=False)
-        dforb2 = pd.read_csv(csv_file_demand_rep_orbit,index_col=False)
+        dforb1 = pd.read_csv(csv_file_demand_ec_orbit)
+        dforb2 = pd.read_csv(csv_file_demand_rep_orbit)
         dforb = pd.concat([dforb1, dforb2])
         dforb = dforb.sort_values(by=["iteration","type"])
         dforb.reset_index(inplace=True, drop=True)
