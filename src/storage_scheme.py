@@ -139,6 +139,36 @@ name_to_node_objs_list_map = {
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
     ],
+
+    "a_b_c_a+b_a+c_b+c": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+        [PlainObj(id_str="c")],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (1, PlainObj(id_str="b")),
+                ]
+            )
+        ],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="a")),
+                    (1, PlainObj(id_str="c")),
+                ]
+            )
+        ],
+        [
+            CodedObj(
+                coeff_obj_list=[
+                    (1, PlainObj(id_str="b")),
+                    (1, PlainObj(id_str="c")),
+                ]
+            )
+        ],
+    ],
 }
 
 

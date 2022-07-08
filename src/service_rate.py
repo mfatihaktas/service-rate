@@ -25,6 +25,7 @@ class ServiceRateInspector:
         obj_to_node_id_map: dict,
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
+        redundancy_w_two_xors: bool = False,
     ):
         ## Number of buckets
         self.m = m
@@ -41,23 +42,26 @@ class ServiceRateInspector:
         self.k = G.shape[0]
         self.n = G.shape[1]
 
-        ## Repair sets are given in terms of obj ids,
+        ## Note: Repair sets are given in terms of obj ids,
         ## in the sense of columns of G or keys of obj_to_node_id_map
-        if max_repair_set_size is None:
-            max_repair_set_size = self.k
-        log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
-        # if max_repair_set_size == 2:
-        #     self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
-        #         n=self.n, G=self.G,
-        #     )
+        if redundancy_w_two_xors:
+            self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
+                n=self.n, G=self.G,
+            )
 
-        # self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map(
-        #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
-        # )
-        self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
-            k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
-        )
+        else:
+            if max_repair_set_size is None:
+                max_repair_set_size = self.k
+            log(DEBUG, "", max_repair_set_size=max_repair_set_size)
+
+            # self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map(
+            #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
+            # )
+            self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
+                k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
+            )
+
         log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
         ## Repair set list
