@@ -34,7 +34,7 @@ log_cli_level = "INFO"
 ## logging output to cli.
 # log_cli_level = "NOTSET"
 # log_cli_format = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
-addopts = "--cov"
+addopts = "--cov --show-capture=stderr"
 testpaths = [
     "tests",
 ]
