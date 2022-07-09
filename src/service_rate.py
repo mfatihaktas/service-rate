@@ -205,7 +205,32 @@ class ServiceRateInspector:
         else:
             return None
 
-    def min_distance_to_boundary(self, obj_demand_list: list[float]) -> float:
+    def min_distance_to_boundary_w_cvxpy(self, obj_demand_list: list[float]) -> float:
+        """ Returns the min distance from obj_demand_list to the service rate boundary.
+        """
+
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        obj = cvxpy.Minimize(cvxpy.sum_squares(self.T @ x - demand_vector))
+        constraints = [self.M @ x <= self.C, x >= 0]
+
+        prob = cvxpy.Problem(obj, constraints)
+        try:
+            prob.solve()
+        except cvxpy.SolverError:
+            prob.solve(solver="SCS")
+
+        # log(DEBUG, f"prob.status= {prob.status}")
+        if prob.status != "optimal":
+            log(WARNING, "Minimization is not optimal", prob_status=prob.status)
+            return None
+
+        # blog(x_val=x.value)
+        point_closest_to_demand_vector = numpy.matmul(self.T, x.value)
+        return numpy.sqrt(numpy.sum((point_closest_to_demand_vector - demand_vector)**2))
+
+    def min_distance_to_boundary_w_convex_hull(self, obj_demand_list: list[float]) -> float:
         """ Returns the min distance from obj_demand_list to the service rate boundary.
 
         Relies on

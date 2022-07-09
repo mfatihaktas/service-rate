@@ -39,11 +39,13 @@ def test_min_cost_dist(service_rate_inspector: service_rate.ServiceRateInspector
     for i in range(10):
         obj_demand_list = conftest.sample_obj_demand_list(k, cum_demand)
         min_cost = service_rate_inspector.min_cost(obj_demand_list)
-        min_dist = service_rate_inspector.min_distance_to_boundary(obj_demand_list)
+        min_dist_w_convex_hull = service_rate_inspector.min_distance_to_boundary_w_convex_hull(obj_demand_list)
+        min_dist_w_cvxpy = service_rate_inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list)
         min_dist_approx = service_rate_inspector.approx_min_distance_to_boundary(obj_demand_list)
         log(DEBUG, f"i= {i}",
             obj_demand_list=obj_demand_list,
             min_cost=min_cost,
-            min_dist=min_dist,
+            min_dist_w_convex_hull=min_dist_w_convex_hull,
+            min_dist_w_cvxpy=min_dist_w_cvxpy,
             min_dist_approx=min_dist_approx
         )
