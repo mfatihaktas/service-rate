@@ -213,7 +213,10 @@ class ServiceRateInspector:
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.sum_squares(self.T @ x - demand_vector))
-        constraints = [self.M @ x <= self.C, x >= 0]
+        if self.is_in_cap_region(numpy.array(obj_demand_list)):
+            constraints = [self.M @ x >= self.C, x >= 0]
+        else:
+            constraints = [self.M @ x <= self.C, x >= 0]
 
         prob = cvxpy.Problem(obj, constraints)
         try:
@@ -238,9 +241,12 @@ class ServiceRateInspector:
         self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
         which take very long to complete when the number of objects > ~30.
 
-        TODO: Investigate why these two functions takes so long to complete,
+        TODO: Investigate why these two functions take so long to complete,
         and if we can make them run faster, or if we can find a different faster
         way to get the same results.
+
+        TODO: This function does not work correctly for points that are inside the
+        service rate region.
         """
 
         if self.compute_halfspace_intersections is False:
@@ -298,7 +304,7 @@ class ServiceRateInspector:
             return numpy.sqrt(numpy.sum(numpy.square(x - y)))
 
         obj_demand_list = [float(i) for i in obj_demand_list]
-        u = numpy.array(obj_demand_list)
+        u = numpy.array(obj_demand_list) + 0.001
         while self.is_in_cap_region(u):
             u *= 2
 

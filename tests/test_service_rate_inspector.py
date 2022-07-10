@@ -34,7 +34,7 @@ def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
 def test_min_cost_dist(service_rate_inspector: service_rate.ServiceRateInspector):
     # Log min cost/dist/dist_approx etc.
     k, n = service_rate_inspector.k, service_rate_inspector.n
-    cum_demand = 1.2*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
+    cum_demand = 0.01*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
     log(DEBUG, "", cum_demand=cum_demand)
     for i in range(10):
         obj_demand_list = conftest.sample_obj_demand_list(k, cum_demand)
@@ -49,3 +49,8 @@ def test_min_cost_dist(service_rate_inspector: service_rate.ServiceRateInspector
             min_dist_w_cvxpy=min_dist_w_cvxpy,
             min_dist_approx=min_dist_approx
         )
+
+
+# def test_min_distance_to_boundary_w_cvxpy(service_rate_inspector: service_rate.ServiceRateInspector):
+#     k, n = service_rate_inspector.k, service_rate_inspector.n
+#     cum_demand = 0.8*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
