@@ -208,7 +208,7 @@ class ServiceRateInspector:
     def min_distance_to_boundary_w_cvxpy(self, obj_demand_list: list[float]) -> float:
         """ Returns the min distance from obj_demand_list to the service rate boundary.
         """
-
+        obj_demand_list = [float(i) for i in obj_demand_list]  # str to float (Oleg)
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 

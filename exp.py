@@ -80,7 +80,8 @@ def run_w_csv_file_path(
         is_in_cap_region = inspector.is_in_cap_region(obj_demand_list)
         min_cost = inspector.min_cost(obj_demand_list)
         # min_distance = inspector.min_distance_to_boundary(obj_demand_list)
-        min_distance = inspector.approx_min_distance_to_boundary(obj_demand_list)
+        # min_distance = inspector.approx_min_distance_to_boundary(obj_demand_list)
+        min_distance = inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list)
 
         log(
             DEBUG,
