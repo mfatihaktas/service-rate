@@ -231,7 +231,13 @@ class ServiceRateInspector:
 
         # blog(x_val=x.value)
         point_closest_to_demand_vector = numpy.matmul(self.T, x.value)
-        return numpy.sqrt(numpy.sum((point_closest_to_demand_vector - demand_vector)**2))
+
+        #Oleg: negative when inside, positive when outside
+        distance = numpy.sqrt(numpy.sum((point_closest_to_demand_vector - demand_vector)**2))
+        if self.is_in_cap_region(obj_demand_list):
+            return -distance
+        else:
+            return distance
 
     def min_distance_to_boundary_w_convex_hull(self, obj_demand_list: list[float]) -> float:
         """ Returns the min distance from obj_demand_list to the service rate boundary.
