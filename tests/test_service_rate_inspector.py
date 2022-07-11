@@ -1,5 +1,3 @@
-import pytest
-
 from src import service_rate, storage_scheme
 from src.debug_utils import *
 
@@ -49,8 +47,3 @@ def test_min_cost_dist(service_rate_inspector: service_rate.ServiceRateInspector
             min_dist_w_cvxpy=min_dist_w_cvxpy,
             min_dist_approx=min_dist_approx
         )
-
-
-# def test_min_distance_to_boundary_w_cvxpy(service_rate_inspector: service_rate.ServiceRateInspector):
-#     k, n = service_rate_inspector.k, service_rate_inspector.n
-#     cum_demand = 0.8*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
