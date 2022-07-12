@@ -1,4 +1,5 @@
 import collections
+import cvxpy
 import itertools
 import joblib
 import math
@@ -272,3 +273,23 @@ def get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
             )
 
     return obj_to_repair_sets_map
+
+
+def solve_prob(
+    prob: cvxpy.Problem,
+) -> float:
+    """Solves the given cvxpy problem and returns the optimal value
+    for the problem.
+    """
+
+    try:
+        prob.solve()
+    except cvxpy.SolverError:
+        prob.solve(solver="SCS")
+
+    # log(DEBUG, f"prob.status= {prob.status}")
+    if prob.status != cvxpy.OPTIMAL:
+        log(WARNING, "Not optimal", prob_status=prob.status)
+        return None
+
+    return prob.value

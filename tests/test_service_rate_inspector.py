@@ -29,21 +29,27 @@ def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
     service_rate_inspector.plot_cap_2d()
 
 
-def test_min_cost_dist(service_rate_inspector: service_rate.ServiceRateInspector):
-    # Log min cost/dist/dist_approx etc.
-    k, n = service_rate_inspector.k, service_rate_inspector.n
-    cum_demand = 0.01*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
+def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspector):
+    cum_demand = 0.9*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
     log(DEBUG, "", cum_demand=cum_demand)
+
     for i in range(10):
-        obj_demand_list = conftest.sample_obj_demand_list(k, cum_demand)
+        obj_demand_list = conftest.sample_obj_demand_list(
+            k=service_rate_inspector.k,
+            cum_demand=cum_demand
+        )
+
         min_cost = service_rate_inspector.min_cost(obj_demand_list)
         min_dist_w_convex_hull = service_rate_inspector.min_distance_to_boundary_w_convex_hull(obj_demand_list)
         min_dist_w_cvxpy = service_rate_inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list)
         min_dist_approx = service_rate_inspector.approx_min_distance_to_boundary(obj_demand_list)
+        max_load = service_rate_inspector.max_load(obj_demand_list)
+
         log(DEBUG, f"i= {i}",
             obj_demand_list=obj_demand_list,
             min_cost=min_cost,
             min_dist_w_convex_hull=min_dist_w_convex_hull,
             min_dist_w_cvxpy=min_dist_w_cvxpy,
-            min_dist_approx=min_dist_approx
+            min_dist_approx=min_dist_approx,
+            max_load=max_load,
         )

@@ -6,6 +6,8 @@ import numpy
 import scipy.spatial
 import string
 
+from typing import Union
+
 from src import plot_polygon, service_rate_utils
 
 from src.debug_utils import *
@@ -146,14 +148,9 @@ class ServiceRateInspector:
         constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
-        try:
-            prob.solve()
-        except cvxpy.SolverError:
-            prob.solve(solver="SCS")
+        opt_value = service_rate_utils.solve_prob(prob)
 
-        # log(DEBUG, f"prob.status= {prob.status}")
-        # blog(x_val=x.value)
-        return prob.status == "optimal"
+        return opt_value is not None
 
     def min_cost(self, obj_demand_list: list[float]):
         # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)
@@ -174,12 +171,8 @@ class ServiceRateInspector:
         constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
-        try:
-            prob.solve()
-        except cvxpy.SolverError:
-            prob.solve(solver="SCS")
-
-        if prob.status != "optimal":
+        opt_value = service_rate_utils.solve_prob(prob)
+        if opt_value is None:
             log(WARNING,
                 "Object demand vector is not in the capacity region, "
                 "thus cannot compute the cost.",
@@ -196,49 +189,52 @@ class ServiceRateInspector:
             )
         log(DEBUG, f"allocation_list= {allocation_list}")
 
-        # log(DEBUG, f"prob.status= {prob.status}")
-        if prob.status == cvxpy.OPTIMAL:
-            cost = cost_coeff_row_vector @ x.value
-            cost = cost.tolist()[0][0]
-            # cost = cost / numpy.sum(x.value)
-            return cost
-        else:
-            return None
+        cost = cost_coeff_row_vector @ x.value
+        cost = cost.tolist()[0][0]
+        # cost = cost / numpy.sum(x.value)
+        return cost
 
     def min_distance_to_boundary_w_cvxpy(self, obj_demand_list: list[float]) -> float:
         """ Returns the min distance from obj_demand_list to the service rate boundary.
         """
 
-        obj_demand_list = [float(i) for i in obj_demand_list]  # str to float (Oleg)
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.sum_squares(self.T @ x - demand_vector))
-        if self.is_in_cap_region(numpy.array(obj_demand_list)):
+        in_cap_region = self.is_in_cap_region(numpy.array(obj_demand_list))
+        if in_cap_region:
             constraints = [self.M @ x >= self.C, x >= 0]
         else:
             constraints = [self.M @ x <= self.C, x >= 0]
 
         prob = cvxpy.Problem(obj, constraints)
-        try:
-            prob.solve()
-        except cvxpy.SolverError:
-            prob.solve(solver="SCS")
-
-        # log(DEBUG, f"prob.status= {prob.status}")
-        if prob.status != "optimal":
-            log(WARNING, "Minimization is not optimal", prob_status=prob.status)
+        opt_value = service_rate_utils.solve_prob(prob)
+        if opt_value is None:
             return None
 
         # blog(x_val=x.value)
         point_closest_to_demand_vector = numpy.matmul(self.T, x.value)
 
-        #Oleg: negative when inside, positive when outside
         distance = numpy.sqrt(numpy.sum((point_closest_to_demand_vector - demand_vector)**2))
-        if self.is_in_cap_region(obj_demand_list):
-            return -distance
-        else:
-            return distance
+        return distance
+
+    def min_distance_to_boundary_w_cvxpy_for_oleg(self, obj_demand_list: list[Union[float, str]]) -> float:
+        """Wrapper around `min_distance_to_boundary_w_cvxpy()` to accomodate the input
+        and output requirements needed by Oleg's use case.
+        """
+
+        obj_demand_list = [float(i) for i in obj_demand_list]
+
+        in_cap_region = self.is_in_cap_region(numpy.array(obj_demand_list))
+        min_distance = self.min_distance_to_boundary_w_cvxpy(obj_demand_list)
+
+        return (
+            -min_distance
+            if in_cap_region
+            else
+            min_distance
+        )
 
     def min_distance_to_boundary_w_convex_hull(self, obj_demand_list: list[float]) -> float:
         """ Returns the min distance from obj_demand_list to the service rate boundary.
@@ -326,6 +322,28 @@ class ServiceRateInspector:
         point_on_boundary = (l + u) / 2
         log(DEBUG, "", point_on_boundary=point_on_boundary)
         return dist(point_on_boundary, numpy.array(obj_demand_list))
+
+    def max_load(self, obj_demand_list: list[float]) -> float:
+        """Returns the load at the the maximally loaded node after the object demand
+        is distributed across the nodes.
+        """
+
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        obj = cvxpy.Minimize(cvxpy.max(self.M @ x))
+        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+
+        prob = cvxpy.Problem(obj, constraints)
+        opt_value = service_rate_utils.solve_prob(prob)
+
+        # blog(x_val=x.value)
+        return (
+            opt_value / self.C
+            if opt_value
+            else
+            None
+        )
 
     def plot_cap(self):
         if self.k == 2:
