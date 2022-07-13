@@ -176,7 +176,7 @@ def get_repair_sets_for_obj_w_joblib(
         index_end: int,
         repair_set_list: list[set[int]],
     ):
-        for comb_set in comb_set_list[index_begin : index_end]:
+        for comb_set in comb_set_list[index_begin : index_end + 1]:
             if is_a_repair_set(comb_set):
                 repair_set_list.append(comb_set)
 
@@ -188,8 +188,8 @@ def get_repair_sets_for_obj_w_joblib(
 
     # Find repair sets with joblib
     num_sets = len(comb_set_list)
-    num_jobs = min(1000, math.ceil(num_sets / 10))
-    num_sets_per_job = num_sets // num_jobs
+    num_jobs = min(100, math.ceil(num_sets / 10))
+    num_sets_per_job = math.ceil(num_sets / num_jobs)
     log(DEBUG, f"num_jobs= {num_jobs}, num_sets_per_job= {num_sets_per_job}")
 
     repair_set_list = []
@@ -197,7 +197,7 @@ def get_repair_sets_for_obj_w_joblib(
         joblib.delayed(find_repair_sets_w_range)(
             comb_set_list,
             index_begin=i * num_sets_per_job,
-            index_end=(i + 1) * num_sets_per_job,
+            index_end=(i + 1) * num_sets_per_job - 1,
             repair_set_list=repair_set_list,
         )
         for i in range(num_jobs)
