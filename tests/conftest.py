@@ -4,6 +4,8 @@ import pytest
 from src import service_rate, storage_scheme
 from src.debug_utils import *
 
+from tests import node_id_objs_list as node_id_objs_list_module
+
 
 def sample_obj_demand_list(
     k: int,
@@ -47,3 +49,14 @@ def service_rate_inspector(
         max_repair_set_size=max_repair_set_size,
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
+
+
+@pytest.fixture(
+    scope="function",
+    params=[
+        node_id_objs_list_module.node_id_objs_list_1,
+        # node_id_objs_list_module.node_id_objs_list_2,
+    ],
+)
+def node_id_objs_list(request) -> list:
+    return request.param

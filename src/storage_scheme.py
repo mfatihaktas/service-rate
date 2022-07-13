@@ -176,9 +176,12 @@ class StorageScheme:
     def __init__(self, node_id_to_objs_list: list[list[Obj]]):
         self._node_id_to_objs_list = node_id_to_objs_list
 
-        # This refers to `k`
+        # Refers to `k`
         self._num_original_objs = self.get_num_original_objs()
+        # Refers to `n`
         self._total_num_objs = sum(len(obj_list) for obj_list in node_id_to_objs_list)
+        # Refers to `m`
+        self._num_nodes = len(self._node_id_to_objs_list)
 
         self._plain_obj_to_orig_id_map = self.get_plain_obj_to_orig_id_map()
 
@@ -219,6 +222,10 @@ class StorageScheme:
     @property
     def total_num_objs(self):
         return self._total_num_objs
+
+    @property
+    def num_nodes(self):
+        return self._num_nodes
 
     @property
     def obj_id_to_node_id_map(self):
