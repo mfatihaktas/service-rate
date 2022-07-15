@@ -4,7 +4,7 @@ from src import storage_scheme as storage_scheme_module
 from src.debug_utils import *
 
 
-node_id_objs_list_1 = [
+node_id_to_objs_list_1 = [
     [storage_scheme_module.PlainObj(id_str="a")],
     [storage_scheme_module.PlainObj(id_str="b")],
     [storage_scheme_module.PlainObj(id_str="c")],
@@ -41,7 +41,7 @@ node_id_objs_list_1 = [
 ]
 
 
-def get_random_node_id_objs_list_w_two_xors(
+def get_random_node_id_to_objs_list_w_two_xors(
     num_original_objs: int,
     num_replicas: int,
     num_xors: int,
@@ -92,18 +92,18 @@ def get_random_node_id_objs_list_w_two_xors(
         )
 
     # Assign objects to nodes
-    node_id_objs_list = [[] for _ in range(num_nodes)]
+    node_id_to_objs_list = [[] for _ in range(num_nodes)]
     def get_random_node_id():
         return random.randint(0, num_nodes - 1)
 
     for obj in obj_list:
         node_id = get_random_node_id()
-        node_id_objs_list[node_id].append(obj)
+        node_id_to_objs_list[node_id].append(obj)
 
-    log(DEBUG, "",
-        node_to_objs={
-            f"node-{i}": obj_list
-            for i, obj_list in enumerate(node_id_objs_list)
-        },
-    )
-    return node_id_objs_list
+    # log(DEBUG, "",
+    #     node_to_objs={
+    #         f"node-{i}": obj_list
+    #         for i, obj_list in enumerate(node_id_to_objs_list)
+    #     },
+    # )
+    return node_id_to_objs_list

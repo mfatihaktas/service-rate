@@ -67,23 +67,16 @@ def are_repair_sets_same(
     return True
 
 
-def test_service_rate_inspector_on_redundancy_w_two_xors(node_id_objs_list: list):
-    from tests import node_id_objs_list as node_id_objs_list_module
-
-    node_id_objs_list = node_id_objs_list_module.get_random_node_id_objs_list_w_two_xors(
-        num_original_objs=10,
-        num_replicas=10,
-        num_xors=10,
-        num_nodes=10,
+def test_service_rate_inspector_on_redundancy_w_two_xors(input_dict: dict):
+    storage_scheme = storage_scheme_module.StorageScheme(
+        node_id_to_objs_list=input_dict["node_id_to_objs_list"],
     )
-
-    storage_scheme = storage_scheme_module.StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=storage_scheme)
 
     service_rate_inspector_w_redundancy_w_two_xors_false = get_service_rate_inspector(
         storage_scheme=storage_scheme,
         redundancy_w_two_xors=False,
-        max_repair_set_size=2,
+        max_repair_set_size=input_dict["max_repair_set_size"],
     )
 
     service_rate_inspector_w_redundancy_w_two_xors_true = get_service_rate_inspector(

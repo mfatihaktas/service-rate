@@ -150,7 +150,7 @@ def get_repair_sets_for_obj_w_joblib(
     G: numpy.array,
     max_repair_set_size=None,
 ) -> list[set[int]]:
-    log(DEBUG, f"obj= {obj}", k=k, n=n, max_repair_set_size=max_repair_set_size)
+    # log(DEBUG, f"obj= {obj}", k=k, n=n, max_repair_set_size=max_repair_set_size)
 
     if max_repair_set_size is None:
         max_repair_set_size = k
@@ -252,7 +252,7 @@ def get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
     obj_to_repair_sets_map = collections.defaultdict(list)
     for i in range(n):
         nonzero_indices = list(G[:, i].nonzero()[0])
-        log(DEBUG, "", nonzero_indices=nonzero_indices)
+        # log(DEBUG, "", nonzero_indices=nonzero_indices)
 
         if len(nonzero_indices) == 1:
             obj = nonzero_indices[0]

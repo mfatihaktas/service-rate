@@ -4,7 +4,7 @@ import pytest
 from src import service_rate, storage_scheme
 from src.debug_utils import *
 
-from tests import node_id_objs_list as node_id_objs_list_module
+from tests import node_id_to_objs as node_id_to_objs
 
 
 def sample_obj_demand_list(
@@ -54,15 +54,57 @@ def service_rate_inspector(
 @pytest.fixture(
     scope="function",
     params=[
-        node_id_objs_list_module.node_id_objs_list_1,
-        # node_id_objs_list_module.node_id_objs_list_2,
-        # node_id_objs_list_module.get_random_node_id_objs_list_w_two_xors(
-        #     num_original_objs=10,
-        #     num_replicas=10,
-        #     num_xors=10,
-        #     num_nodes=10,
-        # ),
+        # Simplistic redundancy schemes
+
+        # {
+        #     "node_id_to_objs_list": node_id_to_objs.node_id_to_objs_list_1,
+        #     "max_repair_set_size": 2,
+        # },
+
+        # {
+        #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
+        #         num_original_objs=10,
+        #         num_replicas=10,
+        #         num_xors=10,
+        #         num_nodes=10,
+        #     ),
+        #     "max_repair_set_size": 2,
+        # },
+
+        # Redundancy with replication
+
+        # {
+        #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
+        #         num_original_objs=200,
+        #         num_replicas=200,
+        #         num_xors=0,
+        #         num_nodes=100,
+        #     ),
+        #     "max_repair_set_size": 1,
+        # },
+
+        # {
+        #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
+        #         num_original_objs=1000,
+        #         num_replicas=1000,
+        #         num_xors=0,
+        #         num_nodes=100,
+        #     ),
+        #     "max_repair_set_size": 1,
+        # },
+
+        # Redundancy with 2-XOR's
+
+        {
+            "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
+                num_original_objs=200,
+                num_replicas=200,
+                num_xors=100,
+                num_nodes=100,
+            ),
+            "max_repair_set_size": 2,
+        },
     ],
 )
-def node_id_objs_list(request) -> list:
+def input_dict(request) -> dict:
     return request.param
