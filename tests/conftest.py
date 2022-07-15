@@ -56,6 +56,12 @@ def service_rate_inspector(
     params=[
         node_id_objs_list_module.node_id_objs_list_1,
         # node_id_objs_list_module.node_id_objs_list_2,
+        # node_id_objs_list_module.get_random_node_id_objs_list_w_two_xors(
+        #     num_original_objs=10,
+        #     num_replicas=10,
+        #     num_xors=10,
+        #     num_nodes=10,
+        # ),
     ],
 )
 def node_id_objs_list(request) -> list:

@@ -206,7 +206,7 @@ def get_repair_sets_for_obj_w_joblib(
     # Remove repari sets which are supersets of a smaller repair set
     _repair_set_list = []
     for repair_set in sorted(repair_set_list, key=len):
-        log(DEBUG, f"repair_set= {repair_set}")
+        # log(DEBUG, f"repair_set= {repair_set}")
 
         add_as_new_repair_set = True
         for _repair_set in _repair_set_list:

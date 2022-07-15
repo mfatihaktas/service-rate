@@ -25,9 +25,9 @@ class ServiceRateInspector:
         C: float,
         G: numpy.ndarray,
         obj_to_node_id_map: dict,
+        redundancy_w_two_xors: bool = True,
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
-        redundancy_w_two_xors: bool = True,
     ):
         ## Number of buckets
         self.m = m
@@ -82,7 +82,7 @@ class ServiceRateInspector:
                 for obj, repair_set in self.obj_to_repair_sets_map.items()
             }
         )
-        log(DEBUG, f"T= \n{self.T}")
+        # log(DEBUG, f"T= \n{self.T}")
 
         ## M
         self.M = service_rate_utils.get_M(
@@ -91,7 +91,7 @@ class ServiceRateInspector:
             repair_set_list=repair_set_list,
             obj_to_node_id_map=self.obj_to_node_id_map,
         )
-        log(DEBUG, f"M= \n{self.M}")
+        # log(DEBUG, f"M= \n{self.M}")
 
         ## Halfspaces
         if compute_halfspace_intersections:

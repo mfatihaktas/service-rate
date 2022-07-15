@@ -11,6 +11,7 @@ from src.debug_utils import *
 def get_service_rate_inspector(
     storage_scheme: storage_scheme_module.StorageScheme,
     redundancy_w_two_xors: bool,
+    max_repair_set_size: int = None,
 ) -> storage_scheme_module.StorageScheme:
     return service_rate.ServiceRateInspector(
         m=storage_scheme.num_nodes,
@@ -18,6 +19,7 @@ def get_service_rate_inspector(
         G=storage_scheme.obj_encoding_matrix,
         obj_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
         redundancy_w_two_xors=redundancy_w_two_xors,
+        max_repair_set_size=max_repair_set_size,
     )
 
 
@@ -36,7 +38,8 @@ def are_repair_sets_same(
     repair_set_list_2: list[set[int]],
 ) -> bool:
     def hash_repair_set(repair_set: set[int]) -> str:
-        return ",".join(str(node_id) for node_id in repair_set)
+        sorted_node_id_list = sorted(list(repair_set))
+        return ",".join(str(node_id) for node_id in sorted_node_id_list)
 
     repair_set_hash_set = set(
         hash_repair_set(repair_set) for repair_set in repair_set_list_1
@@ -45,9 +48,9 @@ def are_repair_sets_same(
     for repair_set in repair_set_list_2:
         hash_ = hash_repair_set(repair_set)
         if hash_ not in repair_set_hash_set:
-            logger.error(
-                "Repair set is in `repair_set_list_2` but not in `repair_set_list_1` \n"
-                f"\t repair_set= {repair_set}"
+            log(ERROR,
+                "Repair set is in `repair_set_list_2` but not in `repair_set_list_1`",
+                repair_set=repair_set,
             )
             return False
 
@@ -55,9 +58,9 @@ def are_repair_sets_same(
             repair_set_hash_set.remove(hash_)
 
     if repair_set_hash_set:
-        logger.error(
-            "There are repair sets which are in `repair_set_list_1` but not in `repair_set_list_2` \n"
-            f"\t repair_set_hash_set= {repair_set_hash_set}"
+        log(ERROR,
+            "There are repair sets which are in `repair_set_list_1` but not in `repair_set_list_2`",
+            repair_set_hash_set=repair_set_hash_set,
         )
         return False
 
@@ -65,12 +68,22 @@ def are_repair_sets_same(
 
 
 def test_service_rate_inspector_on_redundancy_w_two_xors(node_id_objs_list: list):
+    from tests import node_id_objs_list as node_id_objs_list_module
+
+    node_id_objs_list = node_id_objs_list_module.get_random_node_id_objs_list_w_two_xors(
+        num_original_objs=10,
+        num_replicas=10,
+        num_xors=10,
+        num_nodes=10,
+    )
+
     storage_scheme = storage_scheme_module.StorageScheme(node_id_objs_list)
     log(DEBUG, "", storage_scheme=storage_scheme)
 
     service_rate_inspector_w_redundancy_w_two_xors_false = get_service_rate_inspector(
         storage_scheme=storage_scheme,
         redundancy_w_two_xors=False,
+        max_repair_set_size=2,
     )
 
     service_rate_inspector_w_redundancy_w_two_xors_true = get_service_rate_inspector(
