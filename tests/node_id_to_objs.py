@@ -111,22 +111,29 @@ def get_random_node_id_to_objs_list_w_two_xors(
 
 def get_node_id_to_objs_list_w_round_robin_design(
     num_nodes: int,
+    num_original_objs: int,
     replication_factor: int,  # number of copies stored for each object
 ) -> list[list]:
     log(DEBUG, "",
         num_nodes=num_nodes,
+        num_original_objs=num_original_objs,
         replication_factor=replication_factor,
+    )
+
+    check(num_original_objs % num_nodes == 0,
+          "Number of original objects should be a multiple of number of nodes",
+          num_original_objs=num_original_objs,
+          num_nodes=num_nodes,
     )
 
     node_id_to_objs_list = [[] for _ in range(num_nodes)]
 
-    for node_id in range(num_nodes):
+    for original_obj_id in range(num_original_objs):
         for replica_id in range(replication_factor):
-            node_id_ = (node_id + replica_id) % num_nodes
+            node_id_ = (original_obj_id + replica_id) % num_nodes
 
-            obj_id = node_id
             node_id_to_objs_list[node_id_].append(
-                storage_scheme_module.PlainObj(id_str=str(obj_id))
+                storage_scheme_module.PlainObj(id_str=str(original_obj_id))
             )
 
     # log(DEBUG, "",

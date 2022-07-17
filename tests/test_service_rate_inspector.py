@@ -55,16 +55,17 @@ def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspe
         )
 
 
-NUM_RUNS_FOR_ROUND_ROBIN_DESIGN = 100
+NUM_DEMAND_VECTORS = 100
 
 def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_design: dict):
     node_id_to_objs_list = node_id_to_objs.get_node_id_to_objs_list_w_round_robin_design(
+        num_original_objs=input_dict_for_round_robin_design["num_original_objs"],
         num_nodes=input_dict_for_round_robin_design["num_nodes"],
         replication_factor=input_dict_for_round_robin_design["replication_factor"],
     )
 
     scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
-    # log(DEBUG, "", storage_scheme=scheme)
+    log(DEBUG, "", storage_scheme=scheme)
 
     m = len(node_id_to_objs_list)
     C = 1
@@ -73,15 +74,21 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
         C=C,
         G=scheme.obj_encoding_matrix,
         obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        max_repair_set_size=1,
     )
 
     cum_demand = input_dict_for_round_robin_design["cumulative_load_factor"] * m * C
 
     num_in_cap_region = 0
-    for i in range(NUM_RUNS_FOR_ROUND_ROBIN_DESIGN):
-        obj_demand_list = conftest.sample_obj_demand_list(
+    for i in range(NUM_DEMAND_VECTORS):
+        # obj_demand_list = conftest.sample_obj_demand_list(
+        #     k=service_rate_inspector.k,
+        #     cum_demand=cum_demand,
+        # )
+
+        obj_demand_list = conftest.sample_obj_demand_list_w_skewed_popularity(
             k=service_rate_inspector.k,
-            cum_demand=cum_demand
+            cum_demand=cum_demand,
         )
 
         is_in_cap_region = service_rate_inspector.is_in_cap_region(obj_demand_list)
@@ -97,5 +104,5 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
 
     log(DEBUG, "",
         input_dict_for_round_robin_design=input_dict_for_round_robin_design,
-        frac_of_demand_vectors_in_cap_region=num_in_cap_region / NUM_RUNS_FOR_ROUND_ROBIN_DESIGN,
+        frac_of_demand_vectors_in_cap_region=num_in_cap_region / NUM_DEMAND_VECTORS,
     )

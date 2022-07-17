@@ -7,6 +7,26 @@ from src.debug_utils import *
 from tests import node_id_to_objs
 
 
+def sample_obj_demand_list_w_skewed_popularity(
+    k: int,
+    cum_demand: float,
+) -> list[float]:
+    cum_demand_for_popular_objs = 0.8 * cum_demand
+    cum_demand_for_other_objs = cum_demand - cum_demand_for_popular_objs
+
+    num_popular_objs = int(0.3 * k)
+    _popular_obj_demand_list = [random.randint(1, 9) for _ in range(num_popular_objs)]
+    sum_demands = sum(_popular_obj_demand_list)
+    popular_obj_demand_list = [d / sum_demands * cum_demand_for_popular_objs for d in _popular_obj_demand_list]
+
+    num_other_objs =  k - num_popular_objs
+    _other_obj_demand_list = [random.randint(1, 9) for _ in range(num_other_objs)]
+    sum_demands = sum(_other_obj_demand_list)
+    other_obj_demand_list = [d / sum_demands * cum_demand_for_other_objs for d in _other_obj_demand_list]
+
+    return [*popular_obj_demand_list, *other_obj_demand_list]
+
+
 def sample_obj_demand_list(
     k: int,
     cum_demand: float,
@@ -113,34 +133,53 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
 @pytest.fixture(
     scope="function",
     params=[
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 2,
+        #     "cumulative_load_factor": 0.4,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 2,
+        #     "cumulative_load_factor": 0.75,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 2,
+        #     "cumulative_load_factor": 0.8,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 5,
+        #     "cumulative_load_factor": 0.75,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 5,
+        #     "cumulative_load_factor": 0.9,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 10,
+        #     "cumulative_load_factor": 0.8,
+        # },
+
+        # {
+        #     "num_nodes": 100,
+        #     "replication_factor": 10,
+        #     "cumulative_load_factor": 0.95,
+        # },
+
         {
-            "num_nodes": 100,
+            "num_nodes": 10,
+            "num_original_objs": 200,
             "replication_factor": 2,
-            "cumulative_load_factor": 0.4,
-        },
-
-        {
-            "num_nodes": 100,
-            "replication_factor": 2,
-            "cumulative_load_factor": 0.75,
-        },
-
-        {
-            "num_nodes": 100,
-            "replication_factor": 2,
-            "cumulative_load_factor": 0.8,
-        },
-
-        {
-            "num_nodes": 100,
-            "replication_factor": 10,
-            "cumulative_load_factor": 0.8,
-        },
-
-        {
-            "num_nodes": 100,
-            "replication_factor": 10,
-            "cumulative_load_factor": 0.95,
+            "cumulative_load_factor": 0.5,
         },
     ],
 )
