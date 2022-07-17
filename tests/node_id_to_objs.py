@@ -46,7 +46,7 @@ def get_random_node_id_to_objs_list_w_two_xors(
     num_replicas: int,
     num_xors: int,
     num_nodes: int,
-) -> list:
+) -> list[list]:
     log(DEBUG, "",
         num_original_objs=num_original_objs,
         num_replicas=num_replicas,
@@ -99,6 +99,35 @@ def get_random_node_id_to_objs_list_w_two_xors(
     for obj in obj_list:
         node_id = get_random_node_id()
         node_id_to_objs_list[node_id].append(obj)
+
+    # log(DEBUG, "",
+    #     node_to_objs={
+    #         f"node-{i}": obj_list
+    #         for i, obj_list in enumerate(node_id_to_objs_list)
+    #     },
+    # )
+    return node_id_to_objs_list
+
+
+def get_node_id_to_objs_list_w_round_robin_design(
+    num_nodes: int,
+    replication_factor: int,  # number of copies stored for each object
+) -> list[list]:
+    log(DEBUG, "",
+        num_nodes=num_nodes,
+        replication_factor=replication_factor,
+    )
+
+    node_id_to_objs_list = [[] for _ in range(num_nodes)]
+
+    for node_id in range(num_nodes):
+        for replica_id in range(replication_factor):
+            node_id_ = (node_id + replica_id) % num_nodes
+
+            obj_id = node_id
+            node_id_to_objs_list[node_id_].append(
+                storage_scheme_module.PlainObj(id_str=str(obj_id))
+            )
 
     # log(DEBUG, "",
     #     node_to_objs={

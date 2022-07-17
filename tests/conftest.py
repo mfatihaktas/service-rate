@@ -4,7 +4,7 @@ import pytest
 from src import service_rate, storage_scheme
 from src.debug_utils import *
 
-from tests import node_id_to_objs as node_id_to_objs
+from tests import node_id_to_objs
 
 
 def sample_obj_demand_list(
@@ -26,7 +26,7 @@ def sample_obj_demand_list(
         # "a,b_a,b",
     ],
 )
-def node_id_to_objs_list(request) -> str:
+def node_id_to_objs_list(request) -> list[list]:
     return storage_scheme.name_to_node_objs_list_map[request.param]
 
 
@@ -106,5 +106,43 @@ def service_rate_inspector(
         },
     ],
 )
-def input_dict(request) -> dict:
+def input_dict_for_redundancy_w_two_xors(request) -> dict:
+    return request.param
+
+
+@pytest.fixture(
+    scope="function",
+    params=[
+        {
+            "num_nodes": 100,
+            "replication_factor": 2,
+            "cumulative_load_factor": 0.4,
+        },
+
+        {
+            "num_nodes": 100,
+            "replication_factor": 2,
+            "cumulative_load_factor": 0.75,
+        },
+
+        {
+            "num_nodes": 100,
+            "replication_factor": 2,
+            "cumulative_load_factor": 0.8,
+        },
+
+        {
+            "num_nodes": 100,
+            "replication_factor": 10,
+            "cumulative_load_factor": 0.8,
+        },
+
+        {
+            "num_nodes": 100,
+            "replication_factor": 10,
+            "cumulative_load_factor": 0.95,
+        },
+    ],
+)
+def input_dict_for_round_robin_design(request) -> dict:
     return request.param

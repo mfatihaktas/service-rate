@@ -289,7 +289,7 @@ def solve_prob(
 
     # log(DEBUG, f"prob.status= {prob.status}")
     if prob.status != cvxpy.OPTIMAL:
-        log(WARNING, "Not optimal", prob_status=prob.status)
+        # log(WARNING, "Not optimal", prob_status=prob.status)
         return None
 
     return prob.value

@@ -55,7 +55,7 @@ class ServiceRateInspector:
         else:
             if max_repair_set_size is None:
                 max_repair_set_size = self.k
-            log(DEBUG, "", max_repair_set_size=max_repair_set_size)
+            # log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
             # self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map(
             #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
@@ -64,7 +64,7 @@ class ServiceRateInspector:
                 k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
             )
 
-        log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
+        # log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
 
         ## Repair set list
         repair_set_list = []
@@ -332,7 +332,8 @@ class ServiceRateInspector:
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.max(self.M @ x))
-        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+        # constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+        constraints = [x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
         opt_value = service_rate_utils.solve_prob(prob)
