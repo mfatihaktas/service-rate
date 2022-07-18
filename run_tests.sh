@@ -9,6 +9,9 @@ if [ $1 = 's' ]; then
 elif [ $1 = 'x' ]; then
   pytest -rA -v tests/test_service_rate_inspector_on_redundancy_w_two_xors.py
 
+elif [ $1 = 'c' ]; then
+  pytest -rA -v tests/test_service_rate_inspector_w_csv.py
+
 else
   echo "Unexpected arg= $1"
 fi

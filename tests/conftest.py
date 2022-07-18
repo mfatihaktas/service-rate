@@ -185,3 +185,18 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
 )
 def input_dict_for_round_robin_design(request) -> dict:
     return request.param
+
+
+CSV_FOLDER_PATH = "tests/csv"
+
+@pytest.fixture(
+    scope="function",
+    params=[
+        {
+            "csv_file_path_for_node_id_to_objs_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv",
+            "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
+        },
+    ],
+)
+def input_dict_for_test_w_csv(request) -> dict:
+    return request.param

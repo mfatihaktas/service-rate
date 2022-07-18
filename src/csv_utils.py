@@ -5,7 +5,7 @@ from src.debug_utils import *
 from src.storage_scheme import CodedObj, Obj, PlainObj
 
 
-def get_node_id_objs_list_from_oleg_csv_file(csv_file_path: str) -> list[list[Obj]]:
+def get_node_id_to_objs_list_from_oleg_csv_file(csv_file_path: str) -> list[list[Obj]]:
     """CSV file is structured as:
     object-0, object-1, node
 
@@ -69,11 +69,11 @@ def get_obj_demands_list_from_oleg_csv_file(csv_file_path: str) -> list[list[flo
                 line_count += 1
                 continue
 
-            dem_list = []
+            demand_list = []
             for i, s in enumerate(row):
                 if i < num_of_objects:
-                    dem_list.append(s)
-            obj_demands_list.append(dem_list)
+                    demand_list.append(s)
+            obj_demands_list.append(demand_list)
             # obj_demands_list.append([float(s) for s in row])
 
             line_count += 1

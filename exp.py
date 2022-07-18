@@ -50,7 +50,7 @@ def run_w_csv_file_path(
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
-    node_id_objs_list = csv_utils.get_node_id_objs_list_from_oleg_csv_file(
+    node_id_objs_list = csv_utils.get_node_id_to_objs_list_from_oleg_csv_file(
         csv_file_path_for_node_id_objs_list
     )
     # log(DEBUG, "", node_id_objs_list=node_id_objs_list)
