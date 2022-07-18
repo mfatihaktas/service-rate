@@ -157,13 +157,17 @@ def get_repair_sets_for_obj_w_joblib(
     log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
     def is_a_repair_set(comb_set: set[int]) -> bool:
+        y = numpy.array(
+            [0] * obj + [1] + [0] * (k - obj - 1)
+        ).reshape((k, 1))
+
+        if len(comb_set) == 1:
+            i = list(comb_set)[0]
+            return y == G[:, i]
+
         l = [G[:, i] for i in comb_set]
         A = numpy.column_stack(l)
 
-        y = numpy.array(
-            [0] * obj + [1]
-            + [0] * (k - obj - 1)
-        ).reshape((k, 1))
         x, residuals, _, _ = numpy.linalg.lstsq(A, y)
         residuals = y - numpy.dot(A, x)
 
