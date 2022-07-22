@@ -19,12 +19,19 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict)
         C=C,
         G=scheme.obj_encoding_matrix,
         obj_to_node_id_map=scheme.obj_id_to_node_id_map,
-        max_repair_set_size=1,
+        max_repair_set_size=input_dict_for_test_w_csv["max_repair_set_size"],
     )
 
     obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(
         csv_file_path=input_dict_for_test_w_csv["csv_file_path_for_obj_demands_list"],
     )
+
+    def cum_demand_for_top_objects(
+        obj_demand_list: list[float],
+        frac_of_objects: float,
+    ) -> float:
+        n = int(len(obj_demand_list) * frac_of_objects)
+        return sum(obj_demand_list[:n])
 
     num_in_cap_region = 0
     for i, obj_demand_list in enumerate(obj_demands_list):
@@ -33,10 +40,26 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict)
 
         max_load = service_rate_inspector.max_load(obj_demand_list)
 
+        obj_demand_list.sort(reverse=True)
+
         log(DEBUG, f"i= {i}",
             # obj_demand_list=obj_demand_list,
+            obj_demand_list_len=len(obj_demand_list),
             is_in_cap_region=is_in_cap_region,
             max_load=max_load,
+            cum_demand=sum(obj_demand_list),
+            cum_demand_for_top_10_percent_objects=cum_demand_for_top_objects(
+                obj_demand_list=obj_demand_list,
+                frac_of_objects=0.1,
+            ),
+            cum_demand_for_top_20_percent_objects=cum_demand_for_top_objects(
+                obj_demand_list=obj_demand_list,
+                frac_of_objects=0.2,
+            ),
+            cum_demand_for_top_30_percent_objects=cum_demand_for_top_objects(
+                obj_demand_list=obj_demand_list,
+                frac_of_objects=0.3,
+            ),
         )
 
     log(DEBUG, "",

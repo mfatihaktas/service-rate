@@ -72,7 +72,7 @@ def get_obj_demands_list_from_oleg_csv_file(csv_file_path: str) -> list[list[flo
             demand_list = []
             for i, s in enumerate(row):
                 if i < num_of_objects:
-                    demand_list.append(s)
+                    demand_list.append(float(s))
             obj_demands_list.append(demand_list)
             # obj_demands_list.append([float(s) for s in row])
 

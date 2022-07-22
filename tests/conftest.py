@@ -9,20 +9,22 @@ from tests import node_id_to_objs
 
 def sample_obj_demand_list_w_skewed_popularity(
     k: int,
+    frac_of_popular_objects: float,
     cum_demand: float,
+    frac_of_cum_demand_by_popular_objects: float,
 ) -> list[float]:
-    cum_demand_for_popular_objs = 0.8 * cum_demand
-    cum_demand_for_other_objs = cum_demand - cum_demand_for_popular_objs
+    cum_demand_by_popular_objs = frac_of_cum_demand_by_popular_objects * cum_demand
+    cum_demand_by_other_objs = cum_demand - cum_demand_by_popular_objs
 
-    num_popular_objs = int(0.3 * k)
+    num_popular_objs = int(frac_of_popular_objects * k)
     _popular_obj_demand_list = [random.randint(1, 9) for _ in range(num_popular_objs)]
-    sum_demands = sum(_popular_obj_demand_list)
-    popular_obj_demand_list = [d / sum_demands * cum_demand_for_popular_objs for d in _popular_obj_demand_list]
+    demand_sum = sum(_popular_obj_demand_list)
+    popular_obj_demand_list = [d / demand_sum * cum_demand_by_popular_objs for d in _popular_obj_demand_list]
 
     num_other_objs =  k - num_popular_objs
     _other_obj_demand_list = [random.randint(1, 9) for _ in range(num_other_objs)]
-    sum_demands = sum(_other_obj_demand_list)
-    other_obj_demand_list = [d / sum_demands * cum_demand_for_other_objs for d in _other_obj_demand_list]
+    demand_sum = sum(_other_obj_demand_list)
+    other_obj_demand_list = [d / demand_sum * cum_demand_by_other_objs for d in _other_obj_demand_list]
 
     return [*popular_obj_demand_list, *other_obj_demand_list]
 
@@ -32,8 +34,8 @@ def sample_obj_demand_list(
     cum_demand: float,
 ) -> list[float]:
     obj_demand_list = [random.randint(1, 9) for _ in range(k)]
-    sum_demands = sum(obj_demand_list)
-    return [d / sum_demands * cum_demand for d in obj_demand_list]
+    demand_sum = sum(obj_demand_list)
+    return [d / demand_sum * cum_demand for d in obj_demand_list]
 
 
 @pytest.fixture(
@@ -177,9 +179,11 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
 
         {
             "num_nodes": 10,
-            "num_original_objs": 200,
+            "num_original_objs": 500,
             "replication_factor": 2,
             "cumulative_load_factor": 0.5,
+            "frac_of_popular_objects": 0.5,
+            "frac_of_cum_demand_by_popular_objects": 0.8,
         },
     ],
 )
@@ -192,9 +196,16 @@ CSV_FOLDER_PATH = "tests/csv"
 @pytest.fixture(
     scope="function",
     params=[
+        # {
+        #     "csv_file_path_for_node_id_to_objs_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv",
+        #     "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
+        #     "max_repair_set_size": 1,
+        # },
+
         {
-            "csv_file_path_for_node_id_to_objs_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv",
-            "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
+            "csv_file_path_for_node_id_to_objs_list": f"{CSV_FOLDER_PATH}/large/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv",
+            "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/large/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
+            "max_repair_set_size": 1,
         },
     ],
 )
