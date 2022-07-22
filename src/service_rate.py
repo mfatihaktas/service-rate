@@ -324,15 +324,15 @@ class ServiceRateInspector:
         return dist(point_on_boundary, numpy.array(obj_demand_list))
 
     def max_load(self, obj_demand_list: list[float]) -> float:
-        """Returns the load at the the maximally loaded node after the object demand
-        is distributed across the nodes.
+        """Returns the load at the the maximally loaded node (i.e., maximal load)
+        after the object demand is distributed across the nodes in a way that minimizes
+        the maximal load.
         """
 
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.max(self.M @ x))
-        # constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
         constraints = [x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
@@ -345,6 +345,26 @@ class ServiceRateInspector:
             else
             None
         )
+
+    def load_across_nodes(self, obj_demand_list: list[float]) -> float:
+        """Returns the load at the nodes after the object demand is distributed across
+        the nodes in a way that minimizes the maximal load.
+        """
+
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        obj = cvxpy.Minimize(cvxpy.max(self.M @ x))
+        # constraints = [ <= self.C, x >= 0, self.T @ x == demand_vector]
+        constraints = [x >= 0, self.T @ x == demand_vector]
+
+        prob = cvxpy.Problem(obj, constraints)
+        opt_value = service_rate_utils.solve_prob(prob)
+
+        # blog(x_val=x.value)
+        load_across_nodes = numpy.matmul(self.M, x.value)
+
+        return load_across_nodes / self.C
 
     def plot_cap(self):
         if self.k == 2:

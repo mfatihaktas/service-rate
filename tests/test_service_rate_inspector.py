@@ -36,22 +36,17 @@ def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspe
     for i in range(10):
         obj_demand_list = conftest.sample_obj_demand_list(
             k=service_rate_inspector.k,
-            cum_demand=cum_demand
+            cum_demand=cum_demand,
         )
-
-        min_cost = service_rate_inspector.min_cost(obj_demand_list)
-        min_dist_w_convex_hull = service_rate_inspector.min_distance_to_boundary_w_convex_hull(obj_demand_list)
-        min_dist_w_cvxpy = service_rate_inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list)
-        min_dist_approx = service_rate_inspector.approx_min_distance_to_boundary(obj_demand_list)
-        max_load = service_rate_inspector.max_load(obj_demand_list)
 
         log(DEBUG, f"i= {i}",
             obj_demand_list=obj_demand_list,
-            min_cost=min_cost,
-            min_dist_w_convex_hull=min_dist_w_convex_hull,
-            min_dist_w_cvxpy=min_dist_w_cvxpy,
-            min_dist_approx=min_dist_approx,
-            max_load=max_load,
+            min_cost=service_rate_inspector.min_cost(obj_demand_list),
+            min_dist_w_convex_hull=service_rate_inspector.min_distance_to_boundary_w_convex_hull(obj_demand_list),
+            min_dist_w_cvxpy=service_rate_inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list),
+            min_dist_approx=service_rate_inspector.approx_min_distance_to_boundary(obj_demand_list),
+            max_load=service_rate_inspector.max_load(obj_demand_list),
+            load_across_nodes=service_rate_inspector.load_across_nodes(obj_demand_list),
         )
 
 
@@ -88,7 +83,9 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
 
         obj_demand_list = conftest.sample_obj_demand_list_w_skewed_popularity(
             k=service_rate_inspector.k,
+            frac_of_popular_objects=input_dict_for_round_robin_design["frac_of_popular_objects"],
             cum_demand=cum_demand,
+            frac_of_cum_demand_by_popular_objects=input_dict_for_round_robin_design["frac_of_cum_demand_by_popular_objects"],
         )
 
         is_in_cap_region = service_rate_inspector.is_in_cap_region(obj_demand_list)
