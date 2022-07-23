@@ -346,7 +346,7 @@ class ServiceRateInspector:
             None
         )
 
-    def load_across_nodes(self, obj_demand_list: list[float]) -> float:
+    def load_across_nodes(self, obj_demand_list: list[float]) -> list[float]:
         """Returns the load at the nodes after the object demand is distributed across
         the nodes in a way that minimizes the maximal load.
         """
@@ -355,7 +355,6 @@ class ServiceRateInspector:
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.max(self.M @ x))
-        # constraints = [ <= self.C, x >= 0, self.T @ x == demand_vector]
         constraints = [x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
@@ -365,6 +364,27 @@ class ServiceRateInspector:
         load_across_nodes = numpy.matmul(self.M, x.value)
 
         return load_across_nodes / self.C
+
+    def load_across_nodes_when_obj_demands_distributed_evenly_across_repair_sets(self, obj_demand_list: list[float]) -> list[float]:
+        """Returns the load at the nodes after each object demand is distributed evenly across
+        its repair sets.
+        """
+
+        log(DEBUG, f"m= {self.m}")
+
+        load_across_nodes = [0] * self.m
+
+        for orig_obj_id, obj_demand in enumerate(obj_demand_list):
+            repair_set_list = self.obj_to_repair_sets_map[orig_obj_id]
+
+            obj_demand_per_repair_set = obj_demand / len(repair_set_list)
+
+            for repair_set in repair_set_list:
+                for obj_id in repair_set:
+                    node_id = self.obj_to_node_id_map[obj_id]
+                    load_across_nodes[node_id] += obj_demand_per_repair_set
+
+        return load_across_nodes
 
     def plot_cap(self):
         if self.k == 2:
