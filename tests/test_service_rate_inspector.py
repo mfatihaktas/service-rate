@@ -14,7 +14,7 @@ def test_is_in_cap_region():
         m=len(node_id_to_objs_list),
         C=1,
         G=scheme.obj_encoding_matrix,
-        obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
     )
 
     assert inspector.is_in_cap_region([1, 1]) == True
@@ -30,7 +30,7 @@ def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
 
 
 def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspector):
-    cum_demand = 0.9*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.obj_to_repair_sets_map.items())
+    cum_demand = 0.9*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.orig_obj_id_to_repair_sets_w_obj_ids_map.items())
     log(DEBUG, "", cum_demand=cum_demand)
 
     for i in range(10):
@@ -60,7 +60,11 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
     )
 
     scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
-    log(DEBUG, "", storage_scheme=scheme)
+    log(DEBUG, "",
+        storage_scheme=scheme,
+        node_id_to_objs_list=node_id_to_objs_list,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
+    )
 
     m = len(node_id_to_objs_list)
     C = 1
@@ -68,7 +72,7 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
         m=m,
         C=C,
         G=scheme.obj_encoding_matrix,
-        obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
         max_repair_set_size=1,
     )
 

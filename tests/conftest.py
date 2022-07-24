@@ -67,9 +67,10 @@ def service_rate_inspector(
         m=len(node_id_to_objs_list),
         C=1,
         G=scheme.obj_encoding_matrix,
-        obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
         max_repair_set_size=max_repair_set_size,
         compute_halfspace_intersections=compute_halfspace_intersections,
+        redundancy_w_two_xors=True,
     )
 
 
@@ -117,15 +118,30 @@ def service_rate_inspector(
 
         # Redundancy with 2-XOR's
 
+        # {
+        #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
+        #         num_original_objs=200,
+        #         num_replicas=100,
+        #         num_xors=0,
+        #         num_nodes=100,
+        #     ),
+        #     "max_repair_set_size": 2,
+        # },
+
         {
             "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
-                num_original_objs=200,
-                num_replicas=200,
-                num_xors=100,
-                num_nodes=100,
+                num_original_objs=20,
+                num_replicas=10,
+                num_xors=10,
+                num_nodes=10,
             ),
             "max_repair_set_size": 2,
         },
+
+        # {
+        #     "node_id_to_objs_list": storage_scheme.name_to_node_objs_list_map["a_b_a+b"],
+        #     "max_repair_set_size": 2,
+        # },
     ],
 )
 def input_dict_for_redundancy_w_two_xors(request) -> dict:
@@ -177,10 +193,19 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
         #     "cumulative_load_factor": 0.95,
         # },
 
+        # {
+        #     "num_nodes": 10,
+        #     "num_original_objs": 500,
+        #     "replication_factor": 2,
+        #     "cumulative_load_factor": 0.5,
+        #     "frac_of_popular_objects": 0.5,
+        #     "frac_of_cum_demand_by_popular_objects": 0.8,
+        # },
+
         {
             "num_nodes": 10,
-            "num_original_objs": 500,
-            "replication_factor": 2,
+            "num_original_objs": 10,
+            "replication_factor": 3,
             "cumulative_load_factor": 0.5,
             "frac_of_popular_objects": 0.5,
             "frac_of_cum_demand_by_popular_objects": 0.8,

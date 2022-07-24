@@ -18,7 +18,7 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict)
         m=m,
         C=C,
         G=scheme.obj_encoding_matrix,
-        obj_to_node_id_map=scheme.obj_id_to_node_id_map,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
         max_repair_set_size=input_dict_for_test_w_csv["max_repair_set_size"],
     )
 

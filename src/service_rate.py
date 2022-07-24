@@ -24,7 +24,7 @@ class ServiceRateInspector:
         m: int,
         C: float,
         G: numpy.ndarray,
-        obj_to_node_id_map: dict,
+        obj_id_to_node_id_map: dict,
         redundancy_w_two_xors: bool = True,
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
@@ -36,19 +36,21 @@ class ServiceRateInspector:
         ## Object composition matrix
         self.G = G
         ## Map from object id's to node id's
-        self.obj_to_node_id_map = obj_to_node_id_map
+        self.obj_id_to_node_id_map = obj_id_to_node_id_map
         self.compute_halfspace_intersections = compute_halfspace_intersections
 
         numpy.set_printoptions(threshold=sys.maxsize)
+
+        # log(DEBUG, f"G= \n{self.G}")
 
         self.k = G.shape[0]
         self.n = G.shape[1]
 
         ## Note: Repair sets are given in terms of obj ids,
-        ## in the sense of columns of G or keys of obj_to_node_id_map
+        ## in the sense of columns of G or keys of obj_id_to_node_id_map
 
         if redundancy_w_two_xors:
-            self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_for_redundancy_w_two_xors(
+            self.orig_obj_id_to_repair_sets_w_obj_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_obj_ids_map_for_redundancy_w_two_xors(
                 n=self.n, G=self.G,
             )
 
@@ -57,29 +59,34 @@ class ServiceRateInspector:
                 max_repair_set_size = self.k
             # log(DEBUG, "", max_repair_set_size=max_repair_set_size)
 
-            # self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map(
+            # self.orig_obj_id_to_repair_sets_w_obj_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_obj_ids_map(
             #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
             # )
-            self.obj_to_repair_sets_map = service_rate_utils.get_obj_to_repair_sets_map_w_joblib(
+            self.orig_obj_id_to_repair_sets_w_obj_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_obj_ids_map_w_joblib(
                 k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
             )
 
-        # log(DEBUG, "", obj_to_repair_sets_map=self.obj_to_repair_sets_map)
+        log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
+
+        orig_obj_id_to_repair_sets_w_node_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_node_ids_map(
+            orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map,
+            obj_id_to_node_id_map=self.obj_id_to_node_id_map,
+        )
 
         ## Repair set list
-        repair_set_list = []
+        repair_set_w_obj_ids_list = []
         for obj in range(self.k):
-            repair_set_list.extend(self.obj_to_repair_sets_map[obj])
+            repair_set_w_obj_ids_list.extend(self.orig_obj_id_to_repair_sets_w_obj_ids_map[obj])
 
-        self.l = len(repair_set_list)
+        self.l = len(repair_set_w_obj_ids_list)
 
         ## T
         self.T = service_rate_utils.get_T(
-            num_objects=self.k,
-            num_repair_sets=self.l,
-            obj_to_repair_set_size_map={
+            num_orig_objects=self.k,
+            total_num_repair_sets=self.l,
+            orig_obj_to_repair_set_w_obj_ids_size_map={
                 obj: len(repair_set)
-                for obj, repair_set in self.obj_to_repair_sets_map.items()
+                for obj, repair_set in self.orig_obj_id_to_repair_sets_w_obj_ids_map.items()
             }
         )
         # log(DEBUG, f"T= \n{self.T}")
@@ -88,8 +95,8 @@ class ServiceRateInspector:
         self.M = service_rate_utils.get_M(
             num_objects=self.n,
             num_nodes=self.m,
-            repair_set_list=repair_set_list,
-            obj_to_node_id_map=self.obj_to_node_id_map,
+            repair_set_w_obj_ids_list=repair_set_w_obj_ids_list,
+            obj_id_to_node_id_map=self.obj_id_to_node_id_map,
         )
         # log(DEBUG, f"M= \n{self.M}")
 
@@ -97,7 +104,7 @@ class ServiceRateInspector:
         if compute_halfspace_intersections:
             self.halfspaces = service_rate_utils.get_halfspaces(
                 num_nodes=self.m,
-                num_repair_sets=self.l,
+                total_num_repair_sets=self.l,
                 node_capacity=self.C,
                 M=self.M,
             )
@@ -113,10 +120,10 @@ class ServiceRateInspector:
             "ServiceRateInspector( \n"
             f"\t m= {self.m} \n"
             f"\t C= {self.C} \n"
-            f"\t G=\n {self.G} \n"
-            # f"\t obj_to_node_id_map= {self.obj_to_node_id_map} \n"
-            f"\t M= {self.M} \n"
-            f"\t T= {self.T} \n"
+            f"\t G= \n{self.G} \n"
+            # f"\t obj_id_to_node_id_map= {self.obj_id_to_node_id_map} \n"
+            f"\t M= \n{self.M} \n"
+            f"\t T= \n{self.T} \n"
             ")"
         )
 
@@ -124,7 +131,7 @@ class ServiceRateInspector:
         sym_list = string.ascii_lowercase[: self.k]
         node_list = [[] for _ in range(self.m)]
         for obj in range(self.n):
-            ni = self.obj_to_node_id_map[obj]
+            ni = self.obj_id_to_node_id_map[obj]
             l = []
             for r in range(self.k):
                 if self.G[r, obj] != 0:
@@ -161,7 +168,7 @@ class ServiceRateInspector:
 
         cost_coeff_list = []
         for obj in range(self.k):
-            repair_set_list = self.obj_to_repair_sets_map[obj]
+            repair_set_list = self.orig_obj_id_to_repair_sets_w_obj_ids_map[obj]
             for repair_set in repair_set_list:
                 cost_coeff_list.append(len(repair_set))
         log(DEBUG, "", cost_coeff_list=cost_coeff_list)
@@ -375,13 +382,13 @@ class ServiceRateInspector:
         load_across_nodes = [0] * self.m
 
         for orig_obj_id, obj_demand in enumerate(obj_demand_list):
-            repair_set_list = self.obj_to_repair_sets_map[orig_obj_id]
+            repair_set_list = self.orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id]
 
             obj_demand_per_repair_set = obj_demand / len(repair_set_list)
 
             for repair_set in repair_set_list:
                 for obj_id in repair_set:
-                    node_id = self.obj_to_node_id_map[obj_id]
+                    node_id = self.obj_id_to_node_id_map[obj_id]
                     load_across_nodes[node_id] += obj_demand_per_repair_set
 
         return load_across_nodes

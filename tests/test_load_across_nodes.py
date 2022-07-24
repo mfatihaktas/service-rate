@@ -1,4 +1,4 @@
-from src import csv_utils, service_rate, storage_scheme
+from src import csv_utils, service_rate, service_rate_utils, storage_scheme
 from src.debug_utils import *
 
 from tests import conftest, node_id_to_objs
@@ -31,6 +31,11 @@ def test_load_across_nodes():
         G=scheme.obj_encoding_matrix,
         obj_to_node_id_map=scheme.obj_id_to_node_id_map,
         max_repair_set_size=MAX_REPAIR_SET_SIZE,
+    )
+
+    service_rate_utils.log_obj_to_repair_sets_map(
+        obj_to_repair_sets_map=service_rate_inspector.obj_to_repair_sets_map,
+        obj_to_node_id_map=service_rate_inspector.obj_to_node_id_map,
     )
 
     obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(

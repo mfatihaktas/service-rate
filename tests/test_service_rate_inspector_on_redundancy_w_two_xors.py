@@ -17,7 +17,7 @@ def get_service_rate_inspector(
         m=storage_scheme.num_nodes,
         C=1,
         G=storage_scheme.obj_encoding_matrix,
-        obj_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
+        obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
         redundancy_w_two_xors=redundancy_w_two_xors,
         max_repair_set_size=max_repair_set_size,
     )
@@ -84,11 +84,11 @@ def test_service_rate_inspector_on_redundancy_w_two_xors(input_dict_for_redundan
         redundancy_w_two_xors=True,
     )
 
-    obj_to_repair_sets_map_w_false = service_rate_inspector_w_redundancy_w_two_xors_false.obj_to_repair_sets_map
+    obj_to_repair_sets_map_w_false = service_rate_inspector_w_redundancy_w_two_xors_false.orig_obj_id_to_repair_sets_w_obj_ids_map
     obj_to_repair_sets_map_w_false = remove_repair_sets_of_size_two(obj_to_repair_sets_map_w_false)
-    obj_to_repair_sets_map_w_true = service_rate_inspector_w_redundancy_w_two_xors_true.obj_to_repair_sets_map
+    obj_to_repair_sets_map_w_true = service_rate_inspector_w_redundancy_w_two_xors_true.orig_obj_id_to_repair_sets_w_obj_ids_map
 
-    for obj, repair_sets_w_false  in obj_to_repair_sets_map_w_false.items():
+    for obj, repair_sets_w_false in obj_to_repair_sets_map_w_false.items():
         repair_sets_w_true = obj_to_repair_sets_map_w_true[obj]
 
         log(DEBUG,
