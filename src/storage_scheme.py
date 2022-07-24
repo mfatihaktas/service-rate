@@ -27,10 +27,11 @@ class Obj(abc.ABC):
 
 
 class PlainObj(Obj):
-    def __init__(self, id_str: str):
+    def __init__(self, id_str: str, orig_id: int = None):
         super().__init__()
 
         self.id_str = id_str
+        self.orig_id = orig_id
 
     def __hash__(self):
         return hash(self.id_str)
@@ -284,11 +285,18 @@ class StorageScheme:
     def get_plain_obj_to_orig_id_map(self):
         plain_obj_to_orig_id_map = {}
 
-        id_ = 0
+        orig_id = 0
         for obj_list in self.node_id_to_objs_list:
             for obj in obj_list:
-                if isinstance(obj, PlainObj) and obj not in plain_obj_to_orig_id_map:
-                    plain_obj_to_orig_id_map[obj] = id_
-                    id_ += 1
+                if obj in plain_obj_to_orig_id_map:
+                    continue
+                if isinstance(obj, PlainObj) is False:
+                    continue
+
+                if obj.orig_id:
+                    plain_obj_to_orig_id_map[obj] = obj.orig_id
+                else:
+                    plain_obj_to_orig_id_map[obj] = orig_id
+                    orig_id += 1
 
         return plain_obj_to_orig_id_map

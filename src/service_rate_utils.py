@@ -72,13 +72,17 @@ def get_orig_obj_id_to_repair_sets_w_node_ids_map(
 ):
     # log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=orig_obj_id_to_repair_sets_w_obj_ids_map)
 
-    def node_repair_set_in_str(repair_set):
-        s = ",".join([f"{obj_id_to_node_id_map[obj_id]}" for obj_id in repair_set])
-        return f"({s})"
+    # def node_repair_set_in_str(repair_set):
+    #     s = ",".join([f"{obj_id_to_node_id_map[obj_id]}" for obj_id in repair_set])
+    #     return f"({s})"
+
+    def repair_set_w_node_ids(repair_set_w_obj_ids):
+        return set([obj_id_to_node_id_map[obj_id] for obj_id in repair_set_w_obj_ids])
 
     obj_id_to_repair_sets_w_node_ids_map = {
-        obj: ", ".join([node_repair_set_in_str(rs) for rs in repair_sets])
-        for obj, repair_sets in orig_obj_id_to_repair_sets_w_obj_ids_map.items()
+        # obj: ", ".join([node_repair_set_in_str(rs) for rs in repair_sets])
+        obj: [repair_set_w_node_ids(rs) for rs in repair_sets_w_obj_ids]
+        for obj, repair_sets_w_obj_ids in orig_obj_id_to_repair_sets_w_obj_ids_map.items()
     }
 
     # log(DEBUG, "Repair groups in terms of node id's:", obj_id_to_repair_sets_w_node_ids_map=obj_id_to_repair_sets_w_node_ids_map)

@@ -14,8 +14,9 @@ elif [ $1 = 'c' ]; then
   pytest -rA -v tests/test_service_rate_inspector_w_csv.py
 
 elif [ $1 = 'l' ]; then
-  pytest -rA -v tests/test_load_across_nodes.py
-  # pytest -rA -v tests/test_load_across_nodes.py -k "test_load_across_nodes"
+  # pytest -rA -v tests/test_load_across_nodes.py
+  pytest -rA -v tests/test_load_across_nodes.py -k "test_load_across_nodes"
+  # pytest -rA -v tests/test_load_across_nodes.py -k "test_load_on_first_node"
 
 else
   echo "Unexpected arg= $1"

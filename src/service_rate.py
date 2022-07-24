@@ -66,9 +66,9 @@ class ServiceRateInspector:
                 k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
             )
 
-        log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
+        # log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
 
-        orig_obj_id_to_repair_sets_w_node_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_node_ids_map(
+        self.orig_obj_id_to_repair_sets_w_node_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_node_ids_map(
             orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map,
             obj_id_to_node_id_map=self.obj_id_to_node_id_map,
         )
@@ -390,6 +390,28 @@ class ServiceRateInspector:
                 for obj_id in repair_set:
                     node_id = self.obj_id_to_node_id_map[obj_id]
                     load_across_nodes[node_id] += obj_demand_per_repair_set
+
+        return load_across_nodes
+
+    def load_across_nodes_when_obj_demands_replicated_to_repair_sets(self, obj_demand_list: list[float]) -> list[float]:
+        """Returns the load at the nodes after each object demand is replicated to all
+        its repair sets.
+
+        Note: This load replication is only for test purposes, it obviously does not implement a real
+        load distribution logic.
+        """
+
+        log(DEBUG, f"m= {self.m}")
+
+        load_across_nodes = [0] * self.m
+
+        for orig_obj_id, obj_demand in enumerate(obj_demand_list):
+            repair_set_list = self.orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id]
+
+            for repair_set in repair_set_list:
+                for obj_id in repair_set:
+                    node_id = self.obj_id_to_node_id_map[obj_id]
+                    load_across_nodes[node_id] += obj_demand
 
         return load_across_nodes
 

@@ -27,12 +27,16 @@ def get_node_id_to_objs_list_from_oleg_csv_file(csv_file_path: str) -> list[list
 
             [obj_id_0, obj_id_1, node_id] = [int(i) for i in row]
             if obj_id_1 == -1:
-                obj = PlainObj(id_str=chr(ord("a") + obj_id_0))
+                obj = PlainObj(
+                    id_str=str(obj_id_0),
+                    orig_id=obj_id_0,
+                )
+
             else:
                 obj = CodedObj(
                     coeff_obj_list=[
-                        (1, PlainObj(id_str=chr(ord("a") + obj_id_0))),
-                        (1, PlainObj(id_str=chr(ord("a") + obj_id_1))),
+                        (1, PlainObj(id_str=str(obj_id_0))),
+                        (1, PlainObj(id_str=str(obj_id_1))),
                     ]
                 )
 
