@@ -1,9 +1,11 @@
+"""
+Plot 3D convex closed regions in matplotlib
+Ref: https://stackoverflow.com/questions/49098466/plot-3d-convex-closed-regions-in-matplot-lib
+"""
+
 import networkx as nx
 import numpy as np
 from sympy import Plane, Point3D
-
-# Plot 3D convex closed regions in matplot lib
-# Source: https://stackoverflow.com/questions/49098466/plot-3d-convex-closed-regions-in-matplot-lib
 
 
 def simplify(triangles):

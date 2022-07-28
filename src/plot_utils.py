@@ -15,8 +15,8 @@ NICE_RED = "#ff9999"
 NICE_GREEN = "#99ff99"
 NICE_ORANGE = "#ffcc99"
 
-nice_color_c = itertools.cycle((NICE_BLUE, NICE_RED, NICE_ORANGE, NICE_GREEN))
-dark_color_c = itertools.cycle(
+nice_color_cycle = itertools.cycle((NICE_BLUE, NICE_RED, NICE_ORANGE, NICE_GREEN))
+dark_color_cycle = itertools.cycle(
     (
         "green",
         "purple",
@@ -39,8 +39,10 @@ dark_color_c = itertools.cycle(
         "orangered",
     )
 )
-# dark_color_c = itertools.cycle(('magenta', 'purple', 'gray', 'brown', 'turquoise', 'gold', 'olive', 'silver', 'rosybrown', 'plum', 'goldenrod', 'lightsteelblue', 'lightpink', 'orange', 'darkgray', 'orangered'))
-light_color_c = itertools.cycle(
+
+# dark_color_cycle = itertools.cycle(('magenta', 'purple', 'gray', 'brown', 'turquoise', 'gold', 'olive', 'silver', 'rosybrown', 'plum', 'goldenrod', 'lightsteelblue', 'lightpink', 'orange', 'darkgray', 'orangered'))
+
+light_color_cycle = itertools.cycle(
     (
         "silver",
         "rosybrown",
@@ -51,10 +53,13 @@ light_color_c = itertools.cycle(
         "turquoise",
     )
 )
-linestyle_c = itertools.cycle(("-", "--", ":", "-."))
-marker_c = itertools.cycle(
+
+linestyle_cycle = itertools.cycle(("-", "--", ":", "-."))
+
+marker_cycle = itertools.cycle(
     ("o", "v", "^", "p", "d", "<", ">", "h", "H", "*", "s", "1", "2", "3", "4")
 )
+
 skinny_marker_l = ["x", "+", "1", "2", "3", "4"]
 
 mew, ms = 1, 2  # 3, 5
@@ -68,13 +73,13 @@ def prettify(ax):
     ax.spines["top"].set_visible(False)
 
 
-def plot_points(x_y_l, fname):
+def plot_points(x_y_l, file_name):
     x_l, y_l = [], []
     for x_y in x_y_l:
         x_l.append(x_y[0])
         y_l.append(x_y[1])
 
     plot.plot(x_l, y_l, color=NICE_BLUE, marker="o", ls="None")
-    plot.savefig("{}.png".format(fname), bbox_inches="tight")
+    plot.savefig("{}.png".format(file_name), bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "done.")
