@@ -85,6 +85,12 @@ name_to_node_objs_list_map = {
         ],
     ],
 
+    "a_a_b": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+    ],
+
     "a_a_b_b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],

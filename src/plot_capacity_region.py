@@ -1,5 +1,9 @@
+import numpy
+import scipy
+
 from src import plot_polygon_utils, service_rate
 from src.debug_utils import *
+from src.plot_utils import *
 
 
 def plot_capacity_region(
@@ -13,6 +17,20 @@ def plot_capacity_region(
         plot_cap_3d(service_rate_inspector=service_rate_inspector, file_name_suffix=file_name_suffix)
     else:
         log(ERROR, "Not implemented for k= {}".format(k))
+
+
+# def add_popularity_heatmap():
+#     ## Popularity heatmap
+#     if popmodel is not None:
+#       if heatmap_grid_xmax_ymax is None:
+#         heatmap_grid, xmax, ymax = gen_pop_heatmap_grid_xmax_ymax(popmodel)
+#       else:
+#         heatmap_grid, xmax, ymax = heatmap_grid_xmax_ymax
+
+#       plot.imshow(np.rot90(heatmap_grid), cmap=plot.cm.gist_earth_r, extent=[0, xmax, 0, ymax] )
+#       covered_mass = self.integrate_overcaphyperlane(popmodel.joint_pdf)
+#       plot.text(0.75, 0.9, 'Covered mass= {}'.format(covered_mass),
+#         horizontalalignment='center', verticalalignment='center', transform = plot.gca().transAxes)
 
 
 def plot_capacity_region_2d(
@@ -37,19 +55,18 @@ def plot_capacity_region_2d(
         )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
         plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
 
-    plot.legend()
-    fontsize = 18
-    plot.xlabel(r"$\rho_a$", fontsize=fontsize)
+    # plot.legend()
+    fontsize = 24
+    plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
     plot.xlim(xmin=0)
-    plot.ylabel(r"$\rho_b$", fontsize=fontsize)
+    plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
     plot.ylim(ymin=0)
-    title = (
-        r"$k= {}$, $m= {}$, $C= {}$, ".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C)
-        + "Volume= {0:.2f} \n".format(hull.volume)
-        + service_rate_inspector.to_sysrepr()
-    )
-    plot.title(title, fontsize=fontsize, y=1.05)
-    plot.savefig(f"plot_capacity_region_2d_{file_name_suffix}.png", bbox_inches="tight")
+    title = r"$k= {}$, $m= {}$, $C= {}$, ".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C) + \
+            "Volume= {0:.2f} \n".format(hull.volume) + \
+            service_rate_inspector.to_sysrepr()
+    # plot.title(title, fontsize=fontsize, y=1.05)
+    plot.gcf().set_size_inches(3, 2)
+    plot.savefig(f"plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "Done.")
 
@@ -174,11 +191,9 @@ def plot_capacity_region_3d(
     ax.set_zlim(zmin=0)
     ax.view_init(20, 30)
     plot.title(
-        (
-            r"$k= {}$, $m= {}$, $C= {}$".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C)
-            ", Volume= {0:.2f}".format(hull.volume)
-            f"\n{service_rate_inspector.to_sysrepr()}"
-        ),
+        r"$k= {}$, $m= {}$, $C= {}$".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C) + \
+        ", Volume= {0:.2f}".format(hull.volume) + \
+        f"\n{service_rate_inspector.to_sysrepr()}",
         fontsize=fontsize, y=1.05
     )
 

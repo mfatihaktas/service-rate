@@ -37,7 +37,6 @@ def plot_cost_2d(
     # ax = plot.axes(projection='3d')
     ax = plot.gca()
 
-    # cost_matrix[cost_matrix == None] = 0
     cost_matrix = cost_matrix.astype(float)
     cost_matrix = numpy.ma.masked_where(cost_matrix == None, cost_matrix)
     log(DEBUG, "After masking", cost_matrix=cost_matrix)
