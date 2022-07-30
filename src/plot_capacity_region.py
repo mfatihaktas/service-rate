@@ -49,23 +49,36 @@ def plot_capacity_region_2d(
 
     points = numpy.column_stack((x_l, y_l))
     hull = scipy.spatial.ConvexHull(points)
-    for simplex in hull.simplices:
-        simplex = numpy.append(
-            simplex, simplex[0]
-        )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
-        plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
+    # for simplex in hull.simplices:
+    #     simplex = numpy.append(
+    #         simplex, simplex[0]
+    #     )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
+    #     plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
+    log(DEBUG, "", x_l=x_l, y_l=y_l)
+    plot.fill(points[hull.vertices,0], points[hull.vertices,1], c=NICE_BLUE, alpha=0.5)
 
-    # plot.legend()
     fontsize = 24
+
+    # Oleg plot config
+    ax = plot.gca()
+    yticks = [0, 0.5, 1, 1.5, 2, 2.5]
+    xticks = [0.5, 1, 1.5, 2, 2.5]
+    ax.set_xticks(xticks)
+    ax.set_yticks(yticks)
+    ax.set_xlim([0, 2.5])
+    ax.set_ylim([0, 2.5])
+    plot.xticks(fontsize=fontsize)
+    plot.yticks(fontsize=fontsize)
+
     plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
-    plot.xlim(xmin=0)
+    # plot.xlim(xmin=0)
     plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
-    plot.ylim(ymin=0)
+    # plot.ylim(ymin=0)
     title = r"$k= {}$, $m= {}$, $C= {}$, ".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C) + \
             "Volume= {0:.2f} \n".format(hull.volume) + \
             service_rate_inspector.to_sysrepr()
     # plot.title(title, fontsize=fontsize, y=1.05)
-    plot.gcf().set_size_inches(3, 2)
+    plot.gcf().set_size_inches(4, 3)
     plot.savefig(f"plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "Done.")
