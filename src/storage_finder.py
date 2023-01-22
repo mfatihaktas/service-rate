@@ -1,10 +1,12 @@
 import math
 import itertools
 
+from src.debug_utils import *
+
 
 class StorageFinder:
     def __init__(self, demand_list: list[float]):
-        self.demand_list = sorted(demand_list)
+        self.demand_list = demand_list
 
         self.n = len(self.demand_list)
         self.obj_id_subset_to_min_span_size_map = {}
