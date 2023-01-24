@@ -28,59 +28,44 @@ class StorageFinder:
         log(DEBUG, "Done", obj_id_subset_to_min_span_size_map=obj_id_subset_to_min_span_size_map)
         return obj_id_subset_to_min_span_size_map
 
-    # def find_max_intersection_sizes(self):
-    #     # Construct `obj_id_subset_to_min_span_size_map`
-    #     obj_id_subset_to_min_span_size_map = {}
-    #     obj_id_list = list(range(self.n))
-    #     for subset_size in range(1, self.n):
-    #         for obj_id_subset in itertools.combinations(obj_id_list, subset_size):
-    #             min_span_size = math.ceil(sum(self.demand_list[obj_id] for obj_id in obj_id_subset))
-    #             obj_id_subset_to_min_span_size_map[frozenset(obj_id_subset)] = min_span_size
-    #     log(DEBUG, "Done", obj_id_subset_to_min_span_size_map=self.obj_id_subset_to_min_span_size_map)
+    # def assign_objects_to_nodes(self):
+    #     """Assumes nodes are ranked from 0 to n - 1 w.r.t their popularity.
+    #     """
 
-    #     # Construct `obj_id_subset_to_max_intersect_size_map`
-    #     obj_id_subset_to_max_intersect_size_map = {}
-    #     for obj_id_subset, min_span_size in obj_id_subset_to_min_span_size_map.items():
-    #         # TODO
-    #         obj_id_subset_to_max_intersect_size_map[frozenset(obj_id_subset)] = min_span_size
-    #     log(DEBUG, "Done", obj_id_subset_to_min_span_size_map=self.obj_id_subset_to_min_span_size_map)
+    #     def is_proper_set():
+    #     obj_id_to_node_id_set_map = {}
 
+    #     def get_possible_node_ids(obj_id: int, ) -> list[int]:
+    #         possible_node_id_set = set()
+    #         num_possible_node_ids = 0
 
-    def assign_objects_to_nodes(self):
-        """Assumes nodes are ranked from 0 to n - 1 w.r.t their popularity.
-        """
-        node_id_to_objs_map = collections.defaultdict(list)
-        min_num_objs_on_a_node = 0
+    #         # obj_min_span_size = self.obj_id_subset_to_min_span_size_map[frozenset([obj_id])]
 
-        def can_put_in_node(obj_id: int, node_id: int) -> bool:
-            obj_list = node_id_to_objs_map[node_id]
-            obj_id_subset = frozenset([obj_id, *obj_list])
-            min_span_size = self.obj_id_subset_to_min_span_size_map[obj_id_subset]
+    #         obj_id_list = list(range(obj_id))
+    #         for subset_size in range(1, obj_id + 1):
+    #             for obj_id_subset in itertools.combinations(obj_id_list, subset_size):
+    #                 _span = set()
+    #                 for _obj_id in obj_id_subset:
+    #                     _span |= obj_id_to_node_id_set_map[_obj_id]
 
-
-        for obj_id in range(self.n):
-            min_span_size = self.obj_id_subset_to_min_span_size_map[frozenset([obj_id])]
+    #                 obj_id_subset_ = obj_id_subset + (obj_id,)
+    #                 min_span_size = self.obj_id_subset_to_min_span_size_map[frozenset(obj_id_subset_)]
+    #                 max_intersection_size + _span = min_span_size - len()
 
 
 
-            if obj_id == 0:
-                node_id_set = set(range(min_span_size))
-                self.obj_id_to_node_id_set_map[obj_id] = node_id_set
+    #     def helper(obj_id: int):
+    #         if obj_id == self.n:
+    #             return obj_id_to_node_id_set_map
 
-                for node_id in node_id_set:
-                    node_id_to_objs_map[node_id].add(obj_id)
-                min_num_objs_on_a_node = 1
+    #         min_span_size = self.obj_id_subset_to_min_span_size_map[frozenset([obj_id])]
+    #         if obj_id == 0:
+    #             node_id_set = set(range(min_span_size))
+    #             obj_id_to_node_id_set_map[obj_id] = node_id_set
+    #             helper(obj_id=obj_id + 1)
 
-                continue
-
-            for node_id, obj_list in node_id_to_objs_map.items():
-                if len(obj_list) > min_num_objs_on_a_node:
-                    continue
+    #         else:
 
 
-
-            min_num_objs_on_a_node
-
-            for _obj_id in range(obj_id):
-
-            node_id_to_objs_map
+    #             min_span_size
+    #             helper(obj_id=obj_id + 1)
