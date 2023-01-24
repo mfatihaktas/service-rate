@@ -25,12 +25,20 @@ def test_w_integer_programming():
     # node_req_left_list.append([1, 0, 0, 1, 0, 0, 1, 0, 0])
     # node_req_right_list.append([1])
 
+    # Choice intersection constraints
+    M_0 = numpy.array([1, 1, 1, 0, 0, 0, 0, 0, 0])
+    M_1 = numpy.array([0, 0, 0, 1, 1, 1, 0, 0, 0])
+
     x = cvxpy.Variable(shape=(k*n, 1), name="x", integer=True)
 
     obj = cvxpy.Minimize(cvxpy.sum(x))
     # obj = cvxpy.Minimize(cvxpy.norm(x, 1))
     # obj = cvxpy.Minimize(cvxpy.min(x) - cvxpy.max(x))
-    constraints = [obj_req_left_matrix @ x >= obj_req_right_matrix, x >= 0, x <= 1]
+    constraints = [
+        obj_req_left_matrix @ x >= obj_req_right_matrix,
+        (M_0 @ x).T @ (M_1 @ x) >= 2,
+        x >= 0, x <= 1,
+    ]
 
     prob = cvxpy.Problem(obj, constraints)
     # opt_value = service_rate_utils.solve_prob(prob)
