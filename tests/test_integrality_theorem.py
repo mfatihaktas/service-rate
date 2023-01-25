@@ -91,7 +91,6 @@ def test_w_integer_programming_2():
     # node_2: a, c
 
     k, n = 3, 7
-    demand_list = [2, 2, 1]
     obj_id_tuple_to_min_span_size_map = {
         (0,): 3,
         (1,): 2,
@@ -117,7 +116,17 @@ def test_w_integer_programming_2():
     # Range constraints
     constraint_list.extend([x >= 0, x <= 1])
 
-    obj = cvxpy.Minimize(cvxpy.sum(x))
+    C = numpy.array(
+        [
+            [i + 1 for i in range(n)]
+            for _ in range(k)
+        ]
+    )
+    obj = cvxpy.Minimize(cvxpy.sum(cvxpy.multiply(C, x)))
+    # obj = cvxpy.Minimize(cvxpy.norm(x, 1))
+    # obj = cvxpy.Minimize(cvxpy.sum_squares(x))
+    # obj = cvxpy.Minimize(cvxpy.tv(x))
+    # obj = cvxpy.Minimize(cvxpy.tv(cvxpy.cumsum(x, axis=1)))
 
     prob = cvxpy.Problem(obj, constraint_list)
     prob.solve(solver="GLPK_MI")
