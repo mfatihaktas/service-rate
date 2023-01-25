@@ -82,3 +82,49 @@ def test_w_l1_norm():
         sum_x_row_1=numpy.sum(x.value[1, :]),
         sum_x_row_2=numpy.sum(x.value[2, :]),
     )
+
+
+def test_w_integer_programming_2():
+    # Goal:
+    # node_0: a, b
+    # node_1: a, b
+    # node_2: a, c
+
+    k, n = 3, 7
+    demand_list = [2, 2, 1]
+    obj_id_tuple_to_min_span_size_map = {
+        (0,): 3,
+        (1,): 2,
+        (2,): 1,
+        (0, 1): 3,
+        (0, 2): 3,
+        (1, 2): 3,
+        (0, 1, 2): 3,
+    }
+
+    x = cvxpy.Variable(shape=(k, n), name="x", integer=True)
+    constraint_list = []
+
+    # Span constraints
+    for obj_id_tuple, min_span_size in obj_id_tuple_to_min_span_size_map.items():
+        v_list = [x[i, :] for i in obj_id_tuple]
+        constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
+
+    # Node constraints
+    for i in range(n):
+        constraint_list.append(cvxpy.sum(x[:i]) <= 1)
+
+    # Range constraints
+    constraint_list.extend([x >= 0, x <= 1])
+
+    # obj = cvxpy.Minimize(cvxpy.sum(x))
+    obj = cvxpy.Minimize(cvxpy.norm(x, 1))
+
+    prob = cvxpy.Problem(obj, constraint_list)
+    prob.solve(solver="GLPK")
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+    )
