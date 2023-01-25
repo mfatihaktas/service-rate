@@ -111,17 +111,16 @@ def test_w_integer_programming_2():
         constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
 
     # Node constraints
-    for i in range(n):
-        constraint_list.append(cvxpy.sum(x[:i]) <= 1)
+    # for i in range(n):
+    #     constraint_list.append(cvxpy.sum(x[:, i]) <= 1)
 
     # Range constraints
     constraint_list.extend([x >= 0, x <= 1])
 
-    # obj = cvxpy.Minimize(cvxpy.sum(x))
-    obj = cvxpy.Minimize(cvxpy.norm(x, 1))
+    obj = cvxpy.Minimize(cvxpy.sum(x))
 
     prob = cvxpy.Problem(obj, constraint_list)
-    prob.solve(solver="GLPK")
+    prob.solve(solver="GLPK_MI")
 
     log(DEBUG, "",
         prob_status=prob.status,
