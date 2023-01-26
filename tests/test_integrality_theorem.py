@@ -1,6 +1,6 @@
 import cvxpy
 import numpy
-# import pytest
+import pytest
 
 from src import service_rate_utils
 from src.debug_utils import *
@@ -83,31 +83,77 @@ def test_w_l1_norm():
         sum_x_row_2=numpy.sum(x.value[2, :]),
     )
 
+@pytest.fixture(
+    scope="session",
+    params=[
+        # dict(
+        #     # Goal:
+        #     # [a, b]
+        #     # [a, b]
+        #     # [a, c]
+        #     k=3,
+        #     n=7,
+        #     obj_id_tuple_to_min_span_size_map={
+        #         (0,): 3,
+        #         (1,): 2,
+        #         (2,): 1,
+        #         (0, 1): 3,
+        #         (0, 2): 3,
+        #         (1, 2): 3,
+        #         (0, 1, 2): 3,
+        #     }
+        # ),
 
-def test_w_integer_programming_2():
-    # Goal:
-    # node_0: a, b
-    # node_1: a, b
-    # node_2: a, c
+        dict(
+            # Goal:
+            # [a, b]
+            # [a, b]
+            # [a, c]
+            # [a, c]
+            # [d]
+            k=4,
+            n=7,
+            obj_id_tuple_to_min_span_size_map={
+                (0,): 4,
+                (1,): 2,
+                (2,): 2,
+                (3,): 1,
+                (0, 1): 4,
+                (0, 2): 4,
+                (0, 3): 5,
+                (1, 2): 4,
+                (1, 3): 3,
+                (2, 3): 3,
+                (0, 1, 2): 4,
+                (0, 1, 3): 5,
+                (0, 2, 3): 5,
+                (1, 2, 3): 5,
+            }
+        ),
+    ],
+)
+def storage_info_w_span_sizes(request) -> dict:
+    return request.param
 
-    k, n = 3, 7
-    obj_id_tuple_to_min_span_size_map = {
-        (0,): 3,
-        (1,): 2,
-        (2,): 1,
-        (0, 1): 3,
-        (0, 2): 3,
-        (1, 2): 3,
-        (0, 1, 2): 3,
-    }
+
+def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
+    k = storage_info_w_span_sizes["k"]
+    n = storage_info_w_span_sizes["n"]
+    obj_id_tuple_to_min_span_size_map = storage_info_w_span_sizes["obj_id_tuple_to_min_span_size_map"]
 
     x = cvxpy.Variable(shape=(k, n), name="x", integer=True)
+    # x = cvxpy.Variable(shape=(k, n), name="x")
     constraint_list = []
 
     # Span constraints
-    for obj_id_tuple, min_span_size in obj_id_tuple_to_min_span_size_map.items():
-        v_list = [x[i, :] for i in obj_id_tuple]
-        constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
+    # for obj_id_tuple, min_span_size in obj_id_tuple_to_min_span_size_map.items():
+    #     v_list = [x[i, :] for i in obj_id_tuple]
+    #     constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
+
+    # constraint_list.append(x[0, :].T @ x[1, :] <= 2)
+    # constraint_list.append(cvxpy.dotsort(x[0, :], x[1, :]) >= 2)
+    constraint_list.append(cvxpy.quad_form(x[0, :], numpy.ones((n, n))) <= 2)
+    # constraint_list.append(cvxpy.pnorm(x, 2) <= 2)
 
     # Node constraints
     # for i in range(n):
@@ -129,7 +175,8 @@ def test_w_integer_programming_2():
     # obj = cvxpy.Minimize(cvxpy.tv(cvxpy.cumsum(x, axis=1)))
 
     prob = cvxpy.Problem(obj, constraint_list)
-    prob.solve(solver="GLPK_MI")
+    # prob.solve(solver="GLPK_MI")
+    prob.solve()
 
     log(DEBUG, "",
         prob_status=prob.status,
