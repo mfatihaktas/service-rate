@@ -120,6 +120,14 @@ def pstr(**kwargs):
         return s
 
 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Sim log  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
+def slog(level: int, env, caller: str, _msg_: str, **kwargs):
+    level_log_m[level](
+        "t: {:.2f}] {}: {} {}".format(env.now, caller, _msg_, pstr(**kwargs)),
+        extra=get_extra(),
+    )
+
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Assert  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 def check(condition: bool, _msg_: str, **kwargs):
     if not condition:
