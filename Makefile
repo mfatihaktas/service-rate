@@ -1,5 +1,3 @@
-VENV_PATH="/home/mfa51/service-rate-venv"
-
 clean:
 	rm -fr .direnv
 
@@ -12,7 +10,7 @@ env:
 	# pyenv install --verbose 3.10.0
 
 venv:
-	python3 -m venv ${VENV_PATH}
+	python3 -m venv /home/mfa51/service-rate/.venv
 
 install:
 	pip install --upgrade pip; \
