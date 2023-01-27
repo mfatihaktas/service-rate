@@ -183,3 +183,23 @@ def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
         prob_value=prob.value,
         x=x.value,
     )
+
+
+def test_mixed_integer_quadratic_program():
+    # Generate a random problem
+    numpy.random.seed(0)
+    m, n = 40, 25
+
+    A = numpy.random.rand(m, n)
+    b = numpy.random.randn(m)
+
+    x = cvxpy.Variable(n, integer=True)
+    objective = cvxpy.Minimize(cvxpy.sum_squares(A @ x - b))
+    prob = cvxpy.Problem(objective)
+    prob.solve()
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+    )
