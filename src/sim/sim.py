@@ -57,7 +57,7 @@ def sim_single_server(
     )
 
     sink = sink_module.Sink(env=env, _id="sink", num_requests_to_recv=num_requests_to_serve)
-    server = server_module.Server(env=env, _id=f"server", sink=sink)
+    server = server_module.Server(env=env, _id="server", sink=sink)
     source = source_module.Source(
         env=env,
         _id="source",
@@ -68,12 +68,12 @@ def sim_single_server(
 
     env.run(until=sink.recv_requests_proc)
 
-    sim_result = SimResult(t_l=sink.task_response_time_list)
+    sim_result = SimResult(t_l=sink.request_response_time_list)
     log(INFO, "Done", sim_result=sim_result)
     sim_result_list.append(sim_result)
 
 
-def sim_w_joblib(
+def sim_single_server_w_joblib(
     env: simpy.Environment,
     inter_gen_time_rv: random_variable.RandomVariable,
     service_time_rv: random_variable.RandomVariable,
@@ -93,7 +93,7 @@ def sim_w_joblib(
             env=env,
             inter_gen_time_rv=inter_gen_time_rv,
             service_time_rv=service_time_rv,
-            num_requests_to_recv=num_requests_to_serve,
+            num_requests_to_serve=num_requests_to_serve,
             sim_result_list=sim_result_list,
         )
 

@@ -1,6 +1,6 @@
 import simpy
 
-from src.sys import (
+from src.sim import (
     node,
     request as request_module,
 )
@@ -25,7 +25,7 @@ class Sink(node.Node):
     def __repr__(self):
         return f"Sink(id= {self._id})"
 
-    def put(self, request: request_module.Task):
+    def put(self, request: request_module.Request):
         slog(DEBUG, self.env, self, "recved", request=request)
 
         self.request_store.put(request)
@@ -39,9 +39,8 @@ class Sink(node.Node):
             num_requests_recved += 1
             slog(DEBUG, self.env, self, "recved", request=request, num_requests_recved=num_requests_recved)
 
-            if self.sching_agent:
-                response_time = self.env.now - request.arrival_time
-                self.request_response_time_list.append(response_time)
+            response_time = self.env.now - request.arrival_time
+            self.request_response_time_list.append(response_time)
 
             if num_requests_recved >= self.num_requests_to_recv:
                 slog(DEBUG, self.env, self, "recved requested # tasks", num_requests_recved=num_requests_recved)
