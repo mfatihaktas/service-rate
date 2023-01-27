@@ -1,20 +1,20 @@
 import simpy
 
 from src.sim import (
+    node,
     request as request_module,
 )
 from src.debug_utils import *
 
 
-class Server:
+class Server(node.Node):
     def __init__(
         self,
         env: simpy.Environment,
         _id: str,
         sink: node.Node = None,
     ):
-        self.env = env
-        self._id = _id
+        super().__init__(env=env, _id=_id)
         self.sink = sink
 
         self.request_in_serv = None

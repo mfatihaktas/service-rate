@@ -1,18 +1,20 @@
 import simpy
 
-from src.sys import request as request_module
+from src.sys import (
+    node,
+    request as request_module,
+)
 from src.debug_utils import *
 
 
-class Sink:
+class Sink(node.Node):
     def __init__(
         self,
         env: simpy.Environment,
         _id: str,
         num_requests_to_recv: int = None,
     ):
-        self.env = env
-        self._id = _id
+        super().__init__(env=env, _id=_id)
         self.num_requests_to_recv = num_requests_to_recv
 
         self.request_store = simpy.Store(env)
