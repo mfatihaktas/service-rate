@@ -13,14 +13,14 @@ class Source(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
-        inter_request_gen_time_rv: random_variable.RandomVariable,
-        request_service_time_rv: random_variable.RandomVariable,
+        inter_gen_time_rv: random_variable.RandomVariable,
+        service_time_rv: random_variable.RandomVariable,
         next_hop: node.Node,
         num_requests_to_send: int = None,
     ):
         super().__init__(env=env, _id=_id)
-        self.inter_request_gen_time_rv = inter_request_gen_time_rv
-        self.request_service_time_rv = request_service_time_rv
+        self.inter_gen_time_rv = inter_gen_time_rv
+        self.service_time_rv = service_time_rv
         self.next_hop = next_hop
         self.num_requests_to_send = num_requests_to_send
 
@@ -34,7 +34,7 @@ class Source(node.Node):
 
         request_id = 0
         while True:
-            inter_msg_gen_time = self.inter_request_gen_time_rv.sample()
+            inter_msg_gen_time = self.inter_gen_time_rv.sample()
             slog(DEBUG, self.env, self, "waiting",
                  inter_msg_gen_time=inter_msg_gen_time
             )
@@ -42,7 +42,7 @@ class Source(node.Node):
 
             request = request_module.Request(
                 _id=request_id,
-                service_time=self.request_service_time_rv.sample(),
+                service_time=self.service_time_rv.sample(),
                 arrival_time=self.env.now,
             )
 

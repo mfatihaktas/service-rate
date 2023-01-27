@@ -18,7 +18,7 @@ class Sink(node.Node):
         self.num_requests_to_recv = num_requests_to_recv
 
         self.request_store = simpy.Store(env)
-        self.recv_tasks_proc = env.process(self.recv_tasks())
+        self.recv_requests_proc = env.process(self.recv_requests())
 
         self.request_response_time_list = []
 
@@ -30,7 +30,7 @@ class Sink(node.Node):
 
         self.request_store.put(request)
 
-    def recv_tasks(self):
+    def recv_requests(self):
         slog(DEBUG, self.env, self, "started")
 
         num_requests_recved = 0
