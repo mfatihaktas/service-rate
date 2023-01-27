@@ -103,7 +103,7 @@ def sim_single_server_w_joblib(
                 env=env,
                 inter_gen_time_rv=inter_gen_time_rv,
                 service_time_rv=service_time_rv,
-                num_requests_to_recv=num_requests_to_serve,
+                num_requests_to_serve=num_requests_to_serve,
                 sim_result_list=sim_result_list,
             )
             for i in range(num_sim_runs)

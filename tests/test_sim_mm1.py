@@ -28,7 +28,7 @@ def test_MM1(
     inter_gen_time_rv: random_variable.RandomVariable,
     service_time_rv: random_variable.RandomVariable,
 ):
-    num_sim_runs = 1
+    num_sim_runs = 2
     num_requests_to_serve = 10
     sim_result = sim_module.sim_single_server_w_joblib(
         env=env,
