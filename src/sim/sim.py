@@ -15,25 +15,47 @@ from src.debug_utils import *
 
 @dataclasses.dataclass(repr=False)
 class SimResult:
-    t_l: list[float]
+    response_time_list: list[float]
+    frac_dropped_requests_list: float = dataclasses.field(default=None)
 
     ET: float = None
     std_T: float = None
+    self.min_frac_dropped_requests = None
+    self.max_frac_dropped_requests = None
+    self.E_frac_dropped_requests = None
+    self.std_frac_dropped_requests = None
 
     def __repr__(self):
-        return "SimResult( \n" f"\t ET= {self.ET} \n" f"\t std_T= {self.std_T} \n" ")"
+        return (
+            "SimResult( \n"
+            f"\t ET= {self.ET} \n"
+            f"\t std_T= {self.std_T} \n"
+            f"\t E_frac_dropped_requests= {self.E_frac_dropped_requests} \n"
+            f"\t std_frac_dropped_requests= {self.std_frac_dropped_requests} \n"
+            ")"
+        )
 
     def __post_init__(self):
-        self.ET = numpy.mean(self.t_l)
-        self.std_T = numpy.std(self.t_l)
+        self.ET = numpy.mean(self.response_time_list)
+        self.std_T = numpy.std(self.response_time_list)
+
+        self.min_frac_dropped_requests = min(self.frac_dropped_requests_list)
+        self.max_frac_dropped_requests = max(self.frac_dropped_requests_list)
+        self.E_frac_dropped_requests = numpy.mean(self.frac_dropped_requests_list)
+        self.std_frac_dropped_requests = numpy.std(self.frac_dropped_requests_list)
 
 
 def combine_sim_results(sim_result_list: list[SimResult]) -> SimResult:
-    t_l = []
+    response_time_list = []
+    frac_dropped_requests_list = []
     for sim_result in sim_result_list:
-        t_l.extend(sim_result.t_l)
+        # response_time_list.extend(sim_result.response_time_list)
+        frac_dropped_requests_list.append(sim_result.frac_dropped_requests)
 
-    return SimResult(t_l=t_l)
+    return SimResult(
+        response_time_list=response_time_list,
+        frac_dropped_requests_list=frac_dropped_requests_list
+    )
 
 
 def sim_single_server(
@@ -73,7 +95,10 @@ def sim_single_server(
 
     env.run(until=sink.recv_requests_proc)
 
-    sim_result = SimResult(t_l=sink.request_response_time_list)
+    sim_result = SimResult(
+        response_time_list=sink.request_response_time_list,
+        frac_dropped_requests=server.num_dropped_requests / num_requests_to_serve if queue_length else None,
+    )
     log(INFO, "Done", sim_result=sim_result)
     if sim_result_list is not None:
         sim_result_list.append(sim_result)
