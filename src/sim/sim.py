@@ -16,14 +16,26 @@ from src.debug_utils import *
 @dataclasses.dataclass(repr=False)
 class SimResult:
     response_time_list: list[float]
-    frac_dropped_requests_list: float = dataclasses.field(default=None)
+    frac_dropped_requests: float = dataclasses.field(default=None)
 
-    ET: float = None
-    std_T: float = None
-    self.min_frac_dropped_requests = None
-    self.max_frac_dropped_requests = None
-    self.E_frac_dropped_requests = None
-    self.std_frac_dropped_requests = None
+    def __repr__(self):
+        return (
+            "SimResult( \n"
+            f"\t len(response_time_list)= {len(self.response_time_list)}"
+            f"\t frac_dropped_requests= {self.frac_dropped_requests} \n"
+            ")"
+        )
+
+
+class SummarySimResult:
+    def __init__(self, response_time_list: list[float], frac_dropped_requests_list: list[float]):
+        self.ET = numpy.mean(response_time_list)
+        self.std_T = numpy.std(response_time_list)
+
+        self.min_frac_dropped_requests = min(frac_dropped_requests_list)
+        self.max_frac_dropped_requests = max(frac_dropped_requests_list)
+        self.E_frac_dropped_requests = numpy.mean(frac_dropped_requests_list)
+        self.std_frac_dropped_requests = numpy.std(frac_dropped_requests_list)
 
     def __repr__(self):
         return (
@@ -35,26 +47,17 @@ class SimResult:
             ")"
         )
 
-    def __post_init__(self):
-        self.ET = numpy.mean(self.response_time_list)
-        self.std_T = numpy.std(self.response_time_list)
 
-        self.min_frac_dropped_requests = min(self.frac_dropped_requests_list)
-        self.max_frac_dropped_requests = max(self.frac_dropped_requests_list)
-        self.E_frac_dropped_requests = numpy.mean(self.frac_dropped_requests_list)
-        self.std_frac_dropped_requests = numpy.std(self.frac_dropped_requests_list)
-
-
-def combine_sim_results(sim_result_list: list[SimResult]) -> SimResult:
+def summarize_sim_results(sim_result_list: list[SimResult]) -> SummarySimResult:
     response_time_list = []
     frac_dropped_requests_list = []
     for sim_result in sim_result_list:
         # response_time_list.extend(sim_result.response_time_list)
         frac_dropped_requests_list.append(sim_result.frac_dropped_requests)
 
-    return SimResult(
+    return SummarySimResult(
         response_time_list=response_time_list,
-        frac_dropped_requests_list=frac_dropped_requests_list
+        frac_dropped_requests_list=frac_dropped_requests_list,
     )
 
 
@@ -110,7 +113,7 @@ def sim_single_server_w_joblib(
     num_requests_to_serve: int,
     queue_length: int = None,
     num_sim_runs: int = 1,
-) -> SimResult:
+) -> SummarySimResult:
     log(
         DEBUG,
         "Started",
@@ -142,12 +145,8 @@ def sim_single_server_w_joblib(
             for i in range(num_sim_runs)
         )
 
-    log(INFO, "Done", sim_result_list=sim_result_list)
+    # log(INFO, "Done", sim_result_list=sim_result_list)
+    summary_sim_result = summarize_sim_results(sim_result_list=sim_result_list)
 
-    if len(sim_result_list) > 1:
-        sim_result = combine_sim_results(sim_result_list=sim_result_list)
-    else:
-        sim_result = sim_result_list[0]
-
-    log(INFO, "Done", sim_result=sim_result)
-    return sim_result
+    log(INFO, "Done", summary_sim_result=summary_sim_result)
+    return summary_sim_result
