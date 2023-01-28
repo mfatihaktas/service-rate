@@ -12,7 +12,7 @@ class Server(node.Node):
         self,
         env: simpy.Environment,
         _id: str,
-        sink: node.Node = None,
+        sink: node.Node,
     ):
         super().__init__(env=env, _id=_id)
         self.sink = sink
@@ -70,3 +70,30 @@ class Server(node.Node):
             self.request_in_serv = None
 
         slog(DEBUG, self.env, self, "done")
+
+
+class ServerWithFiniteQueue(Server):
+    def __init__(
+        self,
+        env: simpy.Environment,
+        _id: str,
+        sink: node.Node,
+        queue_length: int,
+    ):
+        super().__init__(env=env, _id=_id, sink=sink)
+        self.queue_length = queue_length
+
+        self.num_dropped_requests = 0
+
+    def __repr__(self):
+        return f"ServerWithFiniteQueue(id= {self._id})"
+
+    def put(self, request: request_module.Request):
+        slog(DEBUG, self.env, self, "recved", request=request)
+
+        request.node_id = self._id
+        if len(self.request_store.items) == self.queue_length:
+            slog(DEBUG, self.env, self, "queue is full, dropping", request=request)
+            self.num_dropped_requests += 1
+        else:
+            self.request_store.put(request)
