@@ -45,9 +45,9 @@ def test_MM1_w_finite_queue(
     inter_gen_time_rv: random_variable.RandomVariable,
     service_time_rv: random_variable.RandomVariable,
 ):
-    num_sim_runs = 2
-    num_requests_to_serve = 10
-    queue_length = 4
+    num_sim_runs = 1
+    num_requests_to_serve = 100
+    queue_length = 2
     sim_result = sim_module.sim_single_server_w_joblib(
         env=env,
         inter_gen_time_rv=inter_gen_time_rv,

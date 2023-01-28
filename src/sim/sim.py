@@ -60,9 +60,9 @@ def sim_single_server(
     sink = sink_module.Sink(env=env, _id="sink", num_requests_to_recv=num_requests_to_serve)
 
     if queue_length:
-        server = server_module.Server(env=env, _id="server", sink=sink)
-    else:
         server = server_module.ServerWithFiniteQueue(env=env, _id="server", sink=sink, queue_length=queue_length)
+    else:
+        server = server_module.Server(env=env, _id="server", sink=sink)
 
     source = source_module.Source(
         env=env,
