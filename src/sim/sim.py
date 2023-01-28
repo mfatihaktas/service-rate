@@ -44,7 +44,6 @@ def combine_sim_results(sim_result_list: list[SimResult]) -> SimResult:
 
 
 def sim_single_server(
-    env: simpy.Environment,
     inter_gen_time_rv: random_variable.RandomVariable,
     service_time_rv: random_variable.RandomVariable,
     num_requests_to_serve: int,
@@ -57,6 +56,7 @@ def sim_single_server(
         num_requests_to_serve=num_requests_to_serve,
     )
 
+    env = simpy.Environment()
     sink = sink_module.Sink(env=env, _id="sink", num_requests_to_recv=num_requests_to_serve)
 
     if queue_length:
@@ -81,7 +81,6 @@ def sim_single_server(
 
 
 def sim_single_server_w_joblib(
-    env: simpy.Environment,
     inter_gen_time_rv: random_variable.RandomVariable,
     service_time_rv: random_variable.RandomVariable,
     num_requests_to_serve: int,
@@ -98,7 +97,6 @@ def sim_single_server_w_joblib(
     sim_result_list = []
     if num_sim_runs == 1:
         sim_single_server(
-            env=env,
             inter_gen_time_rv=inter_gen_time_rv,
             service_time_rv=service_time_rv,
             num_requests_to_serve=num_requests_to_serve,
@@ -109,7 +107,6 @@ def sim_single_server_w_joblib(
     else:
         joblib.Parallel(n_jobs=-1, prefer="threads")(
             joblib.delayed(sim_single_server)(
-                env=env,
                 inter_gen_time_rv=inter_gen_time_rv,
                 service_time_rv=service_time_rv,
                 num_requests_to_serve=num_requests_to_serve,
