@@ -16,3 +16,8 @@ install:
 	pip install --upgrade pip; \
 	pip install poetry; \
 	poetry install
+
+lint:
+	# isort --skip ".direnv/**" .
+	black --exclude=".direnv/*" .
+	flake8 --exclude=".direnv/*" .
