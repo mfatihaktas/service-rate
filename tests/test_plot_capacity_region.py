@@ -10,10 +10,12 @@ from src.debug_utils import *
         "a_a_b",
         "a_b_a+b",
         "a_a_b_b",
-    ]
+    ],
 )
 def test_plot_cost_capacity_region_2d(simple_storage_name: str):
-    node_id_to_objs_list = storage_scheme.name_to_node_objs_list_map[simple_storage_name]
+    node_id_to_objs_list = storage_scheme.name_to_node_objs_list_map[
+        simple_storage_name
+    ]
 
     scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
     log(DEBUG, "", storage_scheme=scheme)

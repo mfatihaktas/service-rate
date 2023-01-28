@@ -1,4 +1,3 @@
-import collections
 import itertools
 import math
 
@@ -12,7 +11,9 @@ class StorageFinder:
         self.demand_list = demand_list
 
         self.n = len(self.demand_list)
-        self.obj_id_subset_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
+        self.obj_id_subset_to_min_span_size_map = (
+            self.get_obj_id_subset_to_min_span_size_map()
+        )
 
         self.obj_id_to_node_id_set_map = {}
 
@@ -22,10 +23,18 @@ class StorageFinder:
         obj_id_list = list(range(self.n))
         for subset_size in range(1, self.n):
             for obj_id_subset in itertools.combinations(obj_id_list, subset_size):
-                min_span_size = math.ceil(sum(self.demand_list[obj_id] for obj_id in obj_id_subset))
-                obj_id_subset_to_min_span_size_map[frozenset(obj_id_subset)] = min_span_size
+                min_span_size = math.ceil(
+                    sum(self.demand_list[obj_id] for obj_id in obj_id_subset)
+                )
+                obj_id_subset_to_min_span_size_map[
+                    frozenset(obj_id_subset)
+                ] = min_span_size
 
-        log(DEBUG, "Done", obj_id_subset_to_min_span_size_map=obj_id_subset_to_min_span_size_map)
+        log(
+            DEBUG,
+            "Done",
+            obj_id_subset_to_min_span_size_map=obj_id_subset_to_min_span_size_map,
+        )
         return obj_id_subset_to_min_span_size_map
 
     # def assign_objects_to_nodes(self):
@@ -52,8 +61,6 @@ class StorageFinder:
     #                 min_span_size = self.obj_id_subset_to_min_span_size_map[frozenset(obj_id_subset_)]
     #                 max_intersection_size + _span = min_span_size - len()
 
-
-
     #     def helper(obj_id: int):
     #         if obj_id == self.n:
     #             return obj_id_to_node_id_set_map
@@ -65,7 +72,6 @@ class StorageFinder:
     #             helper(obj_id=obj_id + 1)
 
     #         else:
-
 
     #             min_span_size
     #             helper(obj_id=obj_id + 1)

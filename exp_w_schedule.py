@@ -18,7 +18,8 @@ def run(
     max_repair_set_size: int = None,
     compute_halfspace_intersections=True,
 ):
-    log(DEBUG,
+    log(
+        DEBUG,
         "Started;",
         node_id_objs_list=node_id_objs_list,
         max_repair_set_size=max_repair_set_size,
@@ -61,9 +62,13 @@ def run(
 
     log(DEBUG, "Done.")
 
+
 if __name__ == "__main__":
     # run(storage_scheme.name_to_node_objs_list_map["a_b_a+b"])
     # run(storage_scheme.name_to_node_objs_list_map["a_a_b_b"])
-    run(node_id_objs_list=storage_scheme.name_to_node_objs_list_map["a_b_a+b_a+2b"], max_repair_set_size=2)
+    run(
+        node_id_objs_list=storage_scheme.name_to_node_objs_list_map["a_b_a+b_a+2b"],
+        max_repair_set_size=2,
+    )
     # run(node_id_objs_list=storage_scheme.name_to_node_objs_list_map["a_a_a_b_a+b_a+2b"], max_repair_set_size=2)
     # run(storage_scheme.name_to_node_objs_list_map["a,b_a,b"])

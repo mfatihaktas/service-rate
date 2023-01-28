@@ -1,7 +1,4 @@
-import collections
 import cvxpy
-import itertools
-import mpl_toolkits
 import numpy
 import scipy.spatial
 import string
@@ -29,13 +26,13 @@ class ServiceRateInspector:
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
     ):
-        ## Number of buckets
+        # Number of buckets
         self.m = m
-        ## Capacity of each node
+        # Capacity of each node
         self.C = C
-        ## Object composition matrix
+        # Object composition matrix
         self.G = G
-        ## Map from object id's to node id's
+        # Map from object id's to node id's
         self.obj_id_to_node_id_map = obj_id_to_node_id_map
         self.compute_halfspace_intersections = compute_halfspace_intersections
 
@@ -46,12 +43,13 @@ class ServiceRateInspector:
         self.k = G.shape[0]
         self.n = G.shape[1]
 
-        ## Note: Repair sets are given in terms of obj ids,
-        ## in the sense of columns of G or keys of obj_id_to_node_id_map
+        # Note: Repair sets are given in terms of obj ids,
+        # in the sense of columns of G or keys of obj_id_to_node_id_map
 
         if redundancy_w_two_xors:
             self.orig_obj_id_to_repair_sets_w_obj_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_obj_ids_map_for_redundancy_w_two_xors(
-                n=self.n, G=self.G,
+                n=self.n,
+                G=self.G,
             )
 
         else:
@@ -63,7 +61,10 @@ class ServiceRateInspector:
             #     k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
             # )
             self.orig_obj_id_to_repair_sets_w_obj_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_obj_ids_map_w_joblib(
-                k=self.k, n=self.n, G=self.G, max_repair_set_size=max_repair_set_size,
+                k=self.k,
+                n=self.n,
+                G=self.G,
+                max_repair_set_size=max_repair_set_size,
             )
 
         # log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
@@ -73,25 +74,27 @@ class ServiceRateInspector:
             obj_id_to_node_id_map=self.obj_id_to_node_id_map,
         )
 
-        ## Repair set list
+        # Repair set list
         repair_set_w_obj_ids_list = []
         for obj in range(self.k):
-            repair_set_w_obj_ids_list.extend(self.orig_obj_id_to_repair_sets_w_obj_ids_map[obj])
+            repair_set_w_obj_ids_list.extend(
+                self.orig_obj_id_to_repair_sets_w_obj_ids_map[obj]
+            )
 
         self.l = len(repair_set_w_obj_ids_list)
 
-        ## T
+        # T
         self.T = service_rate_utils.get_T(
             num_orig_objects=self.k,
             total_num_repair_sets=self.l,
             orig_obj_to_repair_set_w_obj_ids_size_map={
                 obj: len(repair_set)
                 for obj, repair_set in self.orig_obj_id_to_repair_sets_w_obj_ids_map.items()
-            }
+            },
         )
         # log(DEBUG, f"T= \n{self.T}")
 
-        ## M
+        # M
         self.M = service_rate_utils.get_M(
             num_objects=self.n,
             num_nodes=self.m,
@@ -100,7 +103,7 @@ class ServiceRateInspector:
         )
         # log(DEBUG, f"M= \n{self.M}")
 
-        ## Halfspaces
+        # Halfspaces
         if compute_halfspace_intersections:
             self.halfspaces = service_rate_utils.get_halfspaces(
                 num_nodes=self.m,
@@ -109,8 +112,12 @@ class ServiceRateInspector:
                 M=self.M,
             )
 
-            self.boundary_point_list = [list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections]
-            self.boundary_points_in_rows = numpy.array(self.boundary_point_list).reshape((len(self.boundary_point_list), self.k))
+            self.boundary_point_list = [
+                list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections
+            ]
+            self.boundary_points_in_rows = numpy.array(
+                self.boundary_point_list
+            ).reshape((len(self.boundary_point_list), self.k))
 
             self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
             log(DEBUG, "scipy.spatial.ConvexHull is done.")
@@ -180,7 +187,8 @@ class ServiceRateInspector:
         prob = cvxpy.Problem(obj, constraints)
         opt_value = service_rate_utils.solve_prob(prob)
         if opt_value is None:
-            log(WARNING,
+            log(
+                WARNING,
                 "Object demand vector is not in the capacity region, "
                 "thus cannot compute the cost.",
                 prob_status=prob.status,
@@ -191,9 +199,7 @@ class ServiceRateInspector:
         allocation_list = []
         for v_list in x.value.tolist():
             v = v_list[0]
-            allocation_list.append(
-                v if abs(v) > 0.001 else 0
-            )
+            allocation_list.append(v if abs(v) > 0.001 else 0)
         log(DEBUG, f"allocation_list= {allocation_list}")
 
         cost = cost_coeff_row_vector @ x.value
@@ -202,8 +208,7 @@ class ServiceRateInspector:
         return cost
 
     def min_distance_to_boundary_w_cvxpy(self, obj_demand_list: list[float]) -> float:
-        """ Returns the min distance from obj_demand_list to the service rate boundary.
-        """
+        """Returns the min distance from obj_demand_list to the service rate boundary."""
 
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
@@ -223,10 +228,14 @@ class ServiceRateInspector:
         # blog(x_val=x.value)
         point_closest_to_demand_vector = numpy.matmul(self.T, x.value)
 
-        distance = numpy.sqrt(numpy.sum((point_closest_to_demand_vector - demand_vector)**2))
+        distance = numpy.sqrt(
+            numpy.sum((point_closest_to_demand_vector - demand_vector) ** 2)
+        )
         return distance
 
-    def min_distance_to_boundary_w_cvxpy_for_oleg(self, obj_demand_list: list[Union[float, str]]) -> float:
+    def min_distance_to_boundary_w_cvxpy_for_oleg(
+        self, obj_demand_list: list[Union[float, str]]
+    ) -> float:
         """Wrapper around `min_distance_to_boundary_w_cvxpy()` to accomodate the input
         and output requirements needed by Oleg's use case.
         """
@@ -236,15 +245,12 @@ class ServiceRateInspector:
         in_cap_region = self.is_in_cap_region(numpy.array(obj_demand_list))
         min_distance = self.min_distance_to_boundary_w_cvxpy(obj_demand_list)
 
-        return (
-            -min_distance
-            if in_cap_region
-            else
-            min_distance
-        )
+        return -min_distance if in_cap_region else min_distance
 
-    def min_distance_to_boundary_w_convex_hull(self, obj_demand_list: list[float]) -> float:
-        """ Returns the min distance from obj_demand_list to the service rate boundary.
+    def min_distance_to_boundary_w_convex_hull(
+        self, obj_demand_list: list[float]
+    ) -> float:
+        """Returns the min distance from obj_demand_list to the service rate boundary.
 
         Relies on
         self.halfspaces = scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
@@ -260,42 +266,49 @@ class ServiceRateInspector:
         """
 
         if self.compute_halfspace_intersections is False:
-            log(WARNING,
+            log(
+                WARNING,
                 "Cannot compute min distance to service capacity boundary",
-                compute_halfspace_intersection=self.compute_halfspace_intersections
+                compute_halfspace_intersection=self.compute_halfspace_intersections,
             )
             return None
 
         # https://stackoverflow.com/questions/42248202/find-the-projection-of-a-point-on-the-convex-hull-with-scipy
         def min_distance(p, v1, v2):
-          """ Finds projection p' of point p on the closest edge formed by points p1 and p2,
-          and returns the distance from p to p'.
-          """
+            """Finds projection p' of point p on the closest edge formed by points p1 and p2,
+            and returns the distance from p to p'.
+            """
 
-          # blog(p=p, v1=v1, v2=v2)
-          # v2 = v2 - v1
-          l = numpy.sum((v2 - v1)**2) # compute the squared distance between the 2 vertices
-          # blog(l=l, dot=numpy.dot(p-v1, v2-v1)[0] )
-          t = numpy.max([0., numpy.min([1., numpy.dot(p - v1, v2 - v1) / l])]) # numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l] )
-          # blog(dot=numpy.dot(p-v1, v2-v1), t=t)
-          proj = v1 + t*(v2 - v1)
-          return numpy.sqrt(numpy.sum((proj - p)**2))
+            # blog(p=p, v1=v1, v2=v2)
+            # v2 = v2 - v1
+            l = numpy.sum(
+                (v2 - v1) ** 2
+            )  # compute the squared distance between the 2 vertices
+            # blog(l=l, dot=numpy.dot(p-v1, v2-v1)[0] )
+            t = numpy.max(
+                [0.0, numpy.min([1.0, numpy.dot(p - v1, v2 - v1) / l])]
+            )  # numpy.min([1., numpy.dot(p-v1, v2-v1)[0]/l] )
+            # blog(dot=numpy.dot(p-v1, v2-v1), t=t)
+            proj = v1 + t * (v2 - v1)
+            return numpy.sqrt(numpy.sum((proj - p) ** 2))
 
         x = numpy.array(obj_demand_list).reshape((self.k, 1))
-        min_dist = float('Inf')
+        min_dist = float("Inf")
         for i in range(len(self.hull.vertices)):
-          m = min_distance(
-              x.T,
-              self.boundary_points_in_rows[self.hull.vertices[i]],
-              self.boundary_points_in_rows[self.hull.vertices[(i+1) % len(self.hull.vertices)]]
-          )
-          if m < min_dist:
-            min_dist = m
+            m = min_distance(
+                x.T,
+                self.boundary_points_in_rows[self.hull.vertices[i]],
+                self.boundary_points_in_rows[
+                    self.hull.vertices[(i + 1) % len(self.hull.vertices)]
+                ],
+            )
+            if m < min_dist:
+                min_dist = m
 
         return min_dist
 
     def approx_min_distance_to_boundary(self, obj_demand_list: list[float]) -> float:
-        """ Returns the approximate min distance from obj_demand_list to the service rate boundary.
+        """Returns the approximate min distance from obj_demand_list to the service rate boundary.
 
         Finds the approximate min distance as follows:
         - Draws a line L from the point of interest P (obj_demand_list) to origin.
@@ -346,12 +359,7 @@ class ServiceRateInspector:
         opt_value = service_rate_utils.solve_prob(prob)
 
         # blog(x_val=x.value)
-        return (
-            opt_value / self.C
-            if opt_value
-            else
-            None
-        )
+        return opt_value / self.C if opt_value else None
 
     def load_across_nodes(self, obj_demand_list: list[float]) -> list[float]:
         """Returns the load at the nodes after the object demand is distributed across
@@ -365,14 +373,16 @@ class ServiceRateInspector:
         constraints = [x >= 0, self.T @ x == demand_vector]
 
         prob = cvxpy.Problem(obj, constraints)
-        opt_value = service_rate_utils.solve_prob(prob)
+        _ = service_rate_utils.solve_prob(prob)
 
         # blog(x_val=x.value)
         load_across_nodes = numpy.matmul(self.M, x.value)
 
         return load_across_nodes / self.C
 
-    def load_across_nodes_when_obj_demands_distributed_evenly_across_repair_sets(self, obj_demand_list: list[float]) -> list[float]:
+    def load_across_nodes_when_obj_demands_distributed_evenly_across_repair_sets(
+        self, obj_demand_list: list[float]
+    ) -> list[float]:
         """Returns the load at the nodes after each object demand is distributed evenly across
         its repair sets.
         """
@@ -393,7 +403,9 @@ class ServiceRateInspector:
 
         return load_across_nodes
 
-    def load_across_nodes_when_obj_demands_replicated_to_repair_sets(self, obj_demand_list: list[float]) -> list[float]:
+    def load_across_nodes_when_obj_demands_replicated_to_repair_sets(
+        self, obj_demand_list: list[float]
+    ) -> list[float]:
         """Returns the load at the nodes after each object demand is replicated to all
         its repair sets.
 

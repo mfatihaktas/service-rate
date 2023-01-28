@@ -1,5 +1,4 @@
 import collections
-import pytest
 
 from src import (
     service_rate,
@@ -23,7 +22,9 @@ def get_service_rate_inspector(
     )
 
 
-def remove_repair_sets_of_size_two(obj_to_repair_sets_map: dict[int, list]) -> dict[int, list]:
+def remove_repair_sets_of_size_two(
+    obj_to_repair_sets_map: dict[int, list]
+) -> dict[int, list]:
     obj_to_repair_sets_map_ = collections.defaultdict(list)
     for obj, repair_set_list in obj_to_repair_sets_map.items():
         for repair_set in repair_set_list:
@@ -48,7 +49,8 @@ def are_repair_sets_same(
     for repair_set in repair_set_list_2:
         hash_ = hash_repair_set(repair_set)
         if hash_ not in repair_set_hash_set:
-            log(ERROR,
+            log(
+                ERROR,
                 "Repair set is in `repair_set_list_2` but not in `repair_set_list_1`",
                 repair_set=repair_set,
             )
@@ -58,7 +60,8 @@ def are_repair_sets_same(
             repair_set_hash_set.remove(hash_)
 
     if repair_set_hash_set:
-        log(ERROR,
+        log(
+            ERROR,
             "There are repair sets which are in `repair_set_list_1` but not in `repair_set_list_2`",
             repair_set_hash_set=repair_set_hash_set,
         )
@@ -67,9 +70,13 @@ def are_repair_sets_same(
     return True
 
 
-def test_service_rate_inspector_on_redundancy_w_two_xors(input_dict_for_redundancy_w_two_xors: dict):
+def test_service_rate_inspector_on_redundancy_w_two_xors(
+    input_dict_for_redundancy_w_two_xors: dict,
+):
     storage_scheme = storage_scheme_module.StorageScheme(
-        node_id_to_objs_list=input_dict_for_redundancy_w_two_xors["node_id_to_objs_list"],
+        node_id_to_objs_list=input_dict_for_redundancy_w_two_xors[
+            "node_id_to_objs_list"
+        ],
     )
     log(DEBUG, "", storage_scheme=storage_scheme)
 
@@ -84,20 +91,30 @@ def test_service_rate_inspector_on_redundancy_w_two_xors(input_dict_for_redundan
         redundancy_w_two_xors=True,
     )
 
-    obj_to_repair_sets_map_w_false = service_rate_inspector_w_redundancy_w_two_xors_false.orig_obj_id_to_repair_sets_w_obj_ids_map
-    obj_to_repair_sets_map_w_false = remove_repair_sets_of_size_two(obj_to_repair_sets_map_w_false)
-    obj_to_repair_sets_map_w_true = service_rate_inspector_w_redundancy_w_two_xors_true.orig_obj_id_to_repair_sets_w_obj_ids_map
+    obj_to_repair_sets_map_w_false = (
+        service_rate_inspector_w_redundancy_w_two_xors_false.orig_obj_id_to_repair_sets_w_obj_ids_map
+    )
+    obj_to_repair_sets_map_w_false = remove_repair_sets_of_size_two(
+        obj_to_repair_sets_map_w_false
+    )
+    obj_to_repair_sets_map_w_true = (
+        service_rate_inspector_w_redundancy_w_two_xors_true.orig_obj_id_to_repair_sets_w_obj_ids_map
+    )
 
     for obj, repair_sets_w_false in obj_to_repair_sets_map_w_false.items():
         repair_sets_w_true = obj_to_repair_sets_map_w_true[obj]
 
-        log(DEBUG,
+        log(
+            DEBUG,
             f"obj= {obj}",
             repair_sets_w_false=repair_sets_w_false,
             repair_sets_w_true=repair_sets_w_true,
         )
 
-        assert are_repair_sets_same(
-            repair_set_list_1=repair_sets_w_false,
-            repair_set_list_2=repair_sets_w_true,
-        ) == True
+        assert (
+            are_repair_sets_same(
+                repair_set_list_1=repair_sets_w_false,
+                repair_set_list_2=repair_sets_w_true,
+            )
+            is True
+        )

@@ -35,8 +35,8 @@ class Source(node.Node):
         request_id = 0
         while True:
             inter_msg_gen_time = self.inter_gen_time_rv.sample()
-            slog(DEBUG, self.env, self, "waiting",
-                 inter_msg_gen_time=inter_msg_gen_time
+            slog(
+                DEBUG, self.env, self, "waiting", inter_msg_gen_time=inter_msg_gen_time
             )
             yield self.env.timeout(inter_msg_gen_time)
 

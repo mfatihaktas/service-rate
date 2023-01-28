@@ -27,14 +27,6 @@ simpy = "^4.0.1"
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
-[tool.flake8]
-ignore = ["F405"]
-# per-file-ignores = [
-#     "__init__.py:F401",
-# ]
-# max-line-length = 88
-count = true
-
 [tool.pytest.ini_options]
 minversion = "6.1"
 # addopts = "--cov --show-capture=stderr"

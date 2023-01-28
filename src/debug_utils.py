@@ -2,7 +2,6 @@ import inspect
 import logging
 import os
 import pprint
-import sys
 
 
 # Ref:
@@ -26,7 +25,7 @@ class CustomFormatter(logging.Formatter):
         logging.INFO: green + format + reset,
         logging.WARNING: yellow + format + reset,
         logging.ERROR: red + format + reset,
-        logging.CRITICAL: blink_red + format + reset
+        logging.CRITICAL: blink_red + format + reset,
     }
 
     def format(self, record):
@@ -37,7 +36,9 @@ class CustomFormatter(logging.Formatter):
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Log  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
 # LOGGING_FORMAT = "%(levelname)s] %(func_name)s: %(msg)s"
-LOGGING_FORMAT = "%(levelname)s] %(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
+LOGGING_FORMAT = (
+    "%(levelname)s] %(file_name)s:%(line_number)s-%(func_name)s: %(message)s"
+)
 # LOGGING_FORMAT = "%(levelname)s:%(filename)s:%(lineno)s-%(funcName)s: %(message)s"
 
 # formatter = logging.Formatter(LOGGING_FORMAT)
@@ -48,6 +49,7 @@ LOGGER_NAME = "serv_rate"
 logger = logging.getLogger(LOGGER_NAME)
 logger.setLevel(logging.DEBUG)
 
+
 def log_to_std():
     logger = logging.getLogger(LOGGER_NAME)
     # TODO: Not sure why this was needed to silence the
@@ -57,6 +59,7 @@ def log_to_std():
     sh = logging.StreamHandler()
     sh.setFormatter(formatter)
     logger.addHandler(sh)
+
 
 log_to_std()
 
@@ -105,7 +108,7 @@ def log(level: int, _msg_: str, **kwargs):
     level_log_m[level](f"{_msg_}{pstr(**kwargs)}", extra=get_extra())
 
 
-## Always log
+# Always log
 def alog(level: int, _msg_: str, **kwargs):
     logger.critical("{}\n{}".format(_msg_, pstr(**kwargs)), extra=get_extra())
 

@@ -1,9 +1,10 @@
 import math
-import random
-
 import numpy
+import random
 import scipy
 import scipy.stats
+
+from src.debug_utils import *
 
 
 class RandomVariable:
@@ -111,8 +112,8 @@ class Exponential(RandomVariable):
     def var(self) -> float:
         return 1 / self.mu**2
 
-    def moment(self, i) -> float:
-        return moment_ith(i, self)
+    # def moment(self, i) -> float:
+    #     return moment_ith(i, self)
 
     def laplace(self, s) -> float:
         check(self.D > 0, "D should be 0", D=self.D)

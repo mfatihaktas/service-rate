@@ -1,14 +1,14 @@
-import matplotlib
+import itertools
 
 # matplotlib.rcParams['pdf.fonttype'] = 42
 # matplotlib.rcParams['ps.fonttype'] = 42
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plot
 
-plot.rcParams.update({"text.usetex": True})
-import itertools
-
 from src.debug_utils import *
+
+
+plot.rcParams.update({"text.usetex": True})
 
 NICE_BLUE = "#66b3ff"
 NICE_RED = "#ff9999"

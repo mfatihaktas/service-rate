@@ -12,9 +12,15 @@ def plot_capacity_region(
 ):
     k = service_rate_inspector.k
     if k == 2:
-        plot_cap_2d(service_rate_inspector=service_rate_inspector, file_name_suffix=file_name_suffix)
+        plot_cap_2d(
+            service_rate_inspector=service_rate_inspector,
+            file_name_suffix=file_name_suffix,
+        )
     elif k == 3:
-        plot_cap_3d(service_rate_inspector=service_rate_inspector, file_name_suffix=file_name_suffix)
+        plot_cap_3d(
+            service_rate_inspector=service_rate_inspector,
+            file_name_suffix=file_name_suffix,
+        )
     else:
         log(ERROR, "Not implemented for k= {}".format(k))
 
@@ -37,8 +43,10 @@ def plot_capacity_region_2d(
     service_rate_inspector: service_rate.ServiceRateInspector,
     file_name_suffix: str,
 ):
-    check(service_rate_inspector.compute_halfspace_intersections,
-          "To plot capacity region, `compute_halfspace_intersections` should have been set")
+    check(
+        service_rate_inspector.compute_halfspace_intersections,
+        "To plot capacity region, `compute_halfspace_intersections` should have been set",
+    )
 
     # log(INFO, "", halfspaces_intersections=service_rate_inspector.halfspaces.intersections)
     x_l, y_l = [], []
@@ -55,7 +63,9 @@ def plot_capacity_region_2d(
     #     )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
     #     plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
     log(DEBUG, "", x_l=x_l, y_l=y_l)
-    plot.fill(points[hull.vertices,0], points[hull.vertices,1], c=NICE_BLUE, alpha=0.5)
+    plot.fill(
+        points[hull.vertices, 0], points[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
+    )
 
     fontsize = 24
 
@@ -74,9 +84,14 @@ def plot_capacity_region_2d(
     # plot.xlim(xmin=0)
     plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
     # plot.ylim(ymin=0)
-    title = r"$k= {}$, $m= {}$, $C= {}$, ".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C) + \
-            "Volume= {0:.2f} \n".format(hull.volume) + \
-            service_rate_inspector.to_sysrepr()
+
+    # title = (
+    #     r"$k= {}$, $m= {}$, $C= {}$, ".format(
+    #         service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+    #     )
+    #     + "Volume= {0:.2f} \n".format(hull.volume)
+    #     + service_rate_inspector.to_sysrepr()
+    # )
     # plot.title(title, fontsize=fontsize, y=1.05)
     plot.gcf().set_size_inches(4, 3)
     plot.savefig(f"plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
@@ -126,9 +141,7 @@ def plot_capacity_region_2d_when_k_g_2(
             simplex = numpy.append(
                 simplex, simplex[0]
             )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
-            plot.plot(
-                points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o"
-            )
+            plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
         plot.xlim(xmin=0)
         plot.ylim(ymin=0)
         plot.xlabel("{}".format(chr(ord("a") + xi)), fontsize=fontsize)
@@ -136,7 +149,9 @@ def plot_capacity_region_2d_when_k_g_2(
         plot.title("i= {}".format(i))
 
     suptitle = (
-        r"$k= {}$, $n= {}$, $C= {}$ \n".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C)
+        r"$k= {}$, $n= {}$, $C= {}$ \n".format(
+            service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+        )
         + service_rate_inspector.to_sysrepr()
     )
     plot.suptitle(suptitle, fontsize=fontsize)  # , y=1.05
@@ -204,17 +219,18 @@ def plot_capacity_region_3d(
     ax.set_zlim(zmin=0)
     ax.view_init(20, 30)
     plot.title(
-        r"$k= {}$, $m= {}$, $C= {}$".format(service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C) + \
-        ", Volume= {0:.2f}".format(hull.volume) + \
-        f"\n{service_rate_inspector.to_sysrepr()}",
-        fontsize=fontsize, y=1.05
+        r"$k= {}$, $m= {}$, $C= {}$".format(
+            service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+        )
+        + ", Volume= {0:.2f}".format(hull.volume)
+        + f"\n{service_rate_inspector.to_sysrepr()}",
+        fontsize=fontsize,
+        y=1.05,
     )
 
     plot.title(r"$k= {}$, $n= {}$".format(self.k, self.m), fontsize=fontsize)
     plot.gcf().set_size_inches(7, 5)
-    plot.savefig(
-        f"plot_cap_3d_{file_name_suffix}.png", bbox_inches="tight"
-    )
+    plot.savefig(f"plot_cap_3d_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")

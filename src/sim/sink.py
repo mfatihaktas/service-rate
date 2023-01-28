@@ -37,13 +37,26 @@ class Sink(node.Node):
         while True:
             request = yield self.request_store.get()
             num_requests_recved += 1
-            slog(DEBUG, self.env, self, "recved", request=request, num_requests_recved=num_requests_recved)
+            slog(
+                DEBUG,
+                self.env,
+                self,
+                "recved",
+                request=request,
+                num_requests_recved=num_requests_recved,
+            )
 
             response_time = self.env.now - request.arrival_time
             self.request_response_time_list.append(response_time)
 
             if num_requests_recved >= self.num_requests_to_recv:
-                slog(DEBUG, self.env, self, "recved requested # tasks", num_requests_recved=num_requests_recved)
+                slog(
+                    DEBUG,
+                    self.env,
+                    self,
+                    "recved requested # tasks",
+                    num_requests_recved=num_requests_recved,
+                )
                 break
 
         slog(DEBUG, self.env, self, "done")

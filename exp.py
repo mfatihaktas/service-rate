@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import sys
 
-from src import service_rate, storage_scheme,csv_utils
+from src import service_rate, storage_scheme, csv_utils
 from src.debug_utils import *
 from os.path import exists
 
@@ -12,7 +12,8 @@ def run(
     max_repair_set_size: int = None,
     compute_halfspace_intersections=False,
 ):
-    log(DEBUG,
+    log(
+        DEBUG,
         "Started;",
         node_id_objs_list=node_id_objs_list,
         max_repair_set_size=max_repair_set_size,
@@ -89,7 +90,7 @@ def run_w_csv_file_path(
             f"\t obj_demand_list= {obj_demand_list} \n"
             f"\t is_in_cap_region= {is_in_cap_region} \n"
             f"\t min_cost= {min_cost} \n"
-            f"\t min_distance= {min_distance}"
+            f"\t min_distance= {min_distance}",
         )
 
         num_is_in_cap_region += int(is_in_cap_region)
@@ -113,8 +114,8 @@ def createResultFilePath(filename):
     return outfile
 
 
-def run_w_sim_result_csv_files(basedir='csv'):
-    compute_halfspace_intersections = False # True
+def run_w_sim_result_csv_files(basedir="csv"):
+    compute_halfspace_intersections = False  # True
 
     csv_file_path_for_node_id_objs_list_replication = (
         basedir + "/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv"
@@ -131,14 +132,26 @@ def run_w_sim_result_csv_files(basedir='csv'):
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
-    csv_file_path_for_node_id_objs_list_coding = (basedir+"/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT.csv")
-    csv_file_path_for_obj_demands_list_coding = (basedir+"/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND.csv")
+    csv_file_path_for_node_id_objs_list_coding = (
+        basedir + "/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT.csv"
+    )
+    csv_file_path_for_obj_demands_list_coding = (
+        basedir + "/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND.csv"
+    )
 
-    csv_file_demand_ec_orbit = basedir+"/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND_ORBIT.csv"
-    csv_file_demand_rep_orbit = basedir+"/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND_ORBIT.csv"
+    csv_file_demand_ec_orbit = (
+        basedir + "/SIMRESULT_SERVICE_RATE_CODING_PLACE_DEMAND_ORBIT.csv"
+    )
+    csv_file_demand_rep_orbit = (
+        basedir + "/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND_ORBIT.csv"
+    )
 
-    csv_file_demand_ec_orbit_place = basedir+"/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT_ORBIT.csv"
-    csv_file_demand_rep_orbit_place = basedir+"/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT_ORBIT.csv"
+    csv_file_demand_ec_orbit_place = (
+        basedir + "/SIMRESULT_SERVICE_RATE_CODING_PLACE_PLACEMENT_ORBIT.csv"
+    )
+    csv_file_demand_rep_orbit_place = (
+        basedir + "/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT_ORBIT.csv"
+    )
 
     max_repair_set_size = 2
 
@@ -154,17 +167,16 @@ def run_w_sim_result_csv_files(basedir='csv'):
     codingResFile = createResultFilePath(csv_file_path_for_obj_demands_list_coding)
     df2 = pd.read_csv(codingResFile)
     df = pd.concat([df1, df2])
-    df = df.sort_values(by=["iteration","type"])
+    df = df.sort_values(by=["iteration", "type"])
     df.reset_index(inplace=True, drop=True)
 
-
     if exists(csv_file_demand_ec_orbit) and exists(csv_file_demand_rep_orbit):
-        dforb1 = pd.read_csv(csv_file_demand_ec_orbit,index_col=False)
-        dforb2 = pd.read_csv(csv_file_demand_rep_orbit,index_col=False)
+        dforb1 = pd.read_csv(csv_file_demand_ec_orbit, index_col=False)
+        dforb2 = pd.read_csv(csv_file_demand_rep_orbit, index_col=False)
         dforb = pd.concat([dforb1, dforb2])
-        dforb = dforb.sort_values(by=["iteration","type"])
+        dforb = dforb.sort_values(by=["iteration", "type"])
         dforb.reset_index(inplace=True, drop=True)
-        placementEquals=True
+        placementEquals = True
         dfPlaceSim = pd.read_csv(csv_file_path_for_node_id_objs_list_replication)
         dfPlaceOrbit = pd.read_csv(csv_file_demand_rep_orbit_place)
         if not dfPlaceSim.equals(dfPlaceOrbit):
@@ -175,7 +187,10 @@ def run_w_sim_result_csv_files(basedir='csv'):
             placementEquals = False
 
         for row in range(dforb.shape[0]):
-            if not (dforb.iloc[row,0:10] == df.iloc[row,0:10]).all() or not placementEquals:
+            if (
+                not (dforb.iloc[row, 0:10] == df.iloc[row, 0:10]).all()
+                or not placementEquals
+            ):
                 print("ERROR: ORBIT csv doesn't equal sim")
             else:
                 df["orbit"] = dforb["completed"]
@@ -183,9 +198,9 @@ def run_w_sim_result_csv_files(basedir='csv'):
                 df["orbitCost"] = dforb["serviceCost"]
                 df["orbitLatency"] = dforb["latency"]
         # df["adjustedCost"] = dforb["cost"] * dforb["reqsPerUserSec"]
-    df['modelCost'] = df['mCost'].fillna(value=0)
-    df.drop(columns=['mCost'],inplace=True)
-    df.to_csv(basedir+"/experiment_output.csv", index=False)
+    df["modelCost"] = df["mCost"].fillna(value=0)
+    df.drop(columns=["mCost"], inplace=True)
+    df.to_csv(basedir + "/experiment_output.csv", index=False)
 
 
 if __name__ == "__main__":
@@ -212,8 +227,8 @@ if __name__ == "__main__":
     #     max_repair_set_size,
     # )
 
-    if len(sys.argv)>1:
-        for i in range(1,len(sys.argv)):
+    if len(sys.argv) > 1:
+        for i in range(1, len(sys.argv)):
             run_w_sim_result_csv_files(sys.argv[i])
     else:
         run_w_sim_result_csv_files()

@@ -84,20 +84,17 @@ name_to_node_objs_list_map = {
             )
         ],
     ],
-
     "a_a_b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
         [PlainObj(id_str="b")],
     ],
-
     "a_a_b_b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
         [PlainObj(id_str="b")],
         [PlainObj(id_str="b")],
     ],
-
     "a_b_a+b_a+2b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="b")],
@@ -118,7 +115,6 @@ name_to_node_objs_list_map = {
             )
         ],
     ],
-
     "a_a_a_b_a+b_a+2b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
@@ -141,12 +137,10 @@ name_to_node_objs_list_map = {
             )
         ],
     ],
-
     "a,b_a,b": [
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
         [PlainObj(id_str="a"), PlainObj(id_str="b")],
     ],
-
     "a_b_c_a+b_a+c_b+c": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="b")],

@@ -39,9 +39,13 @@ class Server(node.Node):
     def work_left(self) -> float:
         remaining_serv_time = 0
         if self.request_in_serv:
-            remaining_serv_time = self.request_in_serv.service_time - (self.env.now - self.serv_start_time)
+            remaining_serv_time = self.request_in_serv.service_time - (
+                self.env.now - self.serv_start_time
+            )
 
-        return remaining_serv_time + sum(request.service_time for request in self.request_store.items)
+        return remaining_serv_time + sum(
+            request.service_time for request in self.request_store.items
+        )
 
     def put(self, request: request_module.Request):
         slog(DEBUG, self.env, self, "recved", request=request)
@@ -59,7 +63,10 @@ class Server(node.Node):
             yield self.env.timeout(self.request_in_serv.service_time)
 
             num_requests_served += 1
-            slog(DEBUG, self.env, self,
+            slog(
+                DEBUG,
+                self.env,
+                self,
                 "processed",
                 request_in_serv=self.request_in_serv,
                 num_requests_served=num_requests_served,

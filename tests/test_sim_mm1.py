@@ -1,5 +1,4 @@
 import pytest
-import simpy
 
 from src.sim import (
     random_variable,

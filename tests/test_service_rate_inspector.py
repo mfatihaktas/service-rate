@@ -17,12 +17,12 @@ def test_is_in_cap_region():
         obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
     )
 
-    assert inspector.is_in_cap_region([1, 1]) == True
-    assert inspector.is_in_cap_region([1.5, 0.35]) == True
-    assert inspector.is_in_cap_region([0.25, 2]) == False
-    assert inspector.is_in_cap_region([1.8, 1.4]) == False
-    assert inspector.is_in_cap_region([2.1, 2]) == False
-    assert inspector.is_in_cap_region([1, 2.3]) == False
+    assert inspector.is_in_cap_region([1, 1]) is True
+    assert inspector.is_in_cap_region([1.5, 0.35]) is True
+    assert inspector.is_in_cap_region([0.25, 2]) is False
+    assert inspector.is_in_cap_region([1.8, 1.4]) is False
+    assert inspector.is_in_cap_region([2.1, 2]) is False
+    assert inspector.is_in_cap_region([1, 2.3]) is False
 
 
 def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
@@ -30,7 +30,10 @@ def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
 
 
 def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspector):
-    cum_demand = 0.9*min(len(repair_set_list) for _, repair_set_list in service_rate_inspector.orig_obj_id_to_repair_sets_w_obj_ids_map.items())
+    cum_demand = 0.9 * min(
+        len(repair_set_list)
+        for _, repair_set_list in service_rate_inspector.orig_obj_id_to_repair_sets_w_obj_ids_map.items()
+    )
     log(DEBUG, "", cum_demand=cum_demand)
 
     for i in range(10):
@@ -39,12 +42,20 @@ def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspe
             cum_demand=cum_demand,
         )
 
-        log(DEBUG, f"i= {i}",
+        log(
+            DEBUG,
+            f"i= {i}",
             obj_demand_list=obj_demand_list,
             min_cost=service_rate_inspector.min_cost(obj_demand_list),
-            min_dist_w_convex_hull=service_rate_inspector.min_distance_to_boundary_w_convex_hull(obj_demand_list),
-            min_dist_w_cvxpy=service_rate_inspector.min_distance_to_boundary_w_cvxpy(obj_demand_list),
-            min_dist_approx=service_rate_inspector.approx_min_distance_to_boundary(obj_demand_list),
+            min_dist_w_convex_hull=service_rate_inspector.min_distance_to_boundary_w_convex_hull(
+                obj_demand_list
+            ),
+            min_dist_w_cvxpy=service_rate_inspector.min_distance_to_boundary_w_cvxpy(
+                obj_demand_list
+            ),
+            min_dist_approx=service_rate_inspector.approx_min_distance_to_boundary(
+                obj_demand_list
+            ),
             max_load=service_rate_inspector.max_load(obj_demand_list),
             load_across_nodes=service_rate_inspector.load_across_nodes(obj_demand_list),
         )
@@ -52,15 +63,22 @@ def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspe
 
 NUM_DEMAND_VECTORS = 100
 
-def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_design: dict):
-    node_id_to_objs_list = node_id_to_objs.get_node_id_to_objs_list_w_round_robin_design(
-        num_original_objs=input_dict_for_round_robin_design["num_original_objs"],
-        num_nodes=input_dict_for_round_robin_design["num_nodes"],
-        replication_factor=input_dict_for_round_robin_design["replication_factor"],
+
+def test_w_frac_of_demand_vectors_in_cap_region(
+    input_dict_for_round_robin_design: dict,
+):
+    node_id_to_objs_list = (
+        node_id_to_objs.get_node_id_to_objs_list_w_round_robin_design(
+            num_original_objs=input_dict_for_round_robin_design["num_original_objs"],
+            num_nodes=input_dict_for_round_robin_design["num_nodes"],
+            replication_factor=input_dict_for_round_robin_design["replication_factor"],
+        )
     )
 
     scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
-    log(DEBUG, "",
+    log(
+        DEBUG,
+        "",
         storage_scheme=scheme,
         node_id_to_objs_list=node_id_to_objs_list,
         obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
@@ -87,15 +105,19 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
 
         obj_demand_list = conftest.sample_obj_demand_list_w_skewed_popularity(
             k=service_rate_inspector.k,
-            frac_of_popular_objects=input_dict_for_round_robin_design["frac_of_popular_objects"],
+            frac_of_popular_objects=input_dict_for_round_robin_design[
+                "frac_of_popular_objects"
+            ],
             cum_demand=cum_demand,
-            frac_of_cum_demand_by_popular_objects=input_dict_for_round_robin_design["frac_of_cum_demand_by_popular_objects"],
+            frac_of_cum_demand_by_popular_objects=input_dict_for_round_robin_design[
+                "frac_of_cum_demand_by_popular_objects"
+            ],
         )
 
         is_in_cap_region = service_rate_inspector.is_in_cap_region(obj_demand_list)
         num_in_cap_region += int(is_in_cap_region)
 
-        max_load = service_rate_inspector.max_load(obj_demand_list)
+        _ = service_rate_inspector.max_load(obj_demand_list)
 
         # log(DEBUG, f"i= {i}",
         #     # obj_demand_list=obj_demand_list,
@@ -103,7 +125,9 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_round_robin_desig
         #     max_load=max_load,
         # )
 
-    log(DEBUG, "",
+    log(
+        DEBUG,
+        "",
         input_dict_for_round_robin_design=input_dict_for_round_robin_design,
         frac_of_demand_vectors_in_cap_region=num_in_cap_region / NUM_DEMAND_VECTORS,
     )

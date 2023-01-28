@@ -3,8 +3,6 @@ import joblib
 import numpy
 import simpy
 
-from typing import Callable
-
 from src.sim import (
     random_variable,
     server as server_module,
@@ -23,12 +21,7 @@ class SimResult:
     std_T: float = None
 
     def __repr__(self):
-        return (
-            "SimResult( \n"
-            f"\t ET= {self.ET} \n"
-            f"\t std_T= {self.std_T} \n"
-            ")"
-        )
+        return "SimResult( \n" f"\t ET= {self.ET} \n" f"\t std_T= {self.std_T} \n" ")"
 
     def __post_init__(self):
         self.ET = numpy.mean(self.t_l)
@@ -50,21 +43,27 @@ def sim_single_server(
     queue_length: int = None,
     sim_result_list: list[SimResult] = None,
 ):
-    log(DEBUG, "Started",
+    log(
+        DEBUG,
+        "Started",
         inter_gen_time_rv=inter_gen_time_rv,
         service_time_rv=service_time_rv,
         num_requests_to_serve=num_requests_to_serve,
     )
 
     env = simpy.Environment()
-    sink = sink_module.Sink(env=env, _id="sink", num_requests_to_recv=num_requests_to_serve)
+    sink = sink_module.Sink(
+        env=env, _id="sink", num_requests_to_recv=num_requests_to_serve
+    )
 
     if queue_length:
-        server = server_module.ServerWithFiniteQueue(env=env, _id="server", sink=sink, queue_length=queue_length)
+        server = server_module.ServerWithFiniteQueue(
+            env=env, _id="server", sink=sink, queue_length=queue_length
+        )
     else:
         server = server_module.Server(env=env, _id="server", sink=sink)
 
-    source = source_module.Source(
+    _ = source_module.Source(
         env=env,
         _id="source",
         inter_gen_time_rv=inter_gen_time_rv,
@@ -87,7 +86,9 @@ def sim_single_server_w_joblib(
     queue_length: int = None,
     num_sim_runs: int = 1,
 ) -> SimResult:
-    log(DEBUG, "Started",
+    log(
+        DEBUG,
+        "Started",
         inter_gen_time_rv=inter_gen_time_rv,
         service_time_rv=service_time_rv,
         num_requests_to_serve=num_requests_to_serve,

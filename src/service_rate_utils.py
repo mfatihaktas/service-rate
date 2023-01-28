@@ -10,7 +10,7 @@ from src.debug_utils import *
 
 
 def get_T(
-    num_orig_objects: int, # k
+    num_orig_objects: int,  # k
     total_num_repair_sets: int,
     orig_obj_to_repair_set_w_obj_ids_size_map: dict[int, int],
 ) -> numpy.array:
@@ -26,7 +26,7 @@ def get_T(
 
 
 def get_M(
-    num_objects: int, # n
+    num_objects: int,  # n
     num_nodes: int,
     repair_set_w_obj_ids_list: list[set],
     obj_id_to_node_id_map: dict[int, int],
@@ -53,16 +53,20 @@ def get_halfspaces(
     #     M=M,
     # )
 
-    halfspaces = numpy.zeros((num_nodes + total_num_repair_sets, total_num_repair_sets + 1))
+    halfspaces = numpy.zeros(
+        (num_nodes + total_num_repair_sets, total_num_repair_sets + 1)
+    )
     for r in range(num_nodes):
         halfspaces[r, -1] = -node_capacity
 
-    halfspaces[: num_nodes, :-1] = M
+    halfspaces[:num_nodes, :-1] = M
     for r in range(num_nodes, num_nodes + total_num_repair_sets):
         halfspaces[r, r - num_nodes] = -1
     # log(INFO, "halfspaces= \n{}".format(halfspaces) )
 
-    feasible_point = numpy.array([node_capacity / total_num_repair_sets] * total_num_repair_sets)
+    feasible_point = numpy.array(
+        [node_capacity / total_num_repair_sets] * total_num_repair_sets
+    )
     return scipy.spatial.HalfspaceIntersection(halfspaces, feasible_point)
 
 
@@ -100,15 +104,13 @@ def get_orig_obj_id_to_repair_sets_w_obj_ids_map(
 
     for obj in range(k):
         repair_set_list = []
-        y = numpy.array([0] * obj + [1] + [0] * (k - obj - 1)).reshape(
-            (k, 1)
-        )
+        y = numpy.array([0] * obj + [1] + [0] * (k - obj - 1)).reshape((k, 1))
 
         for repair_size in range(1, max_repair_set_size + 1):
             for subset in itertools.combinations(range(n), repair_size):
                 subset = set(subset)
 
-                ## Check if subset contains any previously registered smaller repair group
+                # Check if subset contains any previously registered smaller repair group
                 skip_rg = False
                 for rg in repair_set_list:
                     if rg.issubset(subset):
@@ -158,9 +160,7 @@ def is_a_repair_set(
 ) -> bool:
     # log(INFO, "", comb_set=comb_set)
 
-    y = numpy.array(
-        [0] * obj_id + [1] + [0] * (k - obj_id - 1)
-    ).reshape((k, 1))
+    y = numpy.array([0] * obj_id + [1] + [0] * (k - obj_id - 1)).reshape((k, 1))
 
     l = [G[:, i] for i in comb_set]
     A = numpy.column_stack(l)
@@ -171,7 +171,7 @@ def is_a_repair_set(
     # log(INFO, "", A=A, y=y) # , x=x, residuals=residuals)
     # print(f"residuals= {residuals}")
 
-    return numpy.sum(numpy.absolute(residuals)) < 0.0001 # residuals.size > 0 and
+    return numpy.sum(numpy.absolute(residuals)) < 0.0001  # residuals.size > 0 and
 
 
 def find_repair_sets_w_range(
@@ -304,9 +304,13 @@ def get_orig_obj_id_to_repair_sets_w_obj_ids_map_for_redundancy_w_two_xors(
             [orig_obj_id_1, orig_obj_id_2] = nonzero_indices
 
             for obj_id_2 in orig_obj_id_to_obj_ids_map[orig_obj_id_2]:
-                orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id_1].append({obj_id_2, i})
+                orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id_1].append(
+                    {obj_id_2, i}
+                )
             for obj_id_1 in orig_obj_id_to_obj_ids_map[orig_obj_id_1]:
-                orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id_2].append({obj_id_1, i})
+                orig_obj_id_to_repair_sets_w_obj_ids_map[orig_obj_id_2].append(
+                    {obj_id_1, i}
+                )
 
         else:
             raise ValueError(

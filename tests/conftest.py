@@ -19,12 +19,16 @@ def sample_obj_demand_list_w_skewed_popularity(
     num_popular_objs = int(frac_of_popular_objects * k)
     _popular_obj_demand_list = [random.randint(1, 9) for _ in range(num_popular_objs)]
     demand_sum = sum(_popular_obj_demand_list)
-    popular_obj_demand_list = [d / demand_sum * cum_demand_by_popular_objs for d in _popular_obj_demand_list]
+    popular_obj_demand_list = [
+        d / demand_sum * cum_demand_by_popular_objs for d in _popular_obj_demand_list
+    ]
 
-    num_other_objs =  k - num_popular_objs
+    num_other_objs = k - num_popular_objs
     _other_obj_demand_list = [random.randint(1, 9) for _ in range(num_other_objs)]
     demand_sum = sum(_other_obj_demand_list)
-    other_obj_demand_list = [d / demand_sum * cum_demand_by_other_objs for d in _other_obj_demand_list]
+    other_obj_demand_list = [
+        d / demand_sum * cum_demand_by_other_objs for d in _other_obj_demand_list
+    ]
 
     return [*popular_obj_demand_list, *other_obj_demand_list]
 
@@ -78,12 +82,10 @@ def service_rate_inspector(
     scope="function",
     params=[
         # Simplistic redundancy schemes
-
         # {
         #     "node_id_to_objs_list": node_id_to_objs.node_id_to_objs_list_1,
         #     "max_repair_set_size": 2,
         # },
-
         # {
         #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
         #         num_original_objs=10,
@@ -93,9 +95,7 @@ def service_rate_inspector(
         #     ),
         #     "max_repair_set_size": 2,
         # },
-
         # Redundancy with replication
-
         # {
         #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
         #         num_original_objs=200,
@@ -105,7 +105,6 @@ def service_rate_inspector(
         #     ),
         #     "max_repair_set_size": 1,
         # },
-
         # {
         #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
         #         num_original_objs=1000,
@@ -115,9 +114,7 @@ def service_rate_inspector(
         #     ),
         #     "max_repair_set_size": 1,
         # },
-
         # Redundancy with 2-XOR's
-
         # {
         #     "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
         #         num_original_objs=200,
@@ -127,7 +124,6 @@ def service_rate_inspector(
         #     ),
         #     "max_repair_set_size": 2,
         # },
-
         {
             "node_id_to_objs_list": node_id_to_objs.get_random_node_id_to_objs_list_w_two_xors(
                 num_original_objs=20,
@@ -137,7 +133,6 @@ def service_rate_inspector(
             ),
             "max_repair_set_size": 2,
         },
-
         # {
         #     "node_id_to_objs_list": storage_scheme.name_to_node_objs_list_map["a_b_a+b"],
         #     "max_repair_set_size": 2,
@@ -156,43 +151,36 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
         #     "replication_factor": 2,
         #     "cumulative_load_factor": 0.4,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 2,
         #     "cumulative_load_factor": 0.75,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 2,
         #     "cumulative_load_factor": 0.8,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 5,
         #     "cumulative_load_factor": 0.75,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 5,
         #     "cumulative_load_factor": 0.9,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 10,
         #     "cumulative_load_factor": 0.8,
         # },
-
         # {
         #     "num_nodes": 100,
         #     "replication_factor": 10,
         #     "cumulative_load_factor": 0.95,
         # },
-
         # {
         #     "num_nodes": 10,
         #     "num_original_objs": 500,
@@ -201,7 +189,6 @@ def input_dict_for_redundancy_w_two_xors(request) -> dict:
         #     "frac_of_popular_objects": 0.5,
         #     "frac_of_cum_demand_by_popular_objects": 0.8,
         # },
-
         {
             "num_nodes": 10,
             "num_original_objs": 10,
@@ -218,6 +205,7 @@ def input_dict_for_round_robin_design(request) -> dict:
 
 CSV_FOLDER_PATH = "tests/csv"
 
+
 @pytest.fixture(
     scope="function",
     params=[
@@ -226,7 +214,6 @@ CSV_FOLDER_PATH = "tests/csv"
         #     "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/small/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
         #     "max_repair_set_size": 1,
         # },
-
         {
             "csv_file_path_for_node_id_to_objs_list": f"{CSV_FOLDER_PATH}/large/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_PLACEMENT.csv",
             "csv_file_path_for_obj_demands_list": f"{CSV_FOLDER_PATH}/large/SIMRESULT_SERVICE_RATE_REPLICATION_PLACE_DEMAND.csv",
