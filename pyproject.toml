@@ -2,7 +2,10 @@
 name = "service-rate"
 version = "0.1.0"
 description = ""
-authors = ["Mehmet Aktas <mehmet@overjet.ai>"]
+authors = ["Mehmet Aktas <mfatihaktas@gmail.com>"]
+packages = [
+    { include = "src" }
+]
 
 [tool.poetry.dependencies]
 python = "^3.9,<3.11"
