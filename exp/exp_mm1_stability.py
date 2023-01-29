@@ -37,7 +37,7 @@ def sim_frac_dropped_requests_vs_arrival_rate_for_given_queue_length(
 
     arrival_rate_list = []
     summary_sim_result_list = []
-    for arrival_rate in [0.2, 0.5, 0.8]:
+    for arrival_rate in [0.5, 0.8, 0.9]:
     # for arrival_rate in [0.2]:
         log(INFO, f">>> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
@@ -58,8 +58,8 @@ def sim_frac_dropped_requests_vs_arrival_rate_for_given_queue_length(
 
 
 def sim_frac_dropped_requests_vs_arrival_rate():
-    num_requests_to_serve = 10 # 10000
-    num_sim_runs = 10
+    num_requests_to_serve = 10000
+    num_sim_runs = 8
     log(INFO, "Started", num_requests_to_serve=num_requests_to_serve, num_sim_runs=num_sim_runs)
 
     for queue_length in [5, 10]:
@@ -85,7 +85,13 @@ def sim_frac_dropped_requests_vs_arrival_rate():
 
     # Save the plot
     plot.gcf().set_size_inches(10, 6)
-    plot.savefig("plot_frac_dropped_requests_vs_arrival_rate.png", bbox_inches="tight")
+    plot_name = (
+        "plot_frac_dropped_requests_vs_arrival_rate_w_num"
+        f"_requests_to_serve_{num_requests_to_serve}"
+        f"_num_sim_runs_{num_sim_runs}"
+        ".png"
+    )
+    plot.savefig(plot_name, bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
