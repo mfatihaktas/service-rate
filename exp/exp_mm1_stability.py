@@ -24,22 +24,22 @@ def sim_MM1_w_finite_queue_stability(
     )
 
 
-def sim_frac_dropped_requests_vs_arrival_rate():
-    num_sim_runs = 10
-    num_requests_to_serve = 1000
-    queue_length = 10
-
+def sim_frac_dropped_requests_vs_arrival_rate_for_given_queue_length(
+    num_requests_to_serve: int,
+    num_sim_runs: int,
+    queue_length: int
+):
     log(INFO, "Started",
         num_requests_to_serve=num_requests_to_serve,
-        queue_length=queue_length,
         num_sim_runs=num_sim_runs,
+        queue_length=queue_length,
     )
 
     arrival_rate_list = []
     summary_sim_result_list = []
     for arrival_rate in [0.2, 0.5, 0.8]:
     # for arrival_rate in [0.2]:
-        log(INFO, f">> arrival_rate= {arrival_rate}")
+        log(INFO, f">>> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
 
         summary_sim_result = sim_MM1_w_finite_queue_stability(
@@ -53,6 +53,22 @@ def sim_frac_dropped_requests_vs_arrival_rate():
     E_frac_dropped_requests_list = [summary_sim_result.E_frac_dropped_requests for summary_sim_result in summary_sim_result_list]
     std_frac_dropped_requests_list = [summary_sim_result.std_frac_dropped_requests for summary_sim_result in summary_sim_result_list]
     plot.errorbar(arrival_rate_list, E_frac_dropped_requests_list, yerr=std_frac_dropped_requests_list, color=next(dark_color_cycle), label=fr"$N_q= {queue_length}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
+    log(INFO, "Done")
+
+
+def sim_frac_dropped_requests_vs_arrival_rate():
+    num_requests_to_serve = 10 # 10000
+    num_sim_runs = 10
+    log(INFO, "Started", num_requests_to_serve=num_requests_to_serve, num_sim_runs=num_sim_runs)
+
+    for queue_length in [5, 10]:
+        log(INFO, f">> queue_length= {queue_length}")
+        sim_frac_dropped_requests_vs_arrival_rate_for_given_queue_length(
+            num_requests_to_serve=num_requests_to_serve,
+            num_sim_runs=num_sim_runs,
+            queue_length=queue_length,
+        )
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -68,7 +84,7 @@ def sim_frac_dropped_requests_vs_arrival_rate():
     )
 
     # Save the plot
-    plot.gcf().set_size_inches(4, 6)
+    plot.gcf().set_size_inches(10, 6)
     plot.savefig("plot_frac_dropped_requests_vs_arrival_rate.png", bbox_inches="tight")
     plot.gcf().clear()
 

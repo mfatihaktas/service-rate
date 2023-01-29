@@ -69,7 +69,7 @@ def sim_single_server(
     sim_result_list: list[SimResult] = None,
 ):
     log(
-        DEBUG,
+        INFO,
         "Started",
         inter_gen_time_rv=inter_gen_time_rv,
         service_time_rv=service_time_rv,
