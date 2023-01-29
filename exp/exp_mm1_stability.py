@@ -25,11 +25,11 @@ def sim_MM1_w_finite_queue_stability(
 
 
 def sim_frac_dropped_requests_vs_arrival_rate():
-    num_sim_runs = 2
-    num_requests_to_serve = 10  # 1000
+    num_sim_runs = 10
+    num_requests_to_serve = 1000
     queue_length = 10
 
-    log(DEBUG, "Started",
+    log(INFO, "Started",
         num_requests_to_serve=num_requests_to_serve,
         queue_length=queue_length,
         num_sim_runs=num_sim_runs,
@@ -39,7 +39,7 @@ def sim_frac_dropped_requests_vs_arrival_rate():
     summary_sim_result_list = []
     for arrival_rate in [0.2, 0.5, 0.8]:
     # for arrival_rate in [0.2]:
-        log(DEBUG, f">> arrival_rate= {arrival_rate}")
+        log(INFO, f">> arrival_rate= {arrival_rate}")
         arrival_rate_list.append(arrival_rate)
 
         summary_sim_result = sim_MM1_w_finite_queue_stability(
@@ -72,7 +72,7 @@ def sim_frac_dropped_requests_vs_arrival_rate():
     plot.savefig("plot_frac_dropped_requests_vs_arrival_rate.png", bbox_inches="tight")
     plot.gcf().clear()
 
-    log(DEBUG, "Done")
+    log(INFO, "Done")
 
 
 if __name__ == "__main__":

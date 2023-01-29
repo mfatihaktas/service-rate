@@ -21,7 +21,7 @@ class SimResult:
     def __repr__(self):
         return (
             "SimResult( \n"
-            f"\t len(response_time_list)= {len(self.response_time_list)}"
+            f"\t len(response_time_list)= {len(self.response_time_list)} \n"
             f"\t frac_dropped_requests= {self.frac_dropped_requests} \n"
             ")"
         )
