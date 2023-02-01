@@ -24,12 +24,12 @@ class PopModel_wZipf(object):
         self.zipf_tail_index_rv = zipf_tail_index_rv
         self.arrival_rate_rv = arrival_rate_rv
 
-        self.cap_list_ = self.cap_list(5000)
-        # self.values = numpy.array(self.cap_list_).reshape((self.k, len(self.cap_list_) )).T
-        self.values = numpy.column_stack(tuple(self.cap_list_) )
-        # log(INFO, "", values=self.values)
+        self.demand_vector_list = self.get_demand_vectors(5000)
+        # self.values = numpy.array(self.demand_vector_list).reshape((self.k, len(self.demand_vector_list))).T
+        self.values = numpy.column_stack(tuple(self.demand_vector_list))
+        log(INFO, "", values=self.values)
 
-        self.kernel, self.max_l = self.gaussian_kde()
+        self.kernel, self.max_list = self.gaussian_kde()
 
     def __repr__(self):
         return (
@@ -41,27 +41,27 @@ class PopModel_wZipf(object):
         )
 
     def prob_list(self, tail_index: float):
-        self.v_l = numpy.arange(1, self.k+1)
+        self.v_l = numpy.arange(1, self.k + 1)
         w_l = [float(v)**(-tail_index) for v in self.v_l]
-        return [w/sum(w_l) for w in w_l]
+        return [w / sum(w_l) for w in w_l]
 
-    def cap_list(self, num_points: int):
-        cap_list = []
+    def get_demand_vectors(self, num_points: int) -> list[numpy.array]:
+        demand_vector_list = []
         tail_index_list = [self.zipf_tail_index_rv.sample() for _ in range(num_points)]
         for tail_index in tail_index_list:
             prob_list = self.prob_list(tail_index)
             if random.uniform(0, 1) < 0.5:  # each symbol is equally likely to be more popular
                 prob_list.reverse()
-                ar = self.arrival_rate_rv.sample()
-                # if ar > 2:
-                #   print("ar= {} > 2!".format(ar))
-                cap_list.append(numpy.array(prob_list) * ar)
+            ar = self.arrival_rate_rv.sample()
+            # if ar > 2:
+            #   print("ar= {} > 2!".format(ar))
+            demand_vector_list.append(numpy.array(prob_list) * ar)
 
-        return cap_list
+        return demand_vector_list
 
     def integrate_over_pop_model(self, func: Callable):
         range_list = []
-        for m in self.max_l:
+        for m in self.max_list:
             range_list.append((0, m))
 
         log(INFO, "", range_list=range_list)
@@ -69,9 +69,9 @@ class PopModel_wZipf(object):
         return round(result, 2)
 
     def gaussian_kde(self, num_points=10000):
-        max_l = numpy.amax(self.values, axis=1).tolist()
-        kernel = scipy.stats.gaussian_kde(self.values) # bw_method="silverman"
-        return kernel, max_l
+        max_list = numpy.amax(self.values, axis=1).tolist()
+        kernel = scipy.stats.gaussian_kde(self.values)  # bw_method="silverman"
+        return kernel, max_list
 
     def joint_pdf(self, *args):
         return self.kernel(numpy.array(args).reshape((self.k, 1)) )[0]
@@ -83,7 +83,7 @@ class PopModel_wZipf(object):
         plot.savefig("plot_scatter_2d.png", bbox_inches="tight")
         fig.clear()
 
-        data = pandas.DataFrame(self.cap_list_, columns=["a", "b"] )
+        data = pandas.DataFrame(self.demand_vector_list, columns=["a", "b"] )
         # print("data= {}".format(data) )
         # seaborn.jointplot(x="a", y="b", data=data)
         seaborn.jointplot(x="a", y="b", data=data, kind="kde", space=0) # color="red"
@@ -101,17 +101,18 @@ class PopModel_wZipf(object):
         xmin, xmax = min(self.values[0, :]), max(self.values[0, :])
         ymin, ymax = min(self.values[1, :]), max(self.values[1, :])
         X, Y = numpy.mgrid[xmin:xmax:100j, ymin:ymax:100j]
-        positions = numpy.vstack([X.ravel(), Y.ravel() ])
+        positions = numpy.vstack([X.ravel(), Y.ravel()])
         # blog(positions=positions)
-        Z = numpy.reshape(self.kernel(positions).T, X.shape)
+        # Z = numpy.reshape(self.kernel(positions).T, X.shape)
+        Z = numpy.reshape(self.kernel(positions), X.shape)
         # blog(Z=Z)
 
         plot.imshow(numpy.rot90(Z), cmap=plot.cm.gist_earth_r, extent=[xmin, xmax, ymin, ymax])
         plot.plot(self.values[0, :], self.values[1, :], "k.", markersize=2)
         plot.xlim([xmin, xmax])
         plot.ylim([ymin, ymax])
-        plot.xlabel(r"$\lambda_a$", fontsize=20)
-        plot.ylabel(r"$\lambda_b$", fontsize=20)
+        plot.xlabel(r"$\lambda_a$", fontsize=14)
+        plot.ylabel(r"$\lambda_b$", fontsize=14)
         # plot.title(r"$\lambda \sim {}$, $\alpha \sim {}$".format(self.arrival_rate_rv, self.zipf_tail_index_rv), fontsize=18)
         prettify(plot.gca())
         fig = plot.gcf()
