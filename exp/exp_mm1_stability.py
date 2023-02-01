@@ -134,22 +134,24 @@ def plot_frac_dropped_requests_vs_arrival_rate():
         log(INFO, f">> queue_length= {queue_length}")
 
         sim_data_map = queue_length_to_sim_data_map[queue_length]
-        plot.errorbar(sim_data_map["arrival_rate_list"], sim_data_map["E_frac_dropped_requests_list"], yerr=sim_data_map["std_frac_dropped_requests_list"], color=next(dark_color_cycle), label=r"$N_{\textrm{queue}}$" + fr"$ = {queue_length}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        E_frac_dropped_requests_list = [100 * f for f in sim_data_map["E_frac_dropped_requests_list"]]
+        std_frac_dropped_requests_list = [100 * f for f in sim_data_map["std_frac_dropped_requests_list"]]
+        plot.errorbar(sim_data_map["arrival_rate_list"], E_frac_dropped_requests_list, yerr=std_frac_dropped_requests_list, color=next(dark_color_cycle), label=r"$N_{\textrm{q}}$" + fr"$ = {queue_length}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
-    plot.ylabel("Fraction of requests dropped", fontsize=fontsize)
+    plot.ylabel("Percentage of requests dropped", fontsize=fontsize)
     plot.xlabel(r"Arrival rate $\lambda$", fontsize=fontsize)
 
-    plot.title(
-        r"$X \sim \textrm{Exp}(\lambda)$, "
-        fr"$S \sim {SERVICE_TIME_RV.to_latex()}$, "
-        r"$N_{\textrm{req}}$" + fr"$ = {num_requests_to_serve}$, "
-        r"$N_{\textrm{sim}}$" + fr"$ = {num_sim_runs}$"
-    )
+    # plot.title(
+    #     r"$X \sim \textrm{Exp}(\lambda)$, "
+    #     fr"$S \sim {SERVICE_TIME_RV.to_latex()}$, "
+    #     r"$N_{\textrm{req}}$" + fr"$ = {num_requests_to_serve}$, "
+    #     r"$N_{\textrm{sim}}$" + fr"$ = {num_sim_runs}$"
+    # )
 
     # Save the plot
-    plot.gcf().set_size_inches(10, 6)
+    plot.gcf().set_size_inches(4, 4)
     plot_name = (
         "plot_frac_dropped_requests_vs_arrival_rate_w_num"
         f"_requests_to_serve_{num_requests_to_serve}"
