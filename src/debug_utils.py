@@ -110,7 +110,7 @@ def log(level: int, _msg_: str, **kwargs):
 
 
 # Always log
-def alog(level: int, _msg_: str, **kwargs):
+def alog(_msg_: str, **kwargs):
     logger.critical("{}\n{}".format(_msg_, pstr(**kwargs)), extra=get_extra())
 
 
