@@ -47,8 +47,8 @@ formatter = CustomFormatter()
 LOGGER_NAME = "serv_rate"
 # logging.basicConfig(level=logging.INFO) #, format=LOGGING_FORMAT)
 logger = logging.getLogger(LOGGER_NAME)
-# logger.setLevel(logging.DEBUG)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+# logger.setLevel(logging.INFO)
 
 
 def log_to_std():

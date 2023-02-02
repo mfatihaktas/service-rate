@@ -154,9 +154,9 @@ def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
     #     v_list = [x[i, :] for i in obj_id_tuple]
     #     constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
 
-    # constraint_list.append(x[0, :].T @ x[1, :] <= 2)
+    constraint_list.append(x[0, :].T @ x[1, :] <= 2)
     # constraint_list.append(cvxpy.dotsort(x[0, :], x[1, :]) >= 2)
-    constraint_list.append(cvxpy.quad_form(x[0, :], numpy.ones((n, n))) <= 2)
+    # constraint_list.append(cvxpy.quad_form(x[0, :], numpy.ones((n, n))) <= 2)
     # constraint_list.append(cvxpy.pnorm(x, 2) <= 2)
 
     # Node constraints
@@ -175,7 +175,8 @@ def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
 
     prob = cvxpy.Problem(obj, constraint_list)
     # prob.solve(solver="GLPK_MI")
-    prob.solve()
+    prob.solve(solver="ECOS_BB")
+    # prob.solve()
 
     log(
         DEBUG,
@@ -197,7 +198,9 @@ def test_mixed_integer_quadratic_program():
     x = cvxpy.Variable(n, integer=True)
     objective = cvxpy.Minimize(cvxpy.sum_squares(A @ x - b))
     prob = cvxpy.Problem(objective)
-    prob.solve()
+    # prob.solve()
+    # prob.solve(solver="ECOS_BB")
+    prob.solve(solver="SCIP")
 
     log(
         DEBUG,
