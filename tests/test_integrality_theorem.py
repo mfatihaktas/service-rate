@@ -96,68 +96,235 @@ def test_w_l1_norm():
         #     # [a, c]
         #     k=3,
         #     n=7,
-        #     obj_id_tuple_to_min_span_size_map={
-        #         (0,): 3,
-        #         (1,): 2,
-        #         (2,): 1,
+        #     obj_ids_to_min_span_size_map={
+        #         0: 3,
+        #         1: 2,
+        #         2: 1,
         #         (0, 1): 3,
         #         (0, 2): 3,
         #         (1, 2): 3,
         #         (0, 1, 2): 3,
         #     }
         # ),
+
         dict(
             # Goal:
-            # [a, b]
+            # [a]
             # [a, b]
             # [a, c]
-            # [a, c]
-            # [d]
-            k=4,
+            # [b, c]
+            k=2,
             n=7,
-            obj_id_tuple_to_min_span_size_map={
-                (0,): 4,
-                (1,): 2,
-                (2,): 2,
-                (3,): 1,
-                (0, 1): 4,
-                (0, 2): 4,
-                (0, 3): 5,
-                (1, 2): 4,
-                (1, 3): 3,
-                (2, 3): 3,
-                (0, 1, 2): 4,
-                (0, 1, 3): 5,
-                (0, 2, 3): 5,
-                (1, 2, 3): 5,
-            },
+            obj_ids_to_min_span_size_map={
+                0: 2,
+                1: 2,
+                # 2: 2,
+                (0, 1): 3,
+                # (0, 2): 4,
+                # (1, 2): 3,
+                # (0, 1, 2): 4,
+            }
         ),
+
+        # dict(
+        #     # Goal:
+        #     # [a, b]
+        #     # [a, b]
+        #     # [a, c]
+        #     # [a, c]
+        #     # [d]
+        #     k=4,
+        #     n=7,
+        #     obj_ids_to_min_span_size_map={
+        #         0: 4,
+        #         1: 2,
+        #         2: 2,
+        #         3: 1,
+        #         (0, 1): 4,
+        #         (0, 2): 4,
+        #         (0, 3): 5,
+        #         (1, 2): 4,
+        #         (1, 3): 3,
+        #         (2, 3): 3,
+        #         (0, 1, 2): 4,
+        #         (0, 1, 3): 5,
+        #         (0, 2, 3): 5,
+        #         (1, 2, 3): 5,
+        #     },
+        # ),
     ],
 )
 def storage_info_w_span_sizes(request) -> dict:
     return request.param
 
 
+def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
+    k = storage_info_w_span_sizes["k"]
+    n = storage_info_w_span_sizes["n"]
+    obj_ids_to_min_span_size_map = storage_info_w_span_sizes["obj_ids_to_min_span_size_map"]
+
+    x = cvxpy.Variable(shape=(k, n), name="x", integer=True)
+    constraint_list = []
+
+    # Span constraints
+    for obj_ids, min_span_size in obj_ids_to_min_span_size_map.items():
+        log(DEBUG, f">> obj_ids= {obj_ids}", min_span_size=min_span_size)
+
+        if isinstance(obj_ids, int):
+            constraint_list.append(cvxpy.sum(x[obj_ids, :]) >= min_span_size)
+            continue
+
+        z = cvxpy.Variable(shape=(n, 1), name="z")
+
+        for i in obj_ids:
+            constraint_list.append(cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
+
+        num_objs = len(obj_ids)
+        x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_ids]).T
+        sum_x_i = x_i_in_columns @ numpy.ones((num_objs, 1))
+        log(DEBUG, "", x_i_in_columns=x_i_in_columns, sum_x_i=sum_x_i)
+        constraint_list.append(sum_x_i - len(obj_ids) + 1 <= z)
+
+        obj_choice_union_size = sum(obj_ids_to_min_span_size_map[i] for i in obj_ids)
+        constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
+        log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
+
+    # Range constraints
+    constraint_list.extend([x >= 0, x <= 1])
+
+    C = numpy.hstack([numpy.array([[i + 1] for i in range(n)]) for _ in range(k)])
+    log(DEBUG, "", C=C, constraint_list=constraint_list)
+    obj = cvxpy.Minimize(cvxpy.sum(x @ C))
+
+    prob = cvxpy.Problem(obj, constraint_list)
+    prob.solve(solver="SCIP")
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+    )
+
+
+def test_integer_programming_w_dot_product_constraint_1():
+    k = 3
+    x = cvxpy.Variable(shape=k, name="x", boolean=True)
+    y = cvxpy.Variable(shape=k, name="y", boolean=True)
+    constraint_list = []
+
+    # Span of x and y
+    constraint_list.append(cvxpy.sum(x) >= 2)
+    constraint_list.append(cvxpy.sum(y) >= 2)
+
+    # <x, y> <= 1
+    z = cvxpy.Variable(shape=k, name="z", boolean=True)
+
+    constraint_list.append(x >= z)
+    constraint_list.append(y >= z)
+
+    constraint_list.append(x + y - 1 <= z)
+
+    constraint_list.append(cvxpy.sum(z) <= 1)
+
+    # Range constraints
+    # constraint_list.extend([x >= 0, x <= 1, y >= 0, y <= 1, z >= 0, z <= 1])
+
+    obj = cvxpy.Minimize(cvxpy.sum(x + y))
+
+    prob = cvxpy.Problem(obj, constraint_list)
+    prob.solve(solver="SCIP")
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+        y=y.value,
+        z=z.value,
+    )
+
+
+def test_integer_programming_w_dot_product_constraint_2():
+    k = 10
+    x = cvxpy.Variable(shape=k, name="x", boolean=True)
+    y = cvxpy.Variable(shape=k, name="y", boolean=True)
+    constraint_list = []
+
+    # Span of x and y
+    constraint_list.append(cvxpy.sum(x) >= 4)
+    constraint_list.append(cvxpy.sum(y) >= 4)
+
+    # <x, y> <= 2
+    z = cvxpy.Variable(shape=k, name="z", boolean=True)
+
+    constraint_list.append(x >= z)
+    constraint_list.append(y >= z)
+
+    constraint_list.append(x + y - 1 <= z)
+
+    constraint_list.append(cvxpy.sum(z) <= 2)
+
+    # Objective
+    C = numpy.hstack([numpy.array([[i + 1] for i in range(k)]) for _ in range(2)])
+    # log(DEBUG, "", C=C, constraint_list=constraint_list)
+    obj = cvxpy.Minimize(cvxpy.sum(x @ C) + cvxpy.sum(y @ C))
+
+    prob = cvxpy.Problem(obj, constraint_list)
+    prob.solve(solver="SCIP")
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+        y=y.value,
+        z=z.value,
+    )
+
+
 def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
     k = storage_info_w_span_sizes["k"]
     n = storage_info_w_span_sizes["n"]
-    # obj_id_tuple_to_min_span_size_map = storage_info_w_span_sizes[
-    #     "obj_id_tuple_to_min_span_size_map"
-    # ]
+    obj_ids_to_min_span_size_map = storage_info_w_span_sizes[
+        "obj_ids_to_min_span_size_map"
+    ]
 
     x = cvxpy.Variable(shape=(k, n), name="x", integer=True)
     # x = cvxpy.Variable(shape=(k, n), name="x")
     constraint_list = []
 
     # Span constraints
-    # for obj_id_tuple, min_span_size in obj_id_tuple_to_min_span_size_map.items():
-    #     v_list = [x[i, :] for i in obj_id_tuple]
+    # for obj_ids, min_span_size in obj_ids_to_min_span_size_map.items():
+    #     v_list = [x[i, :] for i in obj_ids]
     #     constraint_list.append(cvxpy.sum(cvxpy.vstack(v_list)) >= min_span_size)
 
     # constraint_list.append(x[0, :].T @ x[1, :] <= 2)
-    # constraint_list.append(cvxpy.dotsort(x[0, :], x[1, :]) >= 2)
+    # z = cvxpy.Variable(shape=(n,), name="z")  # , integer=True
+    # constraint_list.append(x[0, :] >= z)
+    # constraint_list.append(x[1, :] >= z)
+    # constraint_list.append(x[0, :] + x[1, :] - 1 <= z)
+    # constraint_list.append(cvxpy.sum(z) >= 4)
+
+    # Span constraints
+    for obj_ids, min_span_size in obj_ids_to_min_span_size_map.items():
+        log(DEBUG, f">> obj_ids= {obj_ids}", min_span_size=min_span_size)
+
+        if isinstance(obj_ids, int):
+            constraint_list.append(cvxpy.sum(x[obj_ids, :]) >= min_span_size)
+            continue
+
+        z = cvxpy.Variable(shape=(n, 1), name="z")
+
+        num_objs = len(obj_ids)
+        x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_ids]).T
+        sum_x_i = x_i_in_columns @ numpy.ones((num_objs, 1))
+        log(DEBUG, "", x_i_in_columns=x_i_in_columns, sum_x_i=sum_x_i)
+        constraint_list.append(sum_x_i - len(obj_ids) + 1 <= z)
+
+        obj_choice_union_size = sum(obj_ids_to_min_span_size_map[i] for i in obj_ids)
+        constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
+        log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
+
     # constraint_list.append(cvxpy.quad_form(x[0, :], numpy.ones((n, n))) <= 2)
-    constraint_list.append(cvxpy.pnorm(x, 2) <= 2)
+    # constraint_list.append(cvxpy.pnorm(x, 2) <= 2)
 
     # Node constraints
     # for i in range(n):
@@ -166,8 +333,12 @@ def test_w_integer_programming_2(storage_info_w_span_sizes: dict):
     # Range constraints
     constraint_list.extend([x >= 0, x <= 1])
 
-    C = numpy.array([[i + 1 for i in range(n)] for _ in range(k)])
-    obj = cvxpy.Minimize(cvxpy.sum(cvxpy.multiply(C, x)))
+    # C = numpy.array([[i + 1 for i in range(n)] for _ in range(k)])
+    # obj = cvxpy.Minimize(cvxpy.sum(cvxpy.multiply(C, x)))
+    C = numpy.hstack([numpy.array([[i + 1] for i in range(n)]) for _ in range(k)])
+    log(DEBUG, "", C=C, constraint_list=constraint_list)
+    obj = cvxpy.Minimize(cvxpy.sum(x @ C))
+
     # obj = cvxpy.Minimize(cvxpy.norm(x, 1))
     # obj = cvxpy.Minimize(cvxpy.sum_squares(x))
     # obj = cvxpy.Minimize(cvxpy.tv(x))
