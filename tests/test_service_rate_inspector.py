@@ -1,5 +1,5 @@
-from src.service_rate import service_rate, storage_scheme
-from src.debug_utils import *
+from src.service_rate import plot_capacity_region, service_rate, storage_scheme
+from src.utils.debug import *
 
 from tests import conftest, node_id_to_objs
 
@@ -26,7 +26,7 @@ def test_is_in_cap_region():
 
 
 def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
-    service_rate_inspector.plot_cap_2d()
+    plot_capacity_region.plot_capacity_region(service_rate_inspector=service_rate_inspector)
 
 
 def test_min_max_functions(service_rate_inspector: service_rate.ServiceRateInspector):

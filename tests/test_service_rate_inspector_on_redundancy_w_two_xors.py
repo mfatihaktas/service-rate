@@ -1,10 +1,10 @@
 import collections
 
-from src import (
+from src.service_rate import (
     service_rate,
     storage_scheme as storage_scheme_module,
 )
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 def get_service_rate_inspector(

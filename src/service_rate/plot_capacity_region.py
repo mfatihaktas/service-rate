@@ -1,9 +1,9 @@
 import numpy
 import scipy
 
-from src import service_rate
+from src.service_rate import service_rate
 from src.utils import plot_polygon
-from src.debug_utils import *
+from src.utils.debug import *
 from src.utils.plot import *
 
 
