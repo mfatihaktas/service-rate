@@ -5,7 +5,7 @@ import itertools
 # matplotlib.use('Agg')
 import matplotlib.pyplot as plot
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 plot.rcParams.update({"text.usetex": True})

@@ -1,7 +1,7 @@
 import abc
 import numpy
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 class Obj(abc.ABC):

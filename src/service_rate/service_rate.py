@@ -2,6 +2,7 @@ import cvxpy
 import numpy
 import scipy.spatial
 import string
+import sys
 
 from typing import Union
 
