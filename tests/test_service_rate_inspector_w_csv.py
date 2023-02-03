@@ -1,5 +1,5 @@
 from src import csv_utils, service_rate, storage_scheme
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict):

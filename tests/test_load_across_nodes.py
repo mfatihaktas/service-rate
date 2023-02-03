@@ -1,5 +1,5 @@
 from src import csv_utils, service_rate, service_rate_utils, storage_scheme
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 CSV_FOLDER_PATH = "tests/csv/load_across_nodes"

@@ -4,7 +4,7 @@ from src.sim import (
     random_variable,
     sim as sim_module,
 )
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 @pytest.fixture(scope="module")

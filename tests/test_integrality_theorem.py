@@ -2,7 +2,7 @@ import cvxpy
 import numpy
 import pytest
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 def test_w_integer_programming():

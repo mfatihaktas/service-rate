@@ -1,7 +1,7 @@
 import pytest
 
 from src import plot_capacity_region, service_rate, storage_scheme
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 @pytest.mark.parametrize(

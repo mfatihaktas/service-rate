@@ -1,7 +1,7 @@
 import random
 
 from src import storage_scheme as storage_scheme_module
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 node_id_to_objs_list_1 = [
