@@ -163,18 +163,20 @@ def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
     n = storage_info_w_span_sizes["n"]
     obj_ids_to_min_span_size_map = storage_info_w_span_sizes["obj_ids_to_min_span_size_map"]
 
-    x = cvxpy.Variable(shape=(k, n), name="x", integer=True)
+    x = cvxpy.Variable(shape=(k, n), name="x", boolean=True)
     constraint_list = []
 
     # Span constraints
-    for obj_ids, min_span_size in obj_ids_to_min_span_size_map.items():
+    z_list = []
+    for counter, (obj_ids, min_span_size) in enumerate(obj_ids_to_min_span_size_map.items()):
         log(DEBUG, f">> obj_ids= {obj_ids}", min_span_size=min_span_size)
 
         if isinstance(obj_ids, int):
             constraint_list.append(cvxpy.sum(x[obj_ids, :]) >= min_span_size)
             continue
 
-        z = cvxpy.Variable(shape=(n, 1), name="z")
+        z = cvxpy.Variable(shape=(n, 1), name=f"z_{counter}", boolean=True)
+        z_list.append(z)
 
         for i in obj_ids:
             constraint_list.append(cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
@@ -189,10 +191,7 @@ def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
         constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
         log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
 
-    # Range constraints
-    constraint_list.extend([x >= 0, x <= 1])
-
-    C = numpy.hstack([numpy.array([[i + 1] for i in range(n)]) for _ in range(k)])
+    C = numpy.array([[i + 1] for i in range(n)])
     log(DEBUG, "", C=C, constraint_list=constraint_list)
     obj = cvxpy.Minimize(cvxpy.sum(x @ C))
 
@@ -203,47 +202,11 @@ def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
         prob_status=prob.status,
         prob_value=prob.value,
         x=x.value,
+        z_list=[z.value for z in z_list],
     )
 
 
-def test_integer_programming_w_dot_product_constraint_1():
-    k = 3
-    x = cvxpy.Variable(shape=k, name="x", boolean=True)
-    y = cvxpy.Variable(shape=k, name="y", boolean=True)
-    constraint_list = []
-
-    # Span of x and y
-    constraint_list.append(cvxpy.sum(x) >= 2)
-    constraint_list.append(cvxpy.sum(y) >= 2)
-
-    # <x, y> <= 1
-    z = cvxpy.Variable(shape=k, name="z", boolean=True)
-
-    constraint_list.append(x >= z)
-    constraint_list.append(y >= z)
-
-    constraint_list.append(x + y - 1 <= z)
-
-    constraint_list.append(cvxpy.sum(z) <= 1)
-
-    # Range constraints
-    # constraint_list.extend([x >= 0, x <= 1, y >= 0, y <= 1, z >= 0, z <= 1])
-
-    obj = cvxpy.Minimize(cvxpy.sum(x + y))
-
-    prob = cvxpy.Problem(obj, constraint_list)
-    prob.solve(solver="SCIP")
-
-    log(DEBUG, "",
-        prob_status=prob.status,
-        prob_value=prob.value,
-        x=x.value,
-        y=y.value,
-        z=z.value,
-    )
-
-
-def test_integer_programming_w_dot_product_constraint_2():
+def test_integer_programming_w_dot_product_constraint():
     k = 10
     x = cvxpy.Variable(shape=k, name="x", boolean=True)
     y = cvxpy.Variable(shape=k, name="y", boolean=True)

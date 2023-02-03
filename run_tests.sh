@@ -21,9 +21,9 @@ elif [ $1 = "l" ]; then
   # ${PYTEST} tests/test_load_across_nodes.py -k "test_load_on_first_node"
 
 elif [ $1 = "i" ]; then
-  ${PYTEST} "tests/test_integrality_theorem.py::test_integer_programming_w_dot_product_constraint_2"
+  # ${PYTEST} "tests/test_integrality_theorem.py::test_integer_programming_w_dot_product_constraint_2"
   # ${PYTEST} "tests/test_integrality_theorem.py::test_integer_programming_w_dot_product_constraint_1"
-  # ${PYTEST} "tests/test_integrality_theorem.py::test_w_integer_programming_refined"
+  ${PYTEST} "tests/test_integrality_theorem.py::test_w_integer_programming_refined"
   # ${PYTEST} "tests/test_integrality_theorem.py::test_w_integer_programming_2"
   # ${PYTEST} "tests/test_integrality_theorem.py::test_mixed_integer_quadratic_program"
 
