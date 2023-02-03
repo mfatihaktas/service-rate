@@ -1,5 +1,6 @@
-from src import plot_cost, service_rate, storage_scheme
-from src.debug_utils import *
+from src import service_rate, storage_scheme
+from src.utils import plot_cost
+from src.utils.debug import *
 
 
 def test_plot_cost_2d():
