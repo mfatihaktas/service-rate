@@ -1,6 +1,6 @@
 import pytest
 
-from src import plot_capacity_region, service_rate, storage_scheme
+from src.service_rate import plot_capacity_region, service_rate, storage_scheme
 from src.utils.debug import *
 
 

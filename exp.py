@@ -2,7 +2,7 @@ from pathlib import Path
 import pandas as pd
 import sys
 
-from src import service_rate, storage_scheme
+from src.service_rate import service_rate, storage_scheme
 from src.utils import csv
 from src.debug_utils import *
 from os.path import exists

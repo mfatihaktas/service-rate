@@ -1,7 +1,7 @@
 import random
 import pytest
 
-from src import service_rate, storage_scheme
+from src.service_rate import service_rate, storage_scheme
 from src.utils.debug import *
 
 from tests import node_id_to_objs

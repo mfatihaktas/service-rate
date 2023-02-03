@@ -1,6 +1,6 @@
 import random
 
-from src import service_rate, storage_scheme
+from src.service_rate import service_rate, storage_scheme
 from debug_utils import *
 
 

@@ -7,7 +7,7 @@ from typing import Union
 
 from src.service_rate import service_rate_utils
 
-from src.debug_utils import *
+from src.utils.debug import *
 from src.utils.plot import *
 
 

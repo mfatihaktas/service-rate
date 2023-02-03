@@ -1,4 +1,4 @@
-from src import service_rate, storage_scheme
+from src.service_rate import service_rate, storage_scheme
 from src.debug_utils import *
 
 from tests import conftest, node_id_to_objs

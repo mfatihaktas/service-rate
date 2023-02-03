@@ -2,7 +2,7 @@ import collections
 import csv
 
 from src.debug_utils import *
-from src.storage_scheme import CodedObj, Obj, PlainObj
+from src.service_rate.storage_scheme import CodedObj, Obj, PlainObj
 
 
 def get_node_id_to_objs_list_from_oleg_csv_file(csv_file_path: str) -> list[list[Obj]]:
