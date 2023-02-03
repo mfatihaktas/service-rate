@@ -107,51 +107,51 @@ def test_w_l1_norm():
         #     }
         # ),
 
-        # dict(
-        #     # Goal:
-        #     # [a]
-        #     # [a, b]
-        #     # [a, c]
-        #     # [b, c]
-        #     k=2,
-        #     n=7,
-        #     obj_ids_to_min_span_size_map={
-        #         0: 2,
-        #         1: 2,
-        #         # 2: 2,
-        #         (0, 1): 3,
-        #         # (0, 2): 4,
-        #         # (1, 2): 3,
-        #         # (0, 1, 2): 4,
-        #     }
-        # ),
-
         dict(
             # Goal:
-            # [a, b]
+            # [a]
             # [a, b]
             # [a, c]
-            # [a, c]
-            # [d]
-            k=4,
+            # [b, c]
+            k=3,
             n=7,
             obj_ids_to_min_span_size_map={
-                0: 4,
+                0: 2,
                 1: 2,
                 2: 2,
-                3: 1,
-                (0, 1): 4,
+                (0, 1): 3,
                 (0, 2): 4,
-                (0, 3): 5,
-                (1, 2): 4,
-                (1, 3): 3,
-                (2, 3): 3,
+                (1, 2): 3,
                 (0, 1, 2): 4,
-                (0, 1, 3): 5,
-                (0, 2, 3): 5,
-                (1, 2, 3): 5,
-            },
+            }
         ),
+
+        # dict(
+        #     # Goal:
+        #     # [a, b]
+        #     # [a, b]
+        #     # [a, c]
+        #     # [a, c]
+        #     # [d]
+        #     k=4,
+        #     n=7,
+        #     obj_ids_to_min_span_size_map={
+        #         0: 4,
+        #         1: 2,
+        #         2: 2,
+        #         3: 1,
+        #         (0, 1): 4,
+        #         (0, 2): 4,
+        #         (0, 3): 5,
+        #         (1, 2): 4,
+        #         (1, 3): 3,
+        #         (2, 3): 3,
+        #         (0, 1, 2): 4,
+        #         (0, 1, 3): 5,
+        #         (0, 2, 3): 5,
+        #         (1, 2, 3): 5,
+        #     },
+        # ),
     ],
 )
 def storage_info_w_span_sizes(request) -> dict:
@@ -179,7 +179,7 @@ def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
         z_list.append(z)
 
         for i in obj_ids:
-            constraint_list.append(cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
+            constraint_list.append(1 - cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
 
         num_objs = len(obj_ids)
         # x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_ids]).T
@@ -233,6 +233,44 @@ def test_integer_programming_w_dot_product_constraint():
     constraint_list.append(x + y - 1 <= z)
 
     constraint_list.append(cvxpy.sum(z) <= 2)
+
+    # Objective
+    C = numpy.hstack([numpy.array([[i + 1] for i in range(k)]) for _ in range(2)])
+    # log(DEBUG, "", C=C, constraint_list=constraint_list)
+    obj = cvxpy.Minimize(cvxpy.sum(x @ C) + cvxpy.sum(y @ C))
+
+    prob = cvxpy.Problem(obj, constraint_list)
+    prob.solve(solver="SCIP")
+
+    log(DEBUG, "",
+        prob_status=prob.status,
+        prob_value=prob.value,
+        x=x.value,
+        y=y.value,
+        z=z.value,
+    )
+
+
+def test_integer_programming_w_or_constraint():
+    k = 10
+    x = cvxpy.Variable(shape=k, name="x", boolean=True)
+    y = cvxpy.Variable(shape=k, name="y", boolean=True)
+    constraint_list = []
+
+    # Span of x and y
+    constraint_list.append(cvxpy.sum(x) >= 3)
+    constraint_list.append(cvxpy.sum(y) >= 2)
+
+    # |x or y| >= min_span_size
+    min_span_size = 3
+    z = cvxpy.Variable(shape=k, name="z", boolean=True)
+
+    constraint_list.append(1 - x >= z)
+    constraint_list.append(1 - y >= z)
+
+    constraint_list.append(1 - x + 1 - y - 1 <= z)
+
+    constraint_list.append(cvxpy.sum(z) <= k - min_span_size)
 
     # Objective
     C = numpy.hstack([numpy.array([[i + 1] for i in range(k)]) for _ in range(2)])
