@@ -1,7 +1,8 @@
 import numpy
 import scipy
 
-from src import plot_polygon_utils, service_rate
+from src import service_rate
+from src.utils import plot_polygon
 from src.debug_utils import *
 from src.plot_utils import *
 
@@ -200,7 +201,7 @@ def plot_capacity_region_3d(
         ]
         triangles.append(sq)
 
-    new_faces = plot_polygon_utils.simplify(triangles)
+    new_faces = plot_polygon.simplify(triangles)
     for sq in new_faces:
         f = mpl_toolkits.mplot3d.art3d.Poly3DCollection([sq])
         # f.set_color(matplotlib.colors.rgb2hex(scipy.rand(20) ) )
