@@ -800,6 +800,20 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyscipopt"
+version = "4.2.0"
+description = "Python interface and modeling environment for SCIP"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "PySCIPOpt-4.2.0.tar.gz", hash = "sha256:c9ac57a996ad2f9d53bdd354134fb081c1bb3ed9bb5b9ed348c8f80f6161d4ec"},
+]
+
+[package.dependencies]
+wheel = "*"
+
+[[package]]
 name = "pytest"
 version = "7.1.2"
 description = "pytest: simple powerful testing with Python"
@@ -1068,7 +1082,22 @@ files = [
     {file = "typing_extensions-4.2.0.tar.gz", hash = "sha256:f1c24655a0da0d1b67f07e17a5e6b2a105894e6824b92096378bb3668ef02376"},
 ]
 
+[[package]]
+name = "wheel"
+version = "0.38.4"
+description = "A built-package format for Python"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "wheel-0.38.4-py3-none-any.whl", hash = "sha256:b60533f3f5d530e971d6737ca6d58681ee434818fab630c83a734bb10c083ce8"},
+    {file = "wheel-0.38.4.tar.gz", hash = "sha256:965f5259b566725405b05e7cf774052044b1ed30119b5d586b2703aafe8719ac"},
+]
+
+[package.extras]
+test = ["pytest (>=3.0.0)"]
+
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.11"
-content-hash = "f6f1041bca7bd66c39421d943c3823b1f0fce19cf133505fccee0c484b8659c7"
+content-hash = "cc6db6ddf05094f84d67df4d00f1923505e81ec57dbc5ee9a34775015531a2a5"
