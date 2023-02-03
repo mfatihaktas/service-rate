@@ -2,7 +2,8 @@ from pathlib import Path
 import pandas as pd
 import sys
 
-from src import service_rate, storage_scheme, csv_utils
+from src import service_rate, storage_scheme
+from src.utils import csv
 from src.debug_utils import *
 from os.path import exists
 
@@ -51,7 +52,7 @@ def run_w_csv_file_path(
         compute_halfspace_intersections=compute_halfspace_intersections,
     )
 
-    node_id_objs_list = csv_utils.get_node_id_to_objs_list_from_oleg_csv_file(
+    node_id_objs_list = csv.get_node_id_to_objs_list_from_oleg_csv_file(
         csv_file_path_for_node_id_objs_list
     )
     # log(DEBUG, "", node_id_objs_list=node_id_objs_list)
@@ -68,7 +69,7 @@ def run_w_csv_file_path(
         max_repair_set_size=max_repair_set_size,
     )
 
-    obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(
+    obj_demands_list = csv.get_obj_demands_list_from_oleg_csv_file(
         csv_file_path_for_obj_demands_list
     )
     outfile = createResultFilePath(csv_file_path_for_obj_demands_list)

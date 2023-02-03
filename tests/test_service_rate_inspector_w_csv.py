@@ -1,9 +1,10 @@
-from src import csv_utils, service_rate, storage_scheme
+from src import service_rate, storage_scheme
+from src.utils import csv
 from src.utils.debug import *
 
 
 def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict):
-    node_id_to_objs_list = csv_utils.get_node_id_to_objs_list_from_oleg_csv_file(
+    node_id_to_objs_list = csv.get_node_id_to_objs_list_from_oleg_csv_file(
         csv_file_path=input_dict_for_test_w_csv[
             "csv_file_path_for_node_id_to_objs_list"
         ],
@@ -22,7 +23,7 @@ def test_w_frac_of_demand_vectors_in_cap_region(input_dict_for_test_w_csv: dict)
         max_repair_set_size=input_dict_for_test_w_csv["max_repair_set_size"],
     )
 
-    obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(
+    obj_demands_list = csv.get_obj_demands_list_from_oleg_csv_file(
         csv_file_path=input_dict_for_test_w_csv["csv_file_path_for_obj_demands_list"],
     )
 

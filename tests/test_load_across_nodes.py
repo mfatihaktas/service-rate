@@ -1,4 +1,5 @@
-from src import csv_utils, service_rate, service_rate_utils, storage_scheme
+from src import service_rate, service_rate_utils, storage_scheme
+from src.utils import csv
 from src.utils.debug import *
 
 
@@ -18,7 +19,7 @@ MAX_REPAIR_SET_SIZE = 2
 
 
 def test_load_across_nodes():
-    node_id_to_objs_list = csv_utils.get_node_id_to_objs_list_from_oleg_csv_file(
+    node_id_to_objs_list = csv.get_node_id_to_objs_list_from_oleg_csv_file(
         csv_file_path=CSV_FILE_PATH_FOR_NODE_ID_TO_OBJS_LIST,
     )
 
@@ -41,7 +42,7 @@ def test_load_across_nodes():
     )
 
     obj_demands_list = [1]
-    # csv_utils.get_obj_demands_list_from_oleg_csv_file(
+    # csv.get_obj_demands_list_from_oleg_csv_file(
     #     csv_file_path=CSV_FILE_PATH_FOR_OBJ_DEMANDS_LIST,
     # )
 
@@ -64,7 +65,7 @@ def test_load_across_nodes():
 
 
 # def test_load_on_first_node():
-#     node_id_to_objs_list = csv_utils.get_node_id_to_objs_list_from_oleg_csv_file(
+#     node_id_to_objs_list = csv.get_node_id_to_objs_list_from_oleg_csv_file(
 #         csv_file_path=CSV_FILE_PATH_FOR_NODE_ID_TO_OBJS_LIST,
 #     )
 
@@ -85,7 +86,7 @@ def test_load_across_nodes():
 #     )
 
 
-#     obj_demands_list = csv_utils.get_obj_demands_list_from_oleg_csv_file(
+#     obj_demands_list = csv.get_obj_demands_list_from_oleg_csv_file(
 #         csv_file_path=CSV_FILE_PATH_FOR_OBJ_DEMANDS_LIST,
 #     )
 #     obj_demand_list = obj_demands_list[0]
