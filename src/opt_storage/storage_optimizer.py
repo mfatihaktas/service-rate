@@ -6,7 +6,7 @@ from typing import Tuple
 from src.debug_utils import *
 
 
-class StorageFinder:
+class StorageOptimizer:
     def __init__(self, demand_list: list[float]):
         self.demand_list = demand_list
 
