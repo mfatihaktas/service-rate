@@ -1,8 +1,8 @@
 from src import (
-    demand_utils,
     storage_finder as storage_finder_module,
 )
-from src.debug_utils import *
+from src.utils import demand as demand_utils
+from src.utils.debug import *
 
 
 def test_StorageFinder():
