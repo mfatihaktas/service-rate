@@ -26,5 +26,5 @@ install:
 	poetry install
 
 lint:
-	black --exclude=".direnv/*" .
+	# black --exclude=".direnv/*" .
 	flake8 --exclude=".direnv/*" .
