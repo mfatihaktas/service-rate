@@ -1,9 +1,11 @@
+import cvxpy
 import itertools
 import math
+import numpy
 
 from typing import Tuple
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 class StorageOptimizerForDemandVector:
@@ -12,6 +14,7 @@ class StorageOptimizerForDemandVector:
 
         self.k = len(self.demand_list)
         self.obj_id_set_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
+        log(DEBUG, "", obj_id_set_to_min_span_size_map=self.obj_id_set_to_min_span_size_map)
         self.max_num_nodes = 2 * max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
 
         self.obj_id_to_node_id_set_map = {}
@@ -62,18 +65,20 @@ class StorageOptimizerForDemandVector:
             constraint_list.append(cvxpy.sum(z) <= self.k - min_span_size)
 
         C = numpy.array([[i + 1] for i in range(n)])
-        log(DEBUG, "", C=C, constraint_list=constraint_list)
+        # log(DEBUG, "", C=C, constraint_list=constraint_list)
         obj = cvxpy.Minimize(cvxpy.sum(x @ C))
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
+
+        log(DEBUG, "", prob_value=prob.value, x_value=x.value)
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!", x=x.value)
 
         obj_id_to_node_id_set_map = {
             obj_id : set(
                 node_id
-                for node_id in range(self.n)
+                for node_id in range(n)
                 if a[obj_id, node_id] == 1
             )
             for obj_id in range(self.k)

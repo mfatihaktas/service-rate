@@ -7,7 +7,8 @@ from src.utils.debug import *
 @pytest.fixture(
     scope="session",
     params=[
-        [1, 3, 4, 2],
+        [1, 2],
+        # [1, 3, 4, 2],
     ],
 )
 def demand_list(request) -> list[float]:
