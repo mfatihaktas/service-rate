@@ -6,13 +6,13 @@ from typing import Tuple
 from src.debug_utils import *
 
 
-class StorageOptimizer:
+class StorageOptimizerForDemandVector:
     def __init__(self, demand_list: list[float]):
         self.demand_list = demand_list
 
         self.k = len(self.demand_list)
         self.obj_id_set_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
-        self.max_num_nodes = max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
+        self.max_num_nodes = 2 * max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
 
         self.obj_id_to_node_id_set_map = {}
 
@@ -46,25 +46,20 @@ class StorageOptimizer:
                 constraint_list.append(cvxpy.sum(x[obj_id, :]) >= min_span_size)
                 continue
 
-            # Let
-            # - i, j, k be the object indices.
-            # - C_i be the set of nodes/choices for obj_i.
-            # |C_i ^ C_j ^ C_l| = |C_i| + |C_j| + |C_l| -
-            #
+            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
+            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
             z = cvxpy.Variable(shape=(n, 1), name=f"z_{counter}", boolean=True)
 
             for i in obj_id_set:
-                constraint_list.append(cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
+                constraint_list.append(1 - cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
 
             num_objs = len(obj_id_set)
-            x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_id_set]).T
-            sum_x_i = x_i_in_columns @ numpy.ones((num_objs, 1))
-            log(DEBUG, "", x_i_in_columns=x_i_in_columns, sum_x_i=sum_x_i)
-            constraint_list.append(sum_x_i - len(obj_id_set) + 1 <= z)
+            x_i_complement_in_columns = cvxpy.vstack([1 - x[i, :] for i in obj_id_set]).T
+            sum_x_i_complement = x_i_complement_in_columns @ numpy.ones((num_objs, 1))
+            log(DEBUG, "", x_i_complement_in_columns=x_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
+            constraint_list.append(sum_x_i_complement - len(obj_id_set) + 1 <= z)
 
-            obj_choice_union_size = sum(self.obj_id_set_to_min_span_size_map[i] for i in obj_id_set)
-            constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
-            log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
+            constraint_list.append(cvxpy.sum(z) <= self.k - min_span_size)
 
         C = numpy.array([[i + 1] for i in range(n)])
         log(DEBUG, "", C=C, constraint_list=constraint_list)
@@ -72,3 +67,15 @@ class StorageOptimizer:
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
+
+        check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!", x=x.value)
+
+        obj_id_to_node_id_set_map = {
+            obj_id : set(
+                node_id
+                for node_id in range(self.n)
+                if a[obj_id, node_id] == 1
+            )
+            for obj_id in range(self.k)
+        }
+        return obj_id_to_node_id_set_map
