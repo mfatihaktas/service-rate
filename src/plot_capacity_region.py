@@ -4,7 +4,7 @@ import scipy
 from src import service_rate
 from src.utils import plot_polygon
 from src.debug_utils import *
-from src.plot_utils import *
+from src.utils.plot import *
 
 
 def plot_capacity_region(

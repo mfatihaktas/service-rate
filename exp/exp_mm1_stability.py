@@ -3,7 +3,7 @@ from src.sim import (
     sim as sim_module,
 )
 from src.debug_utils import *
-from src.plot_utils import *
+from src.utils.plot import *
 
 
 SERVICE_TIME_RV = random_variable.Exponential(mu=1)

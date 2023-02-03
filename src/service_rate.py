@@ -8,7 +8,7 @@ from typing import Union
 from src import service_rate_utils
 
 from src.debug_utils import *
-from src.plot_utils import *
+from src.utils.plot import *
 
 
 class ServiceRateInspector:
