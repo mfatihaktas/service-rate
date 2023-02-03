@@ -36,12 +36,12 @@ build-backend = "poetry.core.masonry.api"
 minversion = "6.1"
 # addopts = "--cov --show-capture=stderr"
 ## Print only stdout.
-# addopts = "-rP -p no:logging"
-# log_cli_level = "DEBUG"
+addopts = "-rP -p no:logging"
+log_cli_level = "DEBUG"
 ## Print only logs.
 # addopts = "--capture=no"
-log_cli = true
-log_cli_level = "DEBUG"
+# log_cli = true
+# log_cli_level = "DEBUG"
 ## Note (mehmet@overjet.ai): This will allow pytest to print out all the
 ## logging output to cli.
 # log_cli_level = "NOTSET"
