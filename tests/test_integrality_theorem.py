@@ -182,14 +182,22 @@ def test_w_integer_programming_refined(storage_info_w_span_sizes: dict):
             constraint_list.append(cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
 
         num_objs = len(obj_ids)
-        x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_ids]).T
-        sum_x_i = x_i_in_columns @ numpy.ones((num_objs, 1))
-        log(DEBUG, "", x_i_in_columns=x_i_in_columns, sum_x_i=sum_x_i)
-        constraint_list.append(sum_x_i - len(obj_ids) + 1 <= z)
+        # x_i_in_columns = cvxpy.vstack([x[i, :] for i in obj_ids]).T
+        # sum_x_i = x_i_in_columns @ numpy.ones((num_objs, 1))
+        # log(DEBUG, "", x_i_in_columns=x_i_in_columns, sum_x_i=sum_x_i)
+        # constraint_list.append(sum_x_i - len(obj_ids) + 1 <= z)
 
-        obj_choice_union_size = sum(obj_ids_to_min_span_size_map[i] for i in obj_ids)
-        constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
-        log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
+        # obj_choice_union_size = sum(obj_ids_to_min_span_size_map[i] for i in obj_ids)
+        # constraint_list.append(cvxpy.sum(z) <= obj_choice_union_size - min_span_size)
+        # log(DEBUG, "", obj_choice_union_size=obj_choice_union_size, min_span_size=min_span_size)
+
+        one_minus_x_i_in_columns = cvxpy.vstack([1 - x[i, :] for i in obj_ids]).T
+        sum_one_minus_x_i = one_minus_x_i_in_columns @ numpy.ones((num_objs, 1))
+        log(DEBUG, "", one_minus_x_i_in_columns=one_minus_x_i_in_columns, sum_one_minus_x_i=sum_one_minus_x_i)
+        constraint_list.append(sum_one_minus_x_i - len(obj_ids) + 1 <= z)
+
+        constraint_list.append(cvxpy.sum(z) <= n - min_span_size)
+        log(DEBUG, "", min_span_size=min_span_size)
 
     C = numpy.array([[i + 1] for i in range(n)])
     log(DEBUG, "", C=C, constraint_list=constraint_list)
