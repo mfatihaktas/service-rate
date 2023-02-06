@@ -9,10 +9,10 @@ from src.utils.debug import *
 
 
 class StorageOptimizerForDemandVector:
-    def __init__(self, demand_list: list[float]):
-        self.demand_list = demand_list
+    def __init__(self, demand_vector_list: list[list[float]]):
+        self.demand_vector_list = demand_vector_list
 
-        self.k = len(self.demand_list)
+        self.k = len(self.demand_vector_list[0])
         self.obj_id_set_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
         log(DEBUG, "", obj_id_set_to_min_span_size_map=self.obj_id_set_to_min_span_size_map)
         self.max_num_nodes = 2 * max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
@@ -22,9 +22,14 @@ class StorageOptimizerForDemandVector:
     def get_obj_id_subset_to_min_span_size_map(self) -> dict[Tuple[int], int]:
         obj_id_set_to_min_span_size_map = {}
 
-        for subset_size in range(1, self.k):
+        for subset_size in range(1, self.k + 1):
             for obj_id_subset in itertools.combinations(list(range(self.k)), subset_size):
-                min_span_size = math.ceil(sum(self.demand_list[obj_id] for obj_id in obj_id_subset))
+                min_span_size = float("-Inf")
+
+                for demand_vector in self.demand_vector_list:
+                    min_span_size_ = math.ceil(sum(demand_vector[obj_id] for obj_id in obj_id_subset))
+                    min_span_size = max(min_span_size, min_span_size_)
+
                 obj_id_set_to_min_span_size_map[frozenset(obj_id_subset)] = min_span_size
 
         log(DEBUG, "Done",
@@ -59,7 +64,7 @@ class StorageOptimizerForDemandVector:
             num_objs = len(obj_id_set)
             x_i_complement_in_columns = cvxpy.vstack([1 - x[i, :] for i in obj_id_set]).T
             sum_x_i_complement = x_i_complement_in_columns @ numpy.ones((num_objs, 1))
-            log(DEBUG, "", x_i_complement_in_columns=x_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
+            # log(DEBUG, "", x_i_complement_in_columns=x_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
             constraint_list.append(sum_x_i_complement - len(obj_id_set) + 1 <= z)
 
             constraint_list.append(cvxpy.sum(z) <= self.k - min_span_size)
@@ -79,7 +84,7 @@ class StorageOptimizerForDemandVector:
             obj_id : set(
                 node_id
                 for node_id in range(n)
-                if a[obj_id, node_id] == 1
+                if x.value[obj_id, node_id] == 1
             )
             for obj_id in range(self.k)
         }
