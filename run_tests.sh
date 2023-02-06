@@ -27,7 +27,7 @@ elif [ $1 = "i" ]; then
   # ${PYTEST} "tests/test_integrality_theorem.py::test_mixed_integer_quadratic_program"
 
 elif [ $1 = "o" ]; then
-  ${PYTEST} "tests/test_storage_optimizer.py::test_StorageOptimizerForDemandVector"
+  ${PYTEST} "tests/test_storage_optimizer.py::test_StorageOptimizerForDemandVectors"
 
 elif [ $1 = "p" ]; then
   ${PYTEST} "tests/test_popularity.py::test_PopModel_wZipf"

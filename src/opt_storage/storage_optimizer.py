@@ -8,7 +8,7 @@ from typing import Tuple
 from src.utils.debug import *
 
 
-class StorageOptimizerForDemandVector:
+class StorageOptimizerForDemandVectors:
     def __init__(self, demand_vector_list: list[list[float]]):
         self.demand_vector_list = demand_vector_list
 
@@ -67,7 +67,7 @@ class StorageOptimizerForDemandVector:
             # log(DEBUG, "", x_i_complement_in_columns=x_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
             constraint_list.append(sum_x_i_complement - len(obj_id_set) + 1 <= z)
 
-            constraint_list.append(cvxpy.sum(z) <= self.k - min_span_size)
+            constraint_list.append(cvxpy.sum(z) <= n - min_span_size)
 
         C = numpy.array([[i + 1] for i in range(n)])
         # log(DEBUG, "", C=C, constraint_list=constraint_list)
@@ -86,6 +86,6 @@ class StorageOptimizerForDemandVector:
                 for node_id in range(n)
                 if x.value[obj_id, node_id] == 1
             )
-            for obj_id in range(self.k)
+            for obj_id in range(k)
         }
         return obj_id_to_node_id_set_map
