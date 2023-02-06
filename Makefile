@@ -20,7 +20,8 @@ venv:
 	python3 -m venv /home/mfa51/service-rate/.venv
 
 install:
-	SCIPOPTDIR=/home/mfa51/scip_installation \
+	# SCIPOPTDIR=/home/mfa51/scip_installation
+	export SCIPOPTDIR=/Users/mehmet/Desktop/scip-8.0.3/install
 	pip install --upgrade pip; \
 	pip install poetry; \
 	poetry install
