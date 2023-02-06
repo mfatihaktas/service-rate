@@ -16,7 +16,7 @@ from src.utils.debug import *
         ],
     ],
 )
-def demand_vector_list(request) -> list[float]:
+def demand_vector_list(request) -> list[list[float]]:
     return request.param
 
 
