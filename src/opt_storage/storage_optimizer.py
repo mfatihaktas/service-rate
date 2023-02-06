@@ -9,13 +9,18 @@ from src.utils.debug import *
 
 
 class StorageOptimizerReplication:
-    def __init__(self, demand_vector_list: list[list[float]]):
+    def __init__(self, demand_vector_list: list[list[float]], max_num_nodes: int = None):
         self.demand_vector_list = demand_vector_list
+        self.max_num_nodes = max_num_nodes
 
         self.k = len(self.demand_vector_list[0])
         self.obj_id_set_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
         log(DEBUG, "", obj_id_set_to_min_span_size_map=self.obj_id_set_to_min_span_size_map)
-        self.max_num_nodes = 2 * max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
+
+        max_min_span_size = max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
+        if self.max_num_nodes is None or self.max_num_nodes < max_min_span_size:
+            log(INFO, f"Setting max_num_nodes to max_min_span_size= {max_min_span_size}")
+            self.max_num_nodes = max_min_span_size
 
         self.obj_id_to_node_id_set_map = {}
 
