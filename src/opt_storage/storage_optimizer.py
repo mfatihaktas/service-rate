@@ -8,7 +8,7 @@ from typing import Tuple
 from src.utils.debug import *
 
 
-class StorageOptimizerForDemandVectors:
+class StorageOptimizerReplication:
     def __init__(self, demand_vector_list: list[list[float]]):
         self.demand_vector_list = demand_vector_list
 
