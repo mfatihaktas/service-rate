@@ -36,10 +36,13 @@ class PlainObj(Obj):
     def __hash__(self):
         return hash(self.id_str)
 
+    # def __repr__(self):
+    #     return (
+    #         "PlainObj( \n" f"\t id_str= {self.id_str} \n" f"\t id_= {self.id_} \n" ")"
+    #     )
+
     def __repr__(self):
-        return (
-            "PlainObj( \n" f"\t id_str= {self.id_str} \n" f"\t id_= {self.id_} \n" ")"
-        )
+        return self.id_str
 
 
 class CodedObj(Obj):
@@ -60,15 +63,18 @@ class CodedObj(Obj):
         id_tuple = (obj.id_str for _, obj in self.coeff_obj_list)
         return hash(id_tuple)
 
+    # def __repr__(self):
+    #     s = "CodedObj( \n"
+    #     s += f"id_= {self.id_} \n"
+
+    #     for coeff, obj in self.coeff_obj_list:
+    #         s += f"{coeff} x \n{obj} \n"
+    #     s += ")"
+
+    #     return s
+
     def __repr__(self):
-        s = "CodedObj( \n"
-        s += f"id_= {self.id_} \n"
-
-        for coeff, obj in self.coeff_obj_list:
-            s += f"{coeff} x \n{obj} \n"
-        s += ")"
-
-        return s
+        return " + ".join(f"{coeff}x{obj}" if coeff > 1 else f"{obj}" for coeff, obj in self.coeff_obj_list)
 
 
 name_to_node_objs_list_map = {
