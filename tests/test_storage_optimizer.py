@@ -1,6 +1,10 @@
 import pytest
 
 from src.opt_storage import storage_optimizer as storage_optimizer_module
+from src.service_rate import (
+    service_rate,
+    storage_scheme as storage_scheme_module,
+)
 from src.utils.debug import *
 
 
@@ -51,3 +55,22 @@ def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list:
 
     node_id_to_objs_list = storage_optimizer.get_node_id_to_objs_list()
     log(DEBUG, "", node_id_to_objs_list=node_id_to_objs_list)
+
+    storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
+    log(DEBUG, "", storage_scheme=storage_scheme)
+
+    inspector = service_rate.ServiceRateInspector(
+        m=len(node_id_to_objs_list),
+        C=1,
+        G=storage_scheme.obj_encoding_matrix,
+        obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
+        redundancy_w_two_xors=False,
+    )
+
+    # assert inspector.is_in_cap_region([5, 0.3, 0, 0, 0])
+
+    # for demand_vector in demand_vector_list:
+    for demand_vector in [[5, 1, 0, 0, 0]]:
+        assert inspector.is_in_cap_region(demand_vector)
+        load_across_nodes = inspector.load_across_nodes(demand_vector)
+        log(DEBUG, "", demand_vector=demand_vector, load_across_nodes=load_across_nodes)

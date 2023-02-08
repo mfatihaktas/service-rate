@@ -189,15 +189,24 @@ class StorageOptimizerReplicationAndMDS_wSingleObjPerNode(StorageOptimizer):
         node_id_to_objs_list = []
         for obj_id, num_sys in enumerate(num_sys_list):
             for _ in range(num_sys):
-                node_id_to_objs_list.append(storage_scheme_module.PlainObj(id_str=chr(ord("a") + obj_id)))
+                node_id_to_objs_list.append(
+                    [
+                        storage_scheme_module.PlainObj(id_str=chr(ord("a") + obj_id))
+                    ]
+                )
 
         # Add MDS nodes
         for i in range(num_mds):
-            coeff_obj_list = [(i + 1, storage_scheme_module.PlainObj(id_str="a"))]
-            for obj_id in range(1, len(num_sys_list)):
-                coeff_obj_list.append((1, storage_scheme_module.PlainObj(chr(ord("a") + obj_id))))
-
-            node_id_to_objs_list.append(storage_scheme_module.CodedObj(coeff_obj_list=coeff_obj_list))
+            node_id_to_objs_list.append(
+                [
+                    storage_scheme_module.CodedObj(
+                        coeff_obj_list=[
+                            (i + obj_id + 1, storage_scheme_module.PlainObj(chr(ord("a") + obj_id)))
+                            for obj_id in range(len(num_sys_list))
+                        ]
+                    )
+                ]
+            )
 
         return node_id_to_objs_list
 
@@ -210,27 +219,51 @@ class StorageOptimizerReplicationAndMDS_wSingleObjPerNode(StorageOptimizer):
         constraint_list = []
 
         # Span constraints
+        id_to_m_map = {}
         for counter, (obj_id_set, min_span_size) in enumerate(self.obj_id_set_to_min_span_size_map.items()):
             log(DEBUG, f">> counter= {counter}", obj_id_set=obj_id_set, min_span_size=min_span_size)
 
             # Number of recovery groups for `obj_id_set`
-            m = cvxpy.Variable(name=f"m_{counter}")
+            m = cvxpy.Variable(name=f"m_{counter}", integer=True)
+            id_to_m_map[obj_id_set] = m
 
             # num_sys_vars_in_columns = cvxpy.hstack([num_sys[i] for i in range(k) if i not in obj_id_set])
-            constraint_list.extend(
-                [
-                    sum(cvxpy.maximum(m - num_sys[i], 0) for i in range(k) if i not in obj_id_set) + len(obj_id_set) * m <= num_mds,
-                    sum(num_sys[i] for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
-                ]
-            )
+            # max_m = cvxpy.max(cvxpy.hstack([id_to_m_map[frozenset([i])] for i in obj_id_set]))
+            if len(obj_id_set) == 1:
+                constraint_list.extend(
+                    [
+                        sum(cvxpy.maximum(m - num_sys[i], 0) for i in range(k) if i not in obj_id_set) + len(obj_id_set) * m <= num_mds,
+                        sum(num_sys[i] for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
+                        # sum(cvxpy.maximum(num_sys[i] - id_to_m_map[frozenset([i])], 0) for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
+                        # sum(id_to_m_map[frozenset([i])] for i in obj_id_set)
+                        # sum(cvxpy.maximum(num_sys[i], 0) for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
+                        # sum(num_sys[i] - max_m for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
+                        m >= 0,
+                    ]
+                )
+
+            else:
+                max_m = cvxpy.max(cvxpy.hstack([id_to_m_map[frozenset([i])] for i in obj_id_set]))
+                constraint_list.extend(
+                    [
+                        sum(cvxpy.maximum(m - num_sys[i], 0) for i in range(k) if i not in obj_id_set) + len(obj_id_set) * m <= num_mds - max_m,
+                        sum(num_sys[i] for i in obj_id_set) + m + (num_mds - len(obj_id_set) * m) / k >= min_span_size,
+                        m >= 0,
+                    ]
+                )
 
         obj = cvxpy.Minimize(cvxpy.sum(num_sys) + num_mds)
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
 
-        log(DEBUG, "", prob_value=prob.value, num_sys=num_sys.value, num_mds=num_mds.value)
+        log(DEBUG, "",
+            prob_value=prob.value,
+            num_sys=num_sys.value,
+            num_mds=num_mds.value,
+            id_to_m_map={id_: m.value for id_, m in id_to_m_map.items()},
+        )
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!")
 
-        return [int(num_sys.value[i]) for i in range(k)], int(num_mds.value)
+        return [math.ceil(num_sys.value[i]) for i in range(k)], math.ceil(num_mds.value)

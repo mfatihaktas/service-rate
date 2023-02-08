@@ -74,7 +74,7 @@ class CodedObj(Obj):
     #     return s
 
     def __repr__(self):
-        return " + ".join(f"{coeff}x{obj}" if coeff > 1 else f"{obj}" for coeff, obj in self.coeff_obj_list)
+        return " + ".join(f"{coeff}.{obj}" if coeff > 1 else f"{obj}" for coeff, obj in self.coeff_obj_list)
 
 
 name_to_node_objs_list_map = {
