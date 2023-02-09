@@ -332,14 +332,16 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
         constraint_list = []
 
         def find_intersection(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
+            node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
+
             z = cvxpy.Variable(shape=(n, 1), boolean=True)  # , name=f"z_obj_id_{obj_id}_other_obj_id_{other_obj_id}"
 
             for v in node_selection_vector_list:
-                constraint_list.append(cvxpy.reshape(v, shape=(n, 1)) >= z)
+                constraint_list.append(v >= z)
 
             num_vectors = len(node_selection_vector_list)
-            v_in_columns = cvxpy.vstack([v for v in node_selection_vector_list]).T
-            sum_v = v_in_columns @ numpy.ones((num_vectors, 1))
+            v_in_columns = cvxpy.hstack(node_selection_vector_list)
+            sum_v = cvxpy.reshape(cvxpy.sum(v_in_columns, axis=1), shape=(n, 1))
             constraint_list.append(sum_v - num_vectors + 1 <= z)
 
             return z
@@ -347,6 +349,8 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
         def find_union(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
             # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
             # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
+            node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
+
             z = cvxpy.Variable(shape=(n, 1), boolean=True)
 
             for v in node_selection_vector_list:
@@ -354,8 +358,8 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
             num_vectors = len(node_selection_vector_list)
             v_complement_in_columns = cvxpy.hstack([1 - v for v in node_selection_vector_list])
-            sum_v_complement = cvxpy.sum(v_complement_in_columns, axis=1)
-            constraint_list.append(cvxpy.reshape(sum_v_complement, shape=(n, 1)) - num_vectors + 1 <= z)
+            sum_v_complement = cvxpy.reshape(cvxpy.sum(v_complement_in_columns, axis=1), shape=(n, 1))
+            constraint_list.append(sum_v_complement - num_vectors + 1 <= z)
 
             return 1 - z
 
@@ -375,7 +379,7 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
                     # Intersection between nodes for object and the other object
                     obj_id_set = {obj_id, other_obj_id}
-                    z = find_intersection([r[i, :] for i in obj_id_set])
+                    z = find_intersection([r[i] for i in obj_id_set])
                     num_other_obj_nodes_wo_obj = cvxpy.sum(r[other_obj_id, :]) - cvxpy.sum(z)
 
                     # TODO: What if XOR's with different other objects are on the same node?
@@ -390,8 +394,7 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                 continue
 
             # len(obj_id_set) > 1
-            replica_span = find_union([cvxpy.reshape(r[i], shape=(n, 1)) for i in obj_id_set])
-            # replica_span = find_union([r[i] for i in obj_id_set])
+            replica_span = find_union([r[i] for i in obj_id_set])
 
             num_xors_outside_replica_span_list = []
             for other_obj_id in set(range(k)) - obj_id_set:
