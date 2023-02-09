@@ -350,12 +350,12 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
             z = cvxpy.Variable(shape=(n, 1), boolean=True)
 
             for v in node_selection_vector_list:
-                constraint_list.append(1 - cvxpy.reshape(v, shape=(n, 1)) >= z)
+                constraint_list.append(1 - v >= z)
 
             num_vectors = len(node_selection_vector_list)
-            v_complement_in_columns = cvxpy.vstack([1 - v for v in node_selection_vector_list]).T
-            sum_v_complement = v_complement_in_columns @ numpy.ones((num_vectors, 1))
-            constraint_list.append(sum_v_complement - num_vectors + 1 <= z)
+            v_complement_in_columns = cvxpy.hstack([1 - v for v in node_selection_vector_list])
+            sum_v_complement = cvxpy.sum(v_complement_in_columns, axis=1)
+            constraint_list.append(cvxpy.reshape(sum_v_complement, shape=(n, 1)) - num_vectors + 1 <= z)
 
             return 1 - z
 
@@ -390,7 +390,8 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                 continue
 
             # len(obj_id_set) > 1
-            replica_span = find_union([r[i, :] for i in obj_id_set])
+            replica_span = find_union([cvxpy.reshape(r[i], shape=(n, 1)) for i in obj_id_set])
+            # replica_span = find_union([r[i] for i in obj_id_set])
 
             num_xors_outside_replica_span_list = []
             for other_obj_id in set(range(k)) - obj_id_set:
