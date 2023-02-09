@@ -31,10 +31,10 @@ from src.utils.debug import *
         #     [0.1, 0.2, 5, 0.3, 0.3],
         # ],
 
-        # [
-        #     [2, 0],
-        #     [0, 2],
-        # ],
+        [
+            [2, 0],
+            [0, 2],
+        ],
 
         # [
         #     [3, 0],
@@ -52,13 +52,13 @@ from src.utils.debug import *
         #     [0.1, 0.1, 10],
         # ],
 
-        [
-            [3, 0.1, 0.1, 0.1, 0.1],
-            [0.1, 0.1, 0.1, 0.1, 3],
-            [0.1, 0.1, 3, 0.1, 0.1],
-            [0.1, 3, 0.1, 0.1, 0.1],
-            [0.1, 0.1, 0.1, 10, 0.1],
-        ],
+        # [
+        #     [3, 0.1, 0.1, 0.1, 0.1],
+        #     [0.1, 0.1, 0.1, 0.1, 3],
+        #     [0.1, 0.1, 3, 0.1, 0.1],
+        #     [0.1, 3, 0.1, 0.1, 0.1],
+        #     [0.1, 0.1, 0.1, 10, 0.1],
+        # ],
     ],
 )
 def demand_vector_list(request) -> list[list[float]]:
@@ -105,3 +105,10 @@ def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list:
         # load_across_nodes = inspector.load_across_nodes(demand_vector)
         # log(DEBUG, "", demand_vector=demand_vector, load_across_nodes=load_across_nodes)
     """
+
+
+def test_StorageOptimizerReplicationAnd2XORs(demand_vector_list: list[float]):
+    storage_optimizer = storage_optimizer_module.StorageOptimizerReplicationAnd2XORs(demand_vector_list=demand_vector_list)
+
+    obj_id_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map()
+    log(DEBUG, "", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
