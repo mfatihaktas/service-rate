@@ -25,10 +25,39 @@ from src.utils.debug import *
         #     [0.1, 0.2, 0.3, 0.3, 5],
         # ],
 
+        # [
+        #     [5, 0.3, 0.3, 0.2, 0.1],
+        #     [0.1, 0.2, 0.3, 0.3, 5],
+        #     [0.1, 0.2, 5, 0.3, 0.3],
+        # ],
+
+        # [
+        #     [2, 0],
+        #     [0, 2],
+        # ],
+
+        # [
+        #     [3, 0],
+        #     [0, 1.9],
+        # ],
+
+        # [
+        #     [10, 0.1, 0.1],
+        #     [0.1, 0.1, 2],
+        #     [0.1, 20, 0.1],
+        # ],
+
+        # [
+        #     [10, 0.1, 0.1],
+        #     [0.1, 0.1, 10],
+        # ],
+
         [
-            [5, 0.3, 0.3, 0.2, 0.1],
-            [0.1, 0.2, 0.3, 0.3, 5],
-            [0.1, 0.2, 5, 0.3, 0.3],
+            [3, 0.1, 0.1, 0.1, 0.1],
+            [0.1, 0.1, 0.1, 0.1, 3],
+            [0.1, 0.1, 3, 0.1, 0.1],
+            [0.1, 3, 0.1, 0.1, 0.1],
+            [0.1, 0.1, 0.1, 10, 0.1],
         ],
     ],
 )
@@ -56,6 +85,7 @@ def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list:
     node_id_to_objs_list = storage_optimizer.get_node_id_to_objs_list()
     log(DEBUG, "", node_id_to_objs_list=node_id_to_objs_list)
 
+    """
     storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
     log(DEBUG, "", storage_scheme=storage_scheme)
 
@@ -69,8 +99,9 @@ def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list:
 
     # assert inspector.is_in_cap_region([5, 0.3, 0, 0, 0])
 
-    # for demand_vector in demand_vector_list:
-    for demand_vector in [[5, 1, 0, 0, 0]]:
+    for demand_vector in demand_vector_list:
+    # for demand_vector in [[5, 1, 0, 0, 0]]:
         assert inspector.is_in_cap_region(demand_vector)
-        load_across_nodes = inspector.load_across_nodes(demand_vector)
-        log(DEBUG, "", demand_vector=demand_vector, load_across_nodes=load_across_nodes)
+        # load_across_nodes = inspector.load_across_nodes(demand_vector)
+        # log(DEBUG, "", demand_vector=demand_vector, load_across_nodes=load_across_nodes)
+    """
