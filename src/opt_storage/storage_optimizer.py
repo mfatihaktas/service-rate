@@ -243,7 +243,6 @@ class StorageOptimizerReplicationAndMDS_wSingleObjPerNode(StorageOptimizer):
                             + len(obj_id_set) * num_sys_mds_group
                             <= num_mds
                         ),
-                        # sum(num_sys[i] for i in obj_id_set) + num_sys_mds_group + (num_mds - len(obj_id_set) * num_sys_mds_group) / k >= min_span_size,
                         sum(num_sys[i] for i in obj_id_set) + num_sys_mds_group + num_mds_group >= min_span_size,
                         num_mds_group <= (num_mds - len(obj_id_set) * num_sys_mds_group) / k,
                         num_sys_mds_group >= 0,
