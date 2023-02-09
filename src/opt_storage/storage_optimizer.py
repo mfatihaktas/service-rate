@@ -21,7 +21,7 @@ class StorageOptimizer:
         max_min_span_size = max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
         if self.max_num_nodes is None or self.max_num_nodes < max_min_span_size:
             log(INFO, f"Setting max_num_nodes to max_min_span_size= {max_min_span_size}")
-            self.max_num_nodes = max_min_span_size
+            self.max_num_nodes = 2 * max_min_span_size
 
     def get_obj_id_subset_to_min_span_size_map(self) -> dict[Tuple[int], int]:
         obj_id_set_to_min_span_size_map = {}
@@ -331,19 +331,33 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
         constraint_list = []
 
-        def find_intersection(obj_id_set: set[int]) -> cvxpy.Variable:
+        def find_intersection(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
             z = cvxpy.Variable(shape=(n, 1), boolean=True)  # , name=f"z_obj_id_{obj_id}_other_obj_id_{other_obj_id}"
 
-            for i in obj_id_set:
-                constraint_list.append(cvxpy.reshape(r[i, :], shape=(n, 1)) >= z)
+            for v in node_selection_vector_list:
+                constraint_list.append(cvxpy.reshape(v, shape=(n, 1)) >= z)
 
-            num_objs = len(obj_id_set)
-            r_i_complement_in_columns = cvxpy.vstack([r[i, :] for i in obj_id_set]).T
-            sum_r_i_complement = r_i_complement_in_columns @ numpy.ones((num_objs, 1))
-            constraint_list.append(sum_r_i_complement - len(obj_id_set) + 1 <= z)
+            num_vectors = len(node_selection_vector_list)
+            v_in_columns = cvxpy.vstack([v for v in node_selection_vector_list]).T
+            sum_v = v_in_columns @ numpy.ones((num_vectors, 1))
+            constraint_list.append(sum_v - num_vectors + 1 <= z)
 
             return z
 
+        def find_union(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
+            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
+            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
+            z = cvxpy.Variable(shape=(n, 1), boolean=True)
+
+            for v in node_selection_vector_list:
+                constraint_list.append(1 - cvxpy.reshape(v, shape=(n, 1)) >= z)
+
+            num_vectors = len(node_selection_vector_list)
+            v_complement_in_columns = cvxpy.vstack([1 - v for v in node_selection_vector_list]).T
+            sum_v_complement = v_complement_in_columns @ numpy.ones((num_vectors, 1))
+            constraint_list.append(sum_v_complement - num_vectors + 1 <= z)
+
+            return 1 - z
 
         # Span constraints
         for counter, (obj_id_set, min_span_size) in enumerate(self.obj_id_set_to_min_span_size_map.items()):
@@ -361,9 +375,10 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
                     # Intersection between nodes for object and the other object
                     obj_id_set = {obj_id, other_obj_id}
-                    z = find_intersection(obj_id_set=obj_id_set)
+                    z = find_intersection([r[i, :] for i in obj_id_set])
                     num_other_obj_nodes_wo_obj = cvxpy.sum(r[other_obj_id, :]) - cvxpy.sum(z)
 
+                    # TODO: What if XOR's with different other objects are on the same node?
                     num_xors_w_other_obj = cvxpy.sum(obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)])
 
                     num_xored_choice_w_other_obj_list.append(cvxpy.minimum(num_xors_w_other_obj, num_other_obj_nodes_wo_obj))
@@ -374,22 +389,23 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
                 continue
 
-            """
-            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
-            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
-            z = cvxpy.Variable(shape=(n, 1), name=f"z_{counter}", boolean=True)
+            # len(obj_id_set) > 1
+            replica_span = find_union([r[i, :] for i in obj_id_set])
 
-            for i in obj_id_set:
-                constraint_list.append(1 - cvxpy.reshape(r[i, :], shape=(n, 1)) >= z)
+            num_xors_outside_replica_span_list = []
+            for other_obj_id in set(range(k)) - obj_id_set:
+                for obj_id in obj_id_set:
+                    xor_w_other = obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)]
 
-            num_objs = len(obj_id_set)
-            r_i_complement_in_columns = cvxpy.vstack([1 - r[i, :] for i in obj_id_set]).T
-            sum_r_i_complement = r_i_complement_in_columns @ numpy.ones((num_objs, 1))
-            # log(DEBUG, "", r_i_complement_in_columns=r_i_complement_in_columns, sum_r_i_complement=sum_r_i_complement)
-            constraint_list.append(sum_r_i_complement - len(obj_id_set) + 1 <= z)
+                    intersection_between_replica_span_and_xor_w_other = find_intersection([replica_span, xor_w_other])
+                    num_xors_outside_replica_span = cvxpy.sum(xor_w_other) - cvxpy.sum(intersection_between_replica_span_and_xor_w_other)
+                    num_xors_outside_replica_span_list.append(num_xors_outside_replica_span)
 
-            constraint_list.append(cvxpy.sum(z) <= n - min_span_size)
-            """
+            constraint_list.append(
+                cvxpy.sum(replica_span)
+                + sum(num_xors_outside_replica_span_list)
+                >= min_span_size
+            )
 
         obj = cvxpy.Minimize(
             cvxpy.sum(r)
