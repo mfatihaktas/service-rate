@@ -314,14 +314,16 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
     def __init__(self, demand_vector_list: list[list[float]]):
         super().__init__(demand_vector_list=demand_vector_list)
 
-    def get_obj_id_to_node_id_set_map(self) -> dict[int, set[int]]:
+    def get_obj_id_to_node_selection_vector_matrix_and_xored_obj_id_set_to_node_selection_vector_map(
+        self
+    ) -> Tuple[numpy.ndarray, dict[set, numpy.ndarray]]:
         k, n = self.k, self.max_num_nodes
         log(DEBUG, "Started", k=k, n=n)
 
         def get_frozenset(i: int, j: int):
             return frozenset(sorted([i, j]))
 
-        r = cvxpy.Variable(shape=(k, n), name="r", boolean=True)
+        obj_id_to_node_selection_vector_matrix = cvxpy.Variable(shape=(k, n), name="obj_id_to_node_selection_vector_matrix", boolean=True)
         # Assumption: An XOR'ed copy a + b won't be placed in a node with a or b.
         xored_obj_id_set_to_node_selection_vector_map = {
             get_frozenset(i, j): cvxpy.Variable(n, name=f"x_{i},{j}", boolean=True)
@@ -365,13 +367,13 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
         for xored_obj_id_set, xor_node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items():
             # a + b must NOT be placed in a node with a or b.
-            replica_span = find_union([r[i] for i in xored_obj_id_set])
+            replica_span = find_union([obj_id_to_node_selection_vector_matrix[i] for i in xored_obj_id_set])
             intersection_between_replica_span_and_xors = find_intersection([replica_span, xor_node_selection_vector])
 
             constraint_list.append(intersection_between_replica_span_and_xors == 0)
 
             # Number of a + b must be less than a or b replicas
-            min_replica_count = cvxpy.min(cvxpy.hstack(cvxpy.sum(r[i]) for i in xored_obj_id_set))
+            min_replica_count = cvxpy.min(cvxpy.hstack(cvxpy.sum(obj_id_to_node_selection_vector_matrix[i]) for i in xored_obj_id_set))
             constraint_list.append(cvxpy.sum(xor_node_selection_vector) <= min_replica_count)
 
         # Span constraints
@@ -390,13 +392,13 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                 )
 
                 constraint_list.append(
-                    cvxpy.sum(r[obj_id]) + cvxpy.sum(xor_span) >= min_span_size
+                    cvxpy.sum(obj_id_to_node_selection_vector_matrix[obj_id]) + cvxpy.sum(xor_span) >= min_span_size
                 )
 
                 continue
 
             # len(obj_id_set) > 1
-            replica_span = find_union([r[i] for i in obj_id_set])
+            replica_span = find_union([obj_id_to_node_selection_vector_matrix[i] for i in obj_id_set])
 
             num_xors_outside_replica_span_list = []
             for other_obj_id in set(range(k)) - obj_id_set:
@@ -415,27 +417,53 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
             )
 
         obj = cvxpy.Minimize(
-            cvxpy.sum(r)
+            cvxpy.sum(obj_id_to_node_selection_vector_matrix)
             + sum(cvxpy.sum(node_selection_vector) for node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.values())
         )
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
 
+        xored_obj_id_set_to_node_selection_vector_map = {
+            obj_id: node_selection_vector.value
+            for obj_id, node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items()
+        }
+
         log(DEBUG, "",
             prob_value=prob.value,
-            r=r.value,
-            xored_obj_id_set_to_node_selection_vector_map={obj_id: node_selection_vector.value for obj_id, node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items()}
+            obj_id_to_node_selection_vector_matrix=obj_id_to_node_selection_vector_matrix.value,
+            xored_obj_id_set_to_node_selection_vector_map=xored_obj_id_set_to_node_selection_vector_map
         )
 
-        check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!", r=r.value)
+        check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!",
+              obj_id_to_node_selection_vector_matrix=obj_id_to_node_selection_vector_matrix.value
+        )
+
+        return obj_id_to_node_selection_vector_matrix.value, xored_obj_id_set_to_node_selection_vector_map
+
+    def get_obj_id_to_node_id_set_map_and_xor_to_node_id_set_map(self) -> Tuple[dict[int, set[int]], dict[int, set[int]]]:
+        obj_id_to_node_selection_vector_matrix, xored_obj_id_set_to_node_selection_vector_map = (
+            self.get_obj_id_to_node_selection_vector_matrix_and_xored_obj_id_set_to_node_selection_vector_map()
+        )
+
+        k, n = self.k, self.max_num_nodes
 
         obj_id_to_node_id_set_map = {
             obj_id : set(
                 node_id
                 for node_id in range(n)
-                if r.value[obj_id, node_id] == 1
+                if abs(obj_id_to_node_selection_vector_matrix[obj_id, node_id] - 1) < 0.05
             )
             for obj_id in range(k)
         }
-        return obj_id_to_node_id_set_map
+
+        xor_to_node_id_set_map = {
+            " + ".join([str(i) for i in xored_obj_id_set]): set(
+                node_id
+                for node_id in range(n)
+                if abs(node_selection_vector[node_id] - 1) < 0.05
+            )
+            for xored_obj_id_set, node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items()
+        }
+
+        return obj_id_to_node_id_set_map, xor_to_node_id_set_map
