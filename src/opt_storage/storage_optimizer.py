@@ -363,11 +363,16 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
             return 1 - z
 
-        # An XOR a + b must NOT be placed in a node with a or b.
-        for xored_obj_id_set, node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items():
+        for xored_obj_id_set, xor_node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items():
+            # a + b must NOT be placed in a node with a or b.
             replica_span = find_union([r[i] for i in xored_obj_id_set])
-            intersection_between_replica_span_and_xors = find_intersection([replica_span, node_selection_vector])
+            intersection_between_replica_span_and_xors = find_intersection([replica_span, xor_node_selection_vector])
+
             constraint_list.append(intersection_between_replica_span_and_xors == 0)
+
+            # Number of a + b must be less than a or b replicas
+            min_replica_count = cvxpy.min(cvxpy.hstack(cvxpy.sum(r[i]) for i in xored_obj_id_set))
+            constraint_list.append(cvxpy.sum(xor_node_selection_vector) <= min_replica_count)
 
         # Span constraints
         for counter, (obj_id_set, min_span_size) in enumerate(self.obj_id_set_to_min_span_size_map.items()):
@@ -376,23 +381,16 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
             if len(obj_id_set) == 1:
                 obj_id = next(iter(obj_id_set))
 
-                for other_obj_id in set(range(k)) - obj_id_set:
-                    log(DEBUG, f"> other_obj_id= {other_obj_id}")
-                    num_xored_choice_w_other_obj_list = []
-
-                    # TODO: Is this still needed?
-                    # Intersection between nodes for object and the other object
-                    obj_id_set = {obj_id, other_obj_id}
-                    replica_span = find_intersection([r[i] for i in obj_id_set])
-                    num_nodes_w_other_obj_wo_obj_replica = cvxpy.sum(r[other_obj_id, :]) - cvxpy.sum(replica_span)
-
-                    # TODO: What if XOR's with different other objects are on the same node?
-                    num_xors_w_other_obj = cvxpy.sum(xored_obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)])
-
-                    num_xored_choice_w_other_obj_list.append(cvxpy.minimum(num_xors_w_other_obj, num_nodes_w_other_obj_wo_obj_replica))
+                xor_span = find_union(
+                    [
+                        xored_obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)]
+                        for other_obj_id in range(k)
+                        if other_obj_id != obj_id
+                    ]
+                )
 
                 constraint_list.append(
-                    cvxpy.sum(r[obj_id]) + sum(num_xored_choice_w_other_obj_list) >= min_span_size
+                    cvxpy.sum(r[obj_id]) + cvxpy.sum(xor_span) >= min_span_size
                 )
 
                 continue
