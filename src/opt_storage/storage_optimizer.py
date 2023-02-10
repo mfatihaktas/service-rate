@@ -39,10 +39,32 @@ class StorageOptimizer:
 
         return obj_id_set_to_min_span_size_map
 
+    def find_union(
+        self,
+        node_selection_vector_list: list[cvxpy.Variable],
+        constraint_list: list[cvxpy.Expression],
+    ) -> cvxpy.Variable:
+        n = self.max_num_nodes
+        # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
+        # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
+        node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
+
+        z = cvxpy.Variable(shape=(n, 1), boolean=True)
+
+        for v in node_selection_vector_list:
+            constraint_list.append(1 - v >= z)
+
+            num_vectors = len(node_selection_vector_list)
+            v_complement_in_columns = cvxpy.hstack([1 - v for v in node_selection_vector_list])
+            sum_v_complement = cvxpy.reshape(cvxpy.sum(v_complement_in_columns, axis=1), shape=(n, 1))
+            constraint_list.append(sum_v_complement - num_vectors + 1 <= z)
+
+        return 1 - z
+
 
 class StorageOptimizerReplication(StorageOptimizer):
-    def __init__(self, demand_vector_list: list[list[float]]):
-        super().__init__(demand_vector_list=demand_vector_list)
+    def __init__(self, demand_vector_list: list[list[float]], max_num_nodes_factor: int = 1):
+        super().__init__(demand_vector_list=demand_vector_list, max_num_nodes_factor=max_num_nodes_factor)
 
     def get_obj_id_to_node_id_set_map(self) -> dict[int, set[int]]:
         k, n = self.k, self.max_num_nodes
@@ -57,25 +79,18 @@ class StorageOptimizerReplication(StorageOptimizer):
 
             if len(obj_id_set) == 1:
                 obj_id = next(iter(obj_id_set))
-                constraint_list.append(cvxpy.sum(x[obj_id, :]) >= min_span_size)
+                constraint_list.append(cvxpy.sum(x[obj_id]) >= min_span_size)
                 continue
 
-            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
-            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
-            z = cvxpy.Variable(shape=(n, 1), name=f"z_{counter}", boolean=True)
+            # len(obj_id_set) > 1
+            replica_span = self.find_union(
+                node_selection_vector_list=[x[i] for i in obj_id_set],
+                constraint_list=constraint_list,
+            )
 
-            for i in obj_id_set:
-                constraint_list.append(1 - cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
+            constraint_list.append(cvxpy.sum(replica_span) >= min_span_size)
 
-            num_objs = len(obj_id_set)
-            r_i_complement_in_columns = cvxpy.vstack([1 - x[i, :] for i in obj_id_set]).T
-            sum_x_i_complement = r_i_complement_in_columns @ numpy.ones((num_objs, 1))
-            # log(DEBUG, "", r_i_complement_in_columns=r_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
-            constraint_list.append(sum_x_i_complement - len(obj_id_set) + 1 <= z)
-
-            constraint_list.append(cvxpy.sum(z) <= n - min_span_size)
-
-        C = numpy.array([[i + 1] for i in range(n)])
+        # C = numpy.array([[i + 1] for i in range(n)])
         # log(DEBUG, "", C=C, constraint_list=constraint_list)
         # obj = cvxpy.Minimize(cvxpy.sum(x @ C))
 
@@ -151,7 +166,7 @@ class StorageOptimizerReplicationAndMDS(StorageOptimizer):
         # log(DEBUG, "", C=C, constraint_list=constraint_list)
         # obj = cvxpy.Minimize(cvxpy.sum(x @ C) + num_mds_nodes**2 / 2 + num_mds_nodes / 2)
         number_of_object_copies_in_replicated_storage = sum(cvxpy.sum(x[:, i]) for i in range(n))
-        obj = cvxpy.Minimize(number_of_object_copies_in_replicated_storage + 0.7 * num_mds_nodes)
+        obj = cvxpy.Minimize(number_of_object_copies_in_replicated_storage + num_mds_nodes)
         # obj = cvxpy.Minimize(number_of_object_copies_in_replicated_storage + 0.7 * num_mds_nodes)
 
         prob = cvxpy.Problem(obj, constraint_list)
@@ -345,26 +360,12 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
             return z
 
-        def find_union(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
-            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
-            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
-            node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
-
-            z = cvxpy.Variable(shape=(n, 1), boolean=True)
-
-            for v in node_selection_vector_list:
-                constraint_list.append(1 - v >= z)
-
-            num_vectors = len(node_selection_vector_list)
-            v_complement_in_columns = cvxpy.hstack([1 - v for v in node_selection_vector_list])
-            sum_v_complement = cvxpy.reshape(cvxpy.sum(v_complement_in_columns, axis=1), shape=(n, 1))
-            constraint_list.append(sum_v_complement - num_vectors + 1 <= z)
-
-            return 1 - z
-
         for xored_obj_id_set, xor_node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items():
             # a + b must NOT be placed in a node with a or b.
-            replica_span = find_union([obj_id_to_node_selection_vector_matrix[i] for i in xored_obj_id_set])
+            replica_span = self.find_union(
+                node_selection_vector_list=[obj_id_to_node_selection_vector_matrix[i] for i in xored_obj_id_set],
+                constraint_list=constraint_list,
+            )
             intersection_between_replica_span_and_xors = find_intersection([replica_span, xor_node_selection_vector])
 
             constraint_list.append(intersection_between_replica_span_and_xors == 0)
@@ -380,12 +381,13 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
             if len(obj_id_set) == 1:
                 obj_id = next(iter(obj_id_set))
 
-                xor_span = find_union(
-                    [
+                xor_span = self.find_union(
+                    node_selection_vector_list=[
                         xored_obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)]
                         for other_obj_id in range(k)
                         if other_obj_id != obj_id
-                    ]
+                    ],
+                    constraint_list=constraint_list,
                 )
 
                 constraint_list.append(
@@ -395,7 +397,10 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                 continue
 
             # len(obj_id_set) > 1
-            replica_span = find_union([obj_id_to_node_selection_vector_matrix[i] for i in obj_id_set])
+            replica_span = self.find_union(
+                node_selection_vector_list=[obj_id_to_node_selection_vector_matrix[i] for i in obj_id_set],
+                constraint_list=constraint_list,
+            )
 
             num_xors_outside_replica_span_list = []
             for other_obj_id in set(range(k)) - obj_id_set:
@@ -408,9 +413,7 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                     num_xors_outside_replica_span_list.append(num_xors_outside_replica_span)
 
             constraint_list.append(
-                cvxpy.sum(replica_span)
-                + sum(num_xors_outside_replica_span_list)
-                >= min_span_size
+                cvxpy.sum(replica_span) + sum(num_xors_outside_replica_span_list) >= min_span_size
             )
 
         obj = cvxpy.Minimize(

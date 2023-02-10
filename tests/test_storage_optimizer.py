@@ -15,10 +15,10 @@ from src.utils.debug import *
         # [[1, 3, 4, 2]],
         # [[3.5, 1, 0.2, 0.1]],
 
-        # [
-        #     [4, 1, 0.3, 0.2],
-        #     [0.2, 0.3, 1, 4],
-        # ],
+        [
+            [4, 1, 0.3, 0.2],
+            [0.2, 0.3, 1, 4],
+        ],
 
         # [
         #     [5, 0.3, 0.3, 0.2, 0.1],
@@ -47,16 +47,29 @@ from src.utils.debug import *
         #     [0.1, 20, 0.1],
         # ],
 
-        [
-            [10, 0.1, 0.1],
-            [0.1, 0.1, 10],
-        ],
+        # [
+        #     [10, 0.1, 0.1],
+        #     [0.1, 0.1, 10],
+        # ],
+
+        # [
+        #     [10, 0.1, 0.1, 0.1],
+        #     [0.1, 0.1, 0.1, 10],
+        # ],
 
         # [
         #     [3, 0.1, 0.1, 0.1, 0.1],
         #     [0.1, 0.1, 0.1, 0.1, 3],
         #     [0.1, 0.1, 3, 0.1, 0.1],
         #     [0.1, 3, 0.1, 0.1, 0.1],
+        #     [0.1, 0.1, 0.1, 10, 0.1],
+        # ],
+
+        # [
+        #     [5, 0.1, 0.1, 0.1, 0.1],
+        #     [0.1, 0.1, 0.1, 0.1, 5],
+        #     [0.1, 0.1, 5, 0.1, 0.1],
+        #     [0.1, 5, 0.1, 0.1, 0.1],
         #     [0.1, 0.1, 0.1, 10, 0.1],
         # ],
     ],
@@ -66,9 +79,19 @@ def demand_vector_list(request) -> list[list[float]]:
 
 
 def test_StorageOptimizerReplication(demand_vector_list: list[float]):
-    storage_optimizer = storage_optimizer_module.StorageOptimizerReplication(demand_vector_list=demand_vector_list)
+    storage_optimizer = storage_optimizer_module.StorageOptimizerReplication(
+        demand_vector_list=demand_vector_list,
+        max_num_nodes_factor=1,
+    )
     obj_id_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map()
-    log(DEBUG, "", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
+    log(INFO, "With minimal # nodes", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
+
+    storage_optimizer = storage_optimizer_module.StorageOptimizerReplication(
+        demand_vector_list=demand_vector_list,
+        max_num_nodes_factor=2,
+    )
+    obj_id_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map()
+    log(INFO, "With minimal # object copies", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
 
 
 def test_StorageOptimizerReplicationAndMDS(demand_vector_list: list[float]):
