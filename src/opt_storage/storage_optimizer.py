@@ -466,4 +466,13 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
             for xored_obj_id_set, node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items()
         }
 
+        # Report stats
+        node_id_set_list = list(obj_id_to_node_id_set_map.values()) + list(xor_to_node_id_set_map.values())
+        node_id_set = set().union(*node_id_set_list)
+        log(DEBUG, "",
+            num_nodes=len(node_id_set),
+            num_replicas=sum(len(node_id_set) for node_id_set in obj_id_to_node_id_set_map.values()),
+            num_xors=sum(len(node_id_set) for node_id_set in xor_to_node_id_set_map.values()),
+        )
+
         return obj_id_to_node_id_set_map, xor_to_node_id_set_map
