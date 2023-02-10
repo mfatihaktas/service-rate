@@ -66,11 +66,11 @@ class StorageOptimizerReplication(StorageOptimizer):
     def __init__(self, demand_vector_list: list[list[float]], max_num_nodes_factor: int = 1):
         super().__init__(demand_vector_list=demand_vector_list, max_num_nodes_factor=max_num_nodes_factor)
 
-    def get_obj_id_to_node_id_set_map(self) -> dict[int, set[int]]:
+    def get_obj_id_to_node_selection_vector_matrix(self) -> numpy.ndarray:
         k, n = self.k, self.max_num_nodes
         log(DEBUG, "Started", k=k, n=n)
 
-        x = cvxpy.Variable(shape=(k, n), name="x", boolean=True)
+        obj_id_to_node_selection_vector_matrix = cvxpy.Variable(shape=(k, n), name="obj_id_to_node_selection_vector_matrix", boolean=True)
         constraint_list = []
 
         # Span constraints
@@ -79,12 +79,12 @@ class StorageOptimizerReplication(StorageOptimizer):
 
             if len(obj_id_set) == 1:
                 obj_id = next(iter(obj_id_set))
-                constraint_list.append(cvxpy.sum(x[obj_id]) >= min_span_size)
+                constraint_list.append(cvxpy.sum(obj_id_to_node_selection_vector_matrix[obj_id]) >= min_span_size)
                 continue
 
             # len(obj_id_set) > 1
             replica_span = self.find_union(
-                node_selection_vector_list=[x[i] for i in obj_id_set],
+                node_selection_vector_list=[obj_id_to_node_selection_vector_matrix[i] for i in obj_id_set],
                 constraint_list=constraint_list,
             )
 
@@ -97,23 +97,39 @@ class StorageOptimizerReplication(StorageOptimizer):
         # obj = cvxpy.Minimize(cvxpy.max(x @ C) + cvxpy.max(x))
         # obj = cvxpy.Minimize(cvxpy.sum_squares(cvxpy.hstack(cvxpy.sum(x[:, i]) for i in range(n))))
         # obj = cvxpy.Minimize(sum(cvxpy.sum(x[:, i]) for i in range(n)))
-        obj = cvxpy.Minimize(cvxpy.sum(x))
+        obj = cvxpy.Minimize(cvxpy.sum(obj_id_to_node_selection_vector_matrix))
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
 
-        log(DEBUG, "", prob_value=prob.value, x=x.value)
+        log(DEBUG, "", prob_value=prob.value, obj_id_to_node_selection_vector_matrix=obj_id_to_node_selection_vector_matrix.value)
 
-        check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!", x=x.value)
+        check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!", obj_id_to_node_selection_vector_matrix=obj_id_to_node_selection_vector_matrix.value)
+
+        return obj_id_to_node_selection_vector_matrix.value
+
+    def get_obj_id_to_node_id_set_map(self) -> Tuple[dict[int, set[int]]]:
+        obj_id_to_node_selection_vector_matrix = self.get_obj_id_to_node_selection_vector_matrix()
+
+        k, n = self.k, self.max_num_nodes
 
         obj_id_to_node_id_set_map = {
             obj_id : set(
                 node_id
                 for node_id in range(n)
-                if x.value[obj_id, node_id] == 1
+                if abs(obj_id_to_node_selection_vector_matrix[obj_id, node_id] - 1) < 0.05
             )
             for obj_id in range(k)
         }
+
+        # Report stats
+        node_id_set = set().union(*list(obj_id_to_node_id_set_map.values()))
+        log(DEBUG, "",
+            node_id_set=node_id_set,
+            num_nodes=len(node_id_set),
+            num_replicas=sum(len(node_id_set) for node_id_set in obj_id_to_node_id_set_map.values()),
+        )
+
         return obj_id_to_node_id_set_map
 
 
