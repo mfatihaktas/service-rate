@@ -41,16 +41,16 @@ from src.utils.debug import *
         #     [0, 1.9],
         # ],
 
-        [
-            [10, 0.1, 0.1],
-            [0.1, 0.1, 2],
-            [0.1, 20, 0.1],
-        ],
-
         # [
         #     [10, 0.1, 0.1],
-        #     [0.1, 0.1, 10],
+        #     [0.1, 0.1, 2],
+        #     [0.1, 20, 0.1],
         # ],
+
+        [
+            [10, 0.1, 0.1],
+            [0.1, 0.1, 10],
+        ],
 
         # [
         #     [3, 0.1, 0.1, 0.1, 0.1],
@@ -108,7 +108,26 @@ def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list:
 
 
 def test_StorageOptimizerReplicationAnd2XORs(demand_vector_list: list[float]):
-    storage_optimizer = storage_optimizer_module.StorageOptimizerReplicationAnd2XORs(demand_vector_list=demand_vector_list)
+    # With minimal number of nodes
+    storage_optimizer_w_minimal_num_nodes = storage_optimizer_module.StorageOptimizerReplicationAnd2XORs(
+        demand_vector_list=demand_vector_list,
+        max_num_nodes_factor=1,
+    )
 
-    obj_id_to_node_id_set_map, xor_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map_and_xor_to_node_id_set_map()
-    log(DEBUG, "", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map, xor_to_node_id_set_map=xor_to_node_id_set_map)
+    obj_id_to_node_id_set_map, xor_to_node_id_set_map = storage_optimizer_w_minimal_num_nodes.get_obj_id_to_node_id_set_map_and_xor_to_node_id_set_map()
+    log(INFO, "With minimal # nodes",
+        obj_id_to_node_id_set_map=obj_id_to_node_id_set_map,
+        xor_to_node_id_set_map=xor_to_node_id_set_map
+    )
+
+    # With minimal number of object copies
+    storage_optimizer_w_minimal_num_obj_copies = storage_optimizer_module.StorageOptimizerReplicationAnd2XORs(
+        demand_vector_list=demand_vector_list,
+        max_num_nodes_factor=2,
+    )
+
+    obj_id_to_node_id_set_map, xor_to_node_id_set_map = storage_optimizer_w_minimal_num_obj_copies.get_obj_id_to_node_id_set_map_and_xor_to_node_id_set_map()
+    log(INFO, "With minimal # object copies",
+        obj_id_to_node_id_set_map=obj_id_to_node_id_set_map,
+        xor_to_node_id_set_map=xor_to_node_id_set_map
+    )

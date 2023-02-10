@@ -10,18 +10,15 @@ from src.utils.debug import *
 
 
 class StorageOptimizer:
-    def __init__(self, demand_vector_list: list[list[float]], max_num_nodes: int = None):
+    def __init__(self, demand_vector_list: list[list[float]], max_num_nodes_factor: int = 1):
         self.demand_vector_list = demand_vector_list
-        self.max_num_nodes = max_num_nodes
 
         self.k = len(self.demand_vector_list[0])
         self.obj_id_set_to_min_span_size_map = self.get_obj_id_subset_to_min_span_size_map()
         log(DEBUG, "", obj_id_set_to_min_span_size_map=self.obj_id_set_to_min_span_size_map)
 
         max_min_span_size = max(min_span_size for _, min_span_size in self.obj_id_set_to_min_span_size_map.items())
-        if self.max_num_nodes is None or self.max_num_nodes < max_min_span_size:
-            log(INFO, f"Setting max_num_nodes to max_min_span_size= {max_min_span_size}")
-            self.max_num_nodes = 2 * max_min_span_size
+        self.max_num_nodes = max_min_span_size * max_num_nodes_factor
 
     def get_obj_id_subset_to_min_span_size_map(self) -> dict[Tuple[int], int]:
         obj_id_set_to_min_span_size_map = {}
@@ -311,8 +308,8 @@ class StorageOptimizerReplicationAndMDS_wSingleObjPerNode(StorageOptimizer):
 
 
 class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
-    def __init__(self, demand_vector_list: list[list[float]]):
-        super().__init__(demand_vector_list=demand_vector_list)
+    def __init__(self, demand_vector_list: list[list[float]], max_num_nodes_factor: int = None):
+        super().__init__(demand_vector_list=demand_vector_list, max_num_nodes_factor=max_num_nodes_factor)
 
     def get_obj_id_to_node_selection_vector_matrix_and_xored_obj_id_set_to_node_selection_vector_map(
         self
