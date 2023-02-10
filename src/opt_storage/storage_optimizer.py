@@ -167,7 +167,7 @@ class StorageOptimizerReplicationAndMDS(StorageOptimizer):
         k, n = self.k, self.max_num_nodes
         log(DEBUG, "Started", k=k, n=n)
 
-        x = cvxpy.Variable(shape=(k, n), name="x", boolean=True)
+        obj_id_to_node_selection_vector_matrix = cvxpy.Variable(shape=(k, n), name="obj_id_to_node_selection_vector_matrix", boolean=True)
         num_mds_nodes = cvxpy.Variable(name="num_mds_nodes", integer=True)
         constraint_list = []
 
@@ -178,38 +178,36 @@ class StorageOptimizerReplicationAndMDS(StorageOptimizer):
             if len(obj_id_set) == 1:
                 obj_id = next(iter(obj_id_set))
                 constraint_list.append(
-                    cvxpy.sum(x[obj_id, :]) + num_mds_nodes * self.mds_node_capacity / self.k >= min_span_size
+                    cvxpy.sum(obj_id_to_node_selection_vector_matrix[obj_id, :])
+                    + num_mds_nodes * self.mds_node_capacity / self.k >= min_span_size
                 )
                 continue
 
-            # x v y v z = [x' ^ y' ^ z']' = [(1 - x) ^ (1 - y) ^ (1 - z)]'
-            # => |x v y v z| >= s is equivalent to |(1 - x) ^ (1 - y) ^ (1 - z)| <= k - s
-            z = cvxpy.Variable(shape=(n, 1), name=f"z_{counter}", boolean=True)
+            replica_span = self.find_union(
+                node_selection_vector_list=[obj_id_to_node_selection_vector_matrix[i] for i in obj_id_set],
+                constraint_list=constraint_list,
+            )
 
-            for i in obj_id_set:
-                constraint_list.append(1 - cvxpy.reshape(x[i, :], shape=(n, 1)) >= z)
-
-            num_objs = len(obj_id_set)
-            r_i_complement_in_columns = cvxpy.vstack([1 - x[i, :] for i in obj_id_set]).T
-            sum_x_i_complement = r_i_complement_in_columns @ numpy.ones((num_objs, 1))
-            # log(DEBUG, "", r_i_complement_in_columns=r_i_complement_in_columns, sum_x_i_complement=sum_x_i_complement)
-            constraint_list.append(sum_x_i_complement - len(obj_id_set) + 1 <= z)
-
-            constraint_list.append(cvxpy.sum(z) <= n - (min_span_size - num_mds_nodes * self.mds_node_capacity / self.k))
+            constraint_list.append(
+                cvxpy.sum(replica_span) >= min_span_size - num_mds_nodes * self.mds_node_capacity / self.k
+            )
 
         constraint_list.append(num_mds_nodes >= 0)
 
         # C = numpy.array([[i + 1] for i in range(n)])
         # log(DEBUG, "", C=C, constraint_list=constraint_list)
         # obj = cvxpy.Minimize(cvxpy.sum(x @ C) + num_mds_nodes**2 / 2 + num_mds_nodes / 2)
-        number_of_object_copies_in_replicated_storage = sum(cvxpy.sum(x[:, i]) for i in range(n))
-        obj = cvxpy.Minimize(number_of_object_copies_in_replicated_storage + num_mds_nodes)
+        obj = cvxpy.Minimize(cvxpy.sum(obj_id_to_node_selection_vector_matrix) + num_mds_nodes)
         # obj = cvxpy.Minimize(number_of_object_copies_in_replicated_storage + 0.7 * num_mds_nodes)
 
         prob = cvxpy.Problem(obj, constraint_list)
         prob.solve(solver="SCIP")
 
-        log(DEBUG, "", prob_value=prob.value, x=x.value, num_mds_nodes=num_mds_nodes.value)
+        log(DEBUG, "",
+            prob_value=prob.value,
+            obj_id_to_node_selection_vector_matrix=obj_id_to_node_selection_vector_matrix.value,
+            num_mds_nodes=num_mds_nodes.value
+        )
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!")
 
@@ -217,7 +215,7 @@ class StorageOptimizerReplicationAndMDS(StorageOptimizer):
             obj_id : set(
                 node_id
                 for node_id in range(n)
-                if abs(x.value[obj_id, node_id] - 1) < 0.01
+                if abs(obj_id_to_node_selection_vector_matrix.value[obj_id, node_id] - 1) < 0.01
             )
             for obj_id in range(k)
         }
