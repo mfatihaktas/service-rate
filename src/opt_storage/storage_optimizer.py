@@ -39,6 +39,27 @@ class StorageOptimizer:
 
         return obj_id_set_to_min_span_size_map
 
+    def find_intersection(
+        self,
+        node_selection_vector_list: list[cvxpy.Variable],
+        constraint_list: list[cvxpy.Expression],
+    ) -> cvxpy.Variable:
+        n = self.max_num_nodes
+
+        node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
+
+        z = cvxpy.Variable(shape=(n, 1), boolean=True)  # , name=f"z_obj_id_{obj_id}_other_obj_id_{other_obj_id}"
+
+        for v in node_selection_vector_list:
+            constraint_list.append(v >= z)
+
+        num_vectors = len(node_selection_vector_list)
+        v_in_columns = cvxpy.hstack(node_selection_vector_list)
+        sum_v = cvxpy.reshape(cvxpy.sum(v_in_columns, axis=1), shape=(n, 1))
+        constraint_list.append(sum_v - num_vectors + 1 <= z)
+
+        return z
+
     def find_union(
         self,
         node_selection_vector_list: list[cvxpy.Variable],
@@ -361,28 +382,16 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
 
         constraint_list = []
 
-        def find_intersection(node_selection_vector_list: list[cvxpy.Variable]) -> cvxpy.Variable:
-            node_selection_vector_list = [cvxpy.reshape(v, shape=(n, 1)) for v in node_selection_vector_list]
-
-            z = cvxpy.Variable(shape=(n, 1), boolean=True)  # , name=f"z_obj_id_{obj_id}_other_obj_id_{other_obj_id}"
-
-            for v in node_selection_vector_list:
-                constraint_list.append(v >= z)
-
-            num_vectors = len(node_selection_vector_list)
-            v_in_columns = cvxpy.hstack(node_selection_vector_list)
-            sum_v = cvxpy.reshape(cvxpy.sum(v_in_columns, axis=1), shape=(n, 1))
-            constraint_list.append(sum_v - num_vectors + 1 <= z)
-
-            return z
-
         for xored_obj_id_set, xor_node_selection_vector in xored_obj_id_set_to_node_selection_vector_map.items():
             # a + b must NOT be placed in a node with a or b.
             replica_span = self.find_union(
                 node_selection_vector_list=[obj_id_to_node_selection_vector_matrix[i] for i in xored_obj_id_set],
                 constraint_list=constraint_list,
             )
-            intersection_between_replica_span_and_xors = find_intersection([replica_span, xor_node_selection_vector])
+            intersection_between_replica_span_and_xors = self.find_intersection(
+                node_selection_vector_list=[replica_span, xor_node_selection_vector],
+                constraint_list=constraint_list,
+            )
 
             constraint_list.append(intersection_between_replica_span_and_xors == 0)
 
@@ -424,7 +433,10 @@ class StorageOptimizerReplicationAnd2XORs(StorageOptimizer):
                     xor_w_other = xored_obj_id_set_to_node_selection_vector_map[get_frozenset(obj_id, other_obj_id)]
 
                     # TODO: What if XOR's with different other objects are on the same node?
-                    intersection_between_replica_span_and_xor_w_other = find_intersection([replica_span, xor_w_other])
+                    intersection_between_replica_span_and_xor_w_other = self.find_intersection(
+                        node_selection_vector_list=[replica_span, xor_w_other],
+                        constraint_list=constraint_list,
+                    )
                     num_xors_outside_replica_span = cvxpy.sum(xor_w_other) - cvxpy.sum(intersection_between_replica_span_and_xor_w_other)
                     num_xors_outside_replica_span_list.append(num_xors_outside_replica_span)
 
