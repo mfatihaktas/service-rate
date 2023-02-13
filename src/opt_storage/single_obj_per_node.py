@@ -150,7 +150,9 @@ class StorageOptimizerReplicationAndMDS_wSingleObjPerNode(storage_optimizer_modu
 
 @dataclasses.dataclass
 class Object:
-    pass
+    @abc.abstractmethod
+    def get_num_symbols(self):
+        pass
 
 
 @dataclasses.dataclass
@@ -174,6 +176,9 @@ class SysObject(Object):
 
     def get_xor(self) -> int:
         return self.symbol
+
+    def get_num_symbols(self) -> int:
+        return 1
 
 
 @dataclasses.dataclass
@@ -200,8 +205,14 @@ class XORedObject(Object):
     def get_xor(self) -> int:
         return functools.reduce(operator.ixor, self.symbols)
 
+    def get_num_symbols(self) -> int:
+        return len(self.symbols)
+
 
 def get_symbol_recovered_by_object_pair(obj_1: Object, obj_2: Object) -> int:
+    if abs(obj_1.get_num_symbols() - obj_2.get_num_symbols()) != 1:
+        return None
+
     return obj_1.get_xor() ^ obj_2.get_xor()
 
 
@@ -256,7 +267,7 @@ class AccessGraph:
 
         for (obj_1, obj_2) in itertools.combinations(list(self.object_to_num_copies_var_map.keys()), 2):
             recovered_symbol = get_symbol_recovered_by_object_pair(obj_1=obj_1, obj_2=obj_2)
-            if not 0 <= recovered_symbol <= self.k:
+            if recovered_symbol is None or not (0 <= recovered_symbol <= self.k):
                 log(DEBUG, "Not a recovery group", recovered_symbol=recovered_symbol, obj_1=obj_1, obj_2=obj_2)
                 continue
 
@@ -321,27 +332,27 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
                 continue
 
-            # num_touch_list = []
-            # obj_to_num_touch_vars_map = collections.defaultdict(list)
-            # access_edge_list = []
-            # for obj_id in obj_id_set:
-            #     access_edge_list.extend(self.access_graph.symbol_to_access_edges_map[obj_id])
+            num_touch_list = []
+            obj_to_num_touch_vars_map = collections.defaultdict(list)
+            access_edge_list = []
+            for obj_id in obj_id_set:
+                access_edge_list.extend(self.access_graph.symbol_to_access_edges_map[obj_id])
 
-            # for access_edge in access_edge_list:
-            #     num_touch = cvxpy.Variable(integer=True)
-            #     num_touch_list.append(num_touch)
+            for access_edge in access_edge_list:
+                num_touch = cvxpy.Variable(integer=True)
+                num_touch_list.append(num_touch)
 
-            #     for touched_obj in access_edge.get_touched_objects():
-            #         obj_to_num_touch_vars_map[touched_obj].append(num_touch)
+                for touched_obj in access_edge.get_touched_objects():
+                    obj_to_num_touch_vars_map[touched_obj].append(num_touch)
 
-            # constraint_list.append(
-            #     cvxpy.sum(num_touch_list) >= min_span_size
-            # )
+            constraint_list.append(
+                cvxpy.sum(num_touch_list) >= min_span_size
+            )
 
-            # for obj, num_touch_list in obj_to_num_touch_vars_map.items():
-            #     constraint_list.append(
-            #         cvxpy.sum(num_touch_list) <= self.access_graph.object_to_num_copies_var_map[obj]
-            #     )
+            for obj, num_touch_to_obj_list in obj_to_num_touch_vars_map.items():
+                constraint_list.append(
+                    cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.object_to_num_copies_var_map[obj]
+                )
 
         # All `num_copies_var`'s must be >= 0
         constraint_list.append(
