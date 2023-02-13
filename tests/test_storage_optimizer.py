@@ -22,12 +22,12 @@ from src.utils.debug import *
         #     [0.2, 0.3, 1, 4],
         # ],
 
-        [
-            [3, 1, 1, 1],
-            [1, 3, 1, 1],
-            [1, 1, 3, 1],
-            [1, 1, 1, 3],
-        ],
+        # [
+        #     [3, 1, 1, 1],
+        #     [1, 3, 1, 1],
+        #     [1, 1, 3, 1],
+        #     [1, 1, 1, 3],
+        # ],
 
         # [
         #     [5, 0.3, 0.3, 0.2, 0.1],
@@ -55,11 +55,11 @@ from src.utils.debug import *
         #     [0, 1.9],
         # ],
 
-        # [
-        #     [10, 0.1, 0.1],
-        #     [0.1, 0.1, 2],
-        #     [0.1, 20, 0.1],
-        # ],
+        [
+            [10, 0.1, 0.1],
+            [0.1, 0.1, 2],
+            [0.1, 20, 0.1],
+        ],
 
         # [
         #     [10, 0.1, 0.1],
@@ -190,3 +190,8 @@ def test_StorageOptimizerReplicationAndXOR_wSingleObjPerNode(demand_vector_list:
     log(INFO, "",
         object_to_num_copies_map=object_to_num_copies_map,
     )
+
+    m = {}
+    m[single_obj_per_node_module.SysObject(symbol=0)] = 1
+    m[single_obj_per_node_module.XORedObject(symbols=(0, 1))] = 2
+    log(DEBUG, "", m=m)

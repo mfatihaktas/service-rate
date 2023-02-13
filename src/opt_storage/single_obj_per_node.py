@@ -157,8 +157,17 @@ class Object:
 class SysObject(Object):
     symbol: int
 
-    def __eq__(self, other_obj: Object):
-        return isinstance(other_obj, SysObject) and self.symbol == other_obj.symbol
+    # def __eq__(self, other_obj: Object):
+    #     return isinstance(other_obj, SysObject) and self.symbol == other_obj.symbol
+
+    def __cmp__(self, other_obj: Object):
+        if self.symbol == other_obj.symbol:
+            return 0
+        elif self.symbol < other_obj.symbol:
+            return -1
+        else:
+            return 1
+
 
     def __hash__(self):
         return hash(self.symbol)
@@ -169,13 +178,21 @@ class SysObject(Object):
 
 @dataclasses.dataclass
 class XORedObject(Object):
-    symbols: list[int]
+    symbols: tuple[int]
 
-    def __eq__(self, other_obj: Object):
-        return (
-            isinstance(other_obj, XORedObject)
-            and self.symbols == other_obj.symbols
-        )
+    # def __eq__(self, other_obj: Object):
+    #     return (
+    #         isinstance(other_obj, XORedObject)
+    #         and self.symbols == other_obj.symbols
+    #     )
+
+    def __cmp__(self, other_obj: Object):
+        if self.symbols == other_obj.symbols:
+            return 0
+        elif self.symbols < other_obj.symbols:
+            return -1
+        else:
+            return 1
 
     def __hash__(self):
         return hash(self.symbols)
@@ -267,6 +284,8 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
         constraint_list = []
 
         # Span constraints
+        obj_id_to_obj_to_num_touch_vars_map = {}
+
         for counter, (obj_id_set, min_span_size) in enumerate(self.obj_id_set_to_min_span_size_map.items()):
             log(DEBUG, f">> counter= {counter}", obj_id_set=obj_id_set, min_span_size=min_span_size)
 
@@ -276,24 +295,58 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
                 num_touch_list = []
                 obj_to_num_touch_vars_map = collections.defaultdict(list)
                 for access_edge in self.access_graph.symbol_to_access_edges_map[obj_id]:
+                    log(DEBUG, f"access_edge= {access_edge}")
+
                     num_touch = cvxpy.Variable(integer=True)
                     num_touch_list.append(num_touch)
 
                     for touched_obj in access_edge.get_touched_objects():
+                        log(DEBUG, f"touched_obj= {touched_obj}")
                         obj_to_num_touch_vars_map[touched_obj].append(num_touch)
 
                 constraint_list.append(
                     cvxpy.sum(num_touch_list) >= min_span_size
                 )
 
-                for obj, num_touch_var_list in obj_to_num_touch_vars_map.items():
+                for obj, num_touch_to_obj_list in obj_to_num_touch_vars_map.items():
                     constraint_list.append(
-                        cvxpy.sum(num_touch_var_list) <= self.access_graph.object_to_num_copies_var_map[obj]
+                        cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.object_to_num_copies_var_map[obj]
                     )
+
+                constraint_list.append(
+                    cvxpy.vstack(num_touch_list) >= 0
+                )
+                log(DEBUG, "", obj_to_num_touch_vars_map=obj_to_num_touch_vars_map)
+                obj_id_to_obj_to_num_touch_vars_map[obj_id] = obj_to_num_touch_vars_map
 
                 continue
 
-        # self.object_to_num_copies_var_map
+            # num_touch_list = []
+            # obj_to_num_touch_vars_map = collections.defaultdict(list)
+            # access_edge_list = []
+            # for obj_id in obj_id_set:
+            #     access_edge_list.extend(self.access_graph.symbol_to_access_edges_map[obj_id])
+
+            # for access_edge in access_edge_list:
+            #     num_touch = cvxpy.Variable(integer=True)
+            #     num_touch_list.append(num_touch)
+
+            #     for touched_obj in access_edge.get_touched_objects():
+            #         obj_to_num_touch_vars_map[touched_obj].append(num_touch)
+
+            # constraint_list.append(
+            #     cvxpy.sum(num_touch_list) >= min_span_size
+            # )
+
+            # for obj, num_touch_list in obj_to_num_touch_vars_map.items():
+            #     constraint_list.append(
+            #         cvxpy.sum(num_touch_list) <= self.access_graph.object_to_num_copies_var_map[obj]
+            #     )
+
+        # All `num_copies_var`'s must be >= 0
+        constraint_list.append(
+            cvxpy.vstack(list(self.access_graph.object_to_num_copies_var_map.values())) >= 0
+        )
 
         obj = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.object_to_num_copies_var_map.values())))
 
@@ -308,7 +361,14 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
         }
         log(DEBUG, "",
             prob_value=prob.value,
-            object_to_num_copies_map=object_to_num_copies_map,
+            obj_id_to_obj_to_num_touch_vars_map=obj_id_to_obj_to_num_touch_vars_map,
+            obj_id_to_obj_to_num_touch_map={
+                obj_id: {
+                    obj: sum(var.value for var in num_touch_var_list)
+                    for obj, num_touch_var_list in obj_to_num_touch_vars_map.items()
+                }
+                for obj_id, obj_to_num_touch_vars_map in obj_id_to_obj_to_num_touch_vars_map.items()
+            }
         )
 
         return object_to_num_copies_map
