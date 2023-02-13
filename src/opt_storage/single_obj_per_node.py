@@ -154,6 +154,10 @@ class Object:
     def get_num_symbols(self):
         pass
 
+    @abc.abstractmethod
+    def get_symbols(self):
+        pass
+
 
 @dataclasses.dataclass
 class SysObject(Object):
@@ -173,6 +177,9 @@ class SysObject(Object):
 
     def __hash__(self):
         return hash(self.symbol)
+
+    def get_symbols(self) -> list[int]:
+        return [self.symbol]
 
     def get_xor(self) -> int:
         return self.symbol
@@ -202,6 +209,9 @@ class XORedObject(Object):
     def __hash__(self):
         return hash(self.symbols)
 
+    def get_symbols(self) -> list[int]:
+        return self.symbols
+
     def get_xor(self) -> int:
         return functools.reduce(operator.ixor, self.symbols)
 
@@ -213,7 +223,15 @@ def get_symbol_recovered_by_object_pair(obj_1: Object, obj_2: Object) -> int:
     if abs(obj_1.get_num_symbols() - obj_2.get_num_symbols()) != 1:
         return None
 
-    return obj_1.get_xor() ^ obj_2.get_xor()
+    if obj_1.get_num_symbols() < obj_2.get_num_symbols():
+        obj_1, obj_2 = obj_2, obj_1
+
+    recovered_symbol_set = set(obj_1.get_symbols()) - set(obj_2.get_symbols())
+    if len(recovered_symbol_set) > 1:
+        return None
+
+    recovered_symbol = next(iter(recovered_symbol_set))
+    return recovered_symbol
 
 
 @dataclasses.dataclass
@@ -268,7 +286,7 @@ class AccessGraph:
         for (obj_1, obj_2) in itertools.combinations(list(self.object_to_num_copies_var_map.keys()), 2):
             recovered_symbol = get_symbol_recovered_by_object_pair(obj_1=obj_1, obj_2=obj_2)
             if recovered_symbol is None or not (0 <= recovered_symbol <= self.k):
-                log(DEBUG, "Not a recovery group", recovered_symbol=recovered_symbol, obj_1=obj_1, obj_2=obj_2)
+                # log(DEBUG, "Not a recovery group", recovered_symbol=recovered_symbol, obj_1=obj_1, obj_2=obj_2)
                 continue
 
             self.symbol_to_access_edges_map[recovered_symbol].append(RecoveryEdge(obj_1=obj_1, obj_2=obj_2))
