@@ -1,9 +1,11 @@
 import pytest
 
-from src.opt_storage import storage_optimizer as storage_optimizer_module
+from src.opt_storage import (
+    single_obj_per_node as single_obj_per_node_module,
+    storage_optimizer as storage_optimizer_module,
+)
 from src.service_rate import (
     service_rate,
-    storage_scheme as storage_scheme_module,
 )
 from src.utils.debug import *
 
@@ -15,9 +17,16 @@ from src.utils.debug import *
         # [[1, 3, 4, 2]],
         # [[3.5, 1, 0.2, 0.1]],
 
+        # [
+        #     [4, 1, 0.3, 0.2],
+        #     [0.2, 0.3, 1, 4],
+        # ],
+
         [
-            [4, 1, 0.3, 0.2],
-            [0.2, 0.3, 1, 4],
+            [3, 1, 1, 1],
+            [1, 3, 1, 1],
+            [1, 1, 3, 1],
+            [1, 1, 1, 3],
         ],
 
         # [
@@ -34,6 +43,11 @@ from src.utils.debug import *
         # [
         #     [2, 0],
         #     [0, 2],
+        # ],
+
+        # [
+        #     [2, 0, 0.1],
+        #     [0, 2, 0.1],
         # ],
 
         # [
@@ -55,6 +69,7 @@ from src.utils.debug import *
         # [
         #     [10, 0.1, 0.1, 0.1],
         #     [0.1, 0.1, 0.1, 10],
+        #     [0.1, 10, 0.1, 0.1],
         # ],
 
         # [
@@ -95,9 +110,19 @@ def test_StorageOptimizerReplication(demand_vector_list: list[float]):
 
 
 def test_StorageOptimizerReplicationAndMDS(demand_vector_list: list[float]):
-    storage_optimizer = storage_optimizer_module.StorageOptimizerReplicationAndMDS(demand_vector_list=demand_vector_list)
+    storage_optimizer = storage_optimizer_module.StorageOptimizerReplicationAndMDS(
+        demand_vector_list=demand_vector_list,
+        mds_node_capacity=2,
+    )
     obj_id_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map()
-    log(DEBUG, "", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
+    log(DEBUG, "With minimal # nodes", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
+
+    storage_optimizer = storage_optimizer_module.StorageOptimizerReplicationAndMDS(
+        demand_vector_list=demand_vector_list,
+        mds_node_capacity=1,
+    )
+    obj_id_to_node_id_set_map = storage_optimizer.get_obj_id_to_node_id_set_map()
+    log(DEBUG, "With minimal # object copies", obj_id_to_node_id_set_map=obj_id_to_node_id_set_map)
 
 
 def test_StorageOptimizerReplicationAndMDS_wSingleObjPerNode(demand_vector_list: list[float]):
@@ -153,4 +178,15 @@ def test_StorageOptimizerReplicationAnd2XORs(demand_vector_list: list[float]):
     log(INFO, "With minimal # object copies",
         obj_id_to_node_id_set_map=obj_id_to_node_id_set_map,
         xor_to_node_id_set_map=xor_to_node_id_set_map
+    )
+
+
+def test_StorageOptimizerReplicationAndXOR_wSingleObjPerNode(demand_vector_list: list[float]):
+    storage_optimizer = single_obj_per_node_module.StorageOptimizerReplicationAndXOR_wSingleObjPerNode(
+        demand_vector_list=demand_vector_list,
+    )
+
+    object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+    log(INFO, "",
+        object_to_num_copies_map=object_to_num_copies_map,
     )
