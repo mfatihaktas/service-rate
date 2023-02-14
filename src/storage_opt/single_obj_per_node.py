@@ -8,8 +8,8 @@ import operator
 
 from typing import Tuple
 
-from src.opt_storage import storage_optimizer as storage_optimizer_module
 from src.service_rate import storage_scheme as storage_scheme_module
+from src.storage_opt import storage_optimizer as storage_optimizer_module
 from src.utils.debug import *
 
 
