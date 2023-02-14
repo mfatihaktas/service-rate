@@ -35,6 +35,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.pytest.ini_options]
 minversion = "6.1"
 # addopts = "--cov --show-capture=stderr"
+
 ## Print only stdout.
 addopts = "-rP -p no:logging"
 log_cli_level = "INFO"
