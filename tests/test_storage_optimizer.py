@@ -1,6 +1,6 @@
 import pytest
 
-from src.opt_storage import (
+from src.storage_opt import (
     single_obj_per_node as single_obj_per_node_module,
     storage_optimizer as storage_optimizer_module,
 )

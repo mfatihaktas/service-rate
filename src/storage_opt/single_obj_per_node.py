@@ -324,13 +324,13 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
                 num_touch_list = []
                 obj_to_num_touch_vars_map = collections.defaultdict(list)
                 for access_edge in self.access_graph.symbol_to_access_edges_map[obj_id]:
-                    log(DEBUG, f"access_edge= {access_edge}")
+                    # log(DEBUG, f"access_edge= {access_edge}")
 
                     num_touch = cvxpy.Variable(integer=True)
                     num_touch_list.append(num_touch)
 
                     for touched_obj in access_edge.get_touched_objects():
-                        log(DEBUG, f"touched_obj= {touched_obj}")
+                        # log(DEBUG, f"touched_obj= {touched_obj}")
                         obj_to_num_touch_vars_map[touched_obj].append(num_touch)
 
                 constraint_list.append(
@@ -345,7 +345,7 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
                 constraint_list.append(
                     cvxpy.vstack(num_touch_list) >= 0
                 )
-                log(DEBUG, "", obj_to_num_touch_vars_map=obj_to_num_touch_vars_map)
+                # log(DEBUG, "", obj_to_num_touch_vars_map=obj_to_num_touch_vars_map)
                 obj_id_to_obj_to_num_touch_vars_map[obj_id] = obj_to_num_touch_vars_map
 
                 continue
