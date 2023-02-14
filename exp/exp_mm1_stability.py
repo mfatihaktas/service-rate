@@ -164,7 +164,6 @@ def plot_frac_dropped_requests_vs_arrival_rate():
     log(INFO, "Done")
 
 
-
 if __name__ == "__main__":
     # sim_frac_dropped_requests_vs_arrival_rate()
     plot_frac_dropped_requests_vs_arrival_rate()
