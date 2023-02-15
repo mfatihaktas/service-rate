@@ -7,15 +7,16 @@ if [ $1 = "n" ]; then
   # srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=16000 --time=3:00:00 --export=ALL --pty bash -i
 
 elif [ $1 = "j" ]; then
-  FILE="exp_mm1_stability"
+  # FILE="exp_mm1_stability"
+  FILE="exp_single_obj_per_node"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
 #SBATCH --job-name=${FILE}
 #SBATCH --nodes=${NTASKS}            # Number of nodes you require
 #SBATCH --ntasks=${NTASKS}           # Total # of tasks across all nodes
-#SBATCH --cpus-per-task=8            # Cores per task (>1 if multithread tasks)
-#SBATCH --mem=16000                  # Real memory (RAM) required (MB)
+#SBATCH --cpus-per-task=1            # Cores per task (>1 if multithread tasks)
+#SBATCH --mem=8000                   # Real memory (RAM) required (MB)
 #SBATCH --time=24:00:00              # Total run time limit (HH:MM:SS)
 #SBATCH --export=ALL                 # Export your current env to the job env
 #SBATCH --output=log/${FILE}.%N.%j.out
