@@ -2,7 +2,7 @@ import pytest
 
 from typing import Tuple
 
-from src.storage_overlap import storage_design
+from src.storage_overlap import design
 
 from src.utils.debug import *
 
@@ -22,7 +22,7 @@ def test_get_obj_id_to_node_id_set_map_w_replicas_clustering_design(k_n_d: Tuple
     k, n, d = k_n_d
     log(DEBUG, "", k=k, n=n, d=d)
 
-    obj_id_to_node_id_set_map = storage_design.get_obj_id_to_node_id_set_map_w_replicas_clustering_design(
+    obj_id_to_node_id_set_map = design.get_obj_id_to_node_id_set_map_w_replicas_clustering_design(
         k=k, n=n, d=d,
     )
 
@@ -35,7 +35,7 @@ def test_get_obj_id_to_node_id_set_map_w_replicas_cyclic_design(k_n_d: Tuple[int
     k, n, d = k_n_d
     log(DEBUG, "", k=k, n=n, d=d)
 
-    obj_id_to_node_id_set_map = storage_design.get_obj_id_to_node_id_set_map_w_replicas_cyclic_design(
+    obj_id_to_node_id_set_map = design.get_obj_id_to_node_id_set_map_w_replicas_cyclic_design(
         k=k, n=n, d=d,
     )
 
