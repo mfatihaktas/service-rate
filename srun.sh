@@ -7,8 +7,8 @@ if [ $1 = "n" ]; then
   # srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=16000 --time=3:00:00 --export=ALL --pty bash -i
 
 elif [ $1 = "j" ]; then
-  # FILE="exp_mm1_stability"
-  FILE="exp_single_obj_per_node"
+  # FILE="sim/exp_mm1_stability"
+  FILE="storage_opt/exp_single_obj_per_node"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
