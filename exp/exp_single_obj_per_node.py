@@ -32,6 +32,7 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
             num_nodes_list.append(num_nodes)
 
+        log(INFO, f"num_objs= {num_objs}", max_demand_list=max_demand_list, num_nodes_list=num_nodes_list)
         plot.plot(max_demand_list, num_nodes_list, color=next(dark_color_cycle), label=fr"$k= {num_objs}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     # num_objs_list = [3]
