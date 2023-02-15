@@ -4,6 +4,24 @@ from src.model import demand as demand_module
 from src.utils.plot import *
 
 
+def get_object_to_num_copies_map(
+    num_objs: int,
+    demand_vector_list: list[list[float]],
+) -> dict[Object, int]:
+    demand_vector_list = demand_module.get_demand_vectors(
+        num_objs=num_objs,
+        demand_ordered_for_most_popular_objs=[max_demand],
+    )
+
+    storage_optimizer = single_obj_per_node_module.StorageOptimizerReplicationAndXOR_wSingleObjPerNode(
+        demand_vector_list=demand_vector_list,
+    )
+
+    object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+
+    return object_to_num_copies_map
+
+
 def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode():
     max_demand_list = list(range(1, 21))
 
@@ -18,11 +36,10 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
                 demand_ordered_for_most_popular_objs=[max_demand],
             )
 
-            storage_optimizer = single_obj_per_node_module.StorageOptimizerReplicationAndXOR_wSingleObjPerNode(
+            object_to_num_copies_map = get_object_to_num_copies_map(
+                num_objs=num_objs,
                 demand_vector_list=demand_vector_list,
             )
-
-            object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
 
             num_nodes = sum(object_to_num_copies_map.values())
             log(INFO, f"max_demand= {max_demand}",
@@ -35,8 +52,8 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
         log(INFO, f"num_objs= {num_objs}", max_demand_list=max_demand_list, num_nodes_list=num_nodes_list)
         plot.plot(max_demand_list, num_nodes_list, color=next(dark_color_cycle), label=fr"$k= {num_objs}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    # num_objs_list = [3]
-    num_objs_list = [3, 4, 5, 6]
+    num_objs_list = [3]
+    # num_objs_list = [3, 4, 5, 6]
     for num_objs in num_objs_list:
         plot_(num_objs=num_objs)
 
