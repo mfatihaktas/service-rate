@@ -6,8 +6,8 @@ from src.utils.plot import *
 
 def get_object_to_num_copies_map(
     num_objs: int,
-    demand_vector_list: list[list[float]],
-) -> dict[Object, int]:
+    max_demand: float,
+) -> dict[single_obj_per_node_module.Object, int]:
     demand_vector_list = demand_module.get_demand_vectors(
         num_objs=num_objs,
         demand_ordered_for_most_popular_objs=[max_demand],
@@ -25,21 +25,19 @@ def get_object_to_num_copies_map(
 def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode():
     max_demand_list = list(range(1, 21))
 
+    object_to_num_copies_map_list = []
+
     def plot_(num_objs: int):
         log(INFO, f"num_objs= {num_objs}")
 
         num_nodes_list = []
 
         for max_demand in max_demand_list:
-            demand_vector_list = demand_module.get_demand_vectors(
-                num_objs=num_objs,
-                demand_ordered_for_most_popular_objs=[max_demand],
-            )
-
             object_to_num_copies_map = get_object_to_num_copies_map(
                 num_objs=num_objs,
-                demand_vector_list=demand_vector_list,
+                max_demand=max_demand,
             )
+            object_to_num_copies_map_list.append(object_to_num_copies_map)
 
             num_nodes = sum(object_to_num_copies_map.values())
             log(INFO, f"max_demand= {max_demand}",
@@ -49,7 +47,12 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
             num_nodes_list.append(num_nodes)
 
-        log(INFO, f"num_objs= {num_objs}", max_demand_list=max_demand_list, num_nodes_list=num_nodes_list)
+        log(INFO, f"num_objs= {num_objs}",
+            max_demand_list=max_demand_list,
+            num_nodes_list=num_nodes_list,
+            object_to_num_copies_map_list=object_to_num_copies_map_list,
+        )
+
         plot.plot(max_demand_list, num_nodes_list, color=next(dark_color_cycle), label=fr"$k= {num_objs}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     num_objs_list = [3]
