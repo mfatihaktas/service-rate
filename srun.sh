@@ -26,7 +26,7 @@ cd ${HOME}/service-rate
 srun python ${PWD}/exp/${FILE}.py
   " > job_script.sh
 
-  rm log/*
+  # rm log/*
   sbatch job_script.sh
 
 elif [ $1 = "l" ]; then
