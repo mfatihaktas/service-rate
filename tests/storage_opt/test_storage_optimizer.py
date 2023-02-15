@@ -4,9 +4,6 @@ from src.storage_opt import (
     single_obj_per_node as single_obj_per_node_module,
     storage_optimizer as storage_optimizer_module,
 )
-from src.service_rate import (
-    service_rate,
-)
 
 from src.utils.debug import *
 
