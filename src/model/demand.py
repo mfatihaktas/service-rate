@@ -1,5 +1,7 @@
 import itertools
 
+from scipy.stats import zipf
+
 
 def get_demand_vectors(
     num_objs: int,
@@ -12,3 +14,11 @@ def get_demand_vectors(
     )
 
     return [list(p) for p in itertools.permutations(base_demand_vector)]
+
+
+def get_demand_vectors_w_zipf_law(
+    num_objs: int,
+    cum_demand: float,
+    zipf_tail_index: float,
+) -> list[list[float]]:
+    zipf.pmf(k=num_objs, a=zipf_tail_index, loc=0)
