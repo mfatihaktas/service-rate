@@ -25,7 +25,10 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
             object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
 
             num_nodes = sum(object_to_num_copies_map.values())
-            log(INFO, f"max_demand= {max_demand}", num_nodes=num_nodes)
+            log(INFO, f"max_demand= {max_demand}",
+                object_to_num_copies_map=object_to_num_copies_map,
+                num_nodes=num_nodes,
+            )
 
             num_nodes_list.append(num_nodes)
 
