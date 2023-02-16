@@ -1,5 +1,6 @@
 from src.storage_opt import (
-    data as data_module,
+    access_graph as access_graph_module,
+    data,
     single_obj_per_node as single_obj_per_node_module,
 )
 from src.model import demand as demand_module
@@ -7,13 +8,15 @@ from src.model import demand as demand_module
 from src.utils.plot import *
 
 
-def get_obj_to_num_copies_map(
+def get_access_graph(
     num_objs: int,
     max_demand: float,
-) -> dict[single_obj_per_node_module.Object, int]:
+) -> access_graph_module.AccessGraph:
     try:
-        obj_to_num_copies_map = data_module.NUM_OBJS_TO_MAX_DEMAND_TO_OBJ_TO_NUM_COPIES_MAP[num_objs][max_demand]
-        return obj_to_num_copies_map
+        obj_to_num_copies_map = data.NUM_OBJS_TO_MAX_DEMAND_TO_OBJ_TO_NUM_COPIES_MAP[num_objs][max_demand]
+        access_graph = access_graph_module.AccessGraph(k=num_objs, obj_to_num_copies_map=obj_to_num_copies_map)
+        return access_graph
+
     except KeyError:
         log(WARNING, "Data does not exist, will run optimization", num_objs=num_objs, max_demand=max_demand)
 
@@ -26,8 +29,7 @@ def get_obj_to_num_copies_map(
         demand_vector_list=demand_vector_list,
     )
 
-    obj_to_num_copies_map = storage_optimizer.access_graph.get_obj_to_num_copies_map()
-    return obj_to_num_copies_map
+    return storage_optimizer.access_graph
 
 
 def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode():
@@ -41,15 +43,20 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
         num_nodes_list = []
 
         for max_demand in max_demand_list:
-            obj_to_num_copies_map = get_obj_to_num_copies_map(
-                num_objs=num_objs,
-                max_demand=max_demand,
-            )
-            max_demand_to_object_to_num_copies_map[max_demand] = obj_to_num_copies_map
+            access_graph = get_access_graph(num_objs=num_objs, max_demand=max_demand)
+            max_demand_to_object_to_num_copies_map[max_demand] = access_graph.obj_to_num_copies_map
 
-            num_nodes = sum(obj_to_num_copies_map.values())
+            if max_demand == 1:
+                file_name_suffix = (
+                    f"k_{num_objs}"
+                    + f"_max_demand_{max_demand}"
+                    + ".png"
+                )
+                access_graph.draw(file_name_suffix=file_name_suffix)
+
+            num_nodes = sum(access_graph.obj_to_num_copies_map.values())
             log(INFO, f"max_demand= {max_demand}",
-                obj_to_num_copies_map=obj_to_num_copies_map,
+                obj_to_num_copies_map=access_graph.obj_to_num_copies_map,
                 num_nodes=num_nodes,
             )
 
@@ -63,9 +70,9 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
         plot.plot(max_demand_list, num_nodes_list, color=next(dark_color_cycle), label=fr"$k= {num_objs}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    # num_objs_list = [3]
+    num_objs_list = [3]
     # num_objs_list = [4]
-    num_objs_list = [5, 6]
+    # num_objs_list = [5, 6]
     # num_objs_list = [3, 4, 5, 6]
     for num_objs in num_objs_list:
         plot_(num_objs=num_objs)
@@ -80,13 +87,13 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
     # Save the plot
     plot.gcf().set_size_inches(6, 4)
-    title = (
+    file_name = (
         "plot_num_nodes_vs_max_demand_"
         + "k_{}_".format("-".join(str(num) for num in num_objs_list))
         + f"_max_demand_from_{min(max_demand_list)}_to_{max(max_demand_list)}"
         + ".png"
     )
-    plot.savefig(title, bbox_inches="tight")
+    plot.savefig(file_name, bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
