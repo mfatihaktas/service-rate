@@ -51,7 +51,7 @@ def plot_frac_demand_vector_covered_vs_d_for_different_replication_designs():
     # Save the plot
     plot.gcf().set_size_inches(6, 4)
     title = (
-        "plot_num_nodes_vs_max_demand_"
+        "plots/plot_num_nodes_vs_max_demand_"
         + "k_{}_".format("-".join(str(num) for num in num_objs_list))
         + f"_max_demand_from_{min(max_demand_list)}_to_{max(max_demand_list)}"
         + ".png"

@@ -184,7 +184,6 @@ class AccessGraph:
         for obj, num_copies in self.obj_to_num_copies_map.items():
             graph.add_node(
                 obj,
-                label=obj.get_networkx_label(),
                 multiplicity=num_copies,
                 subset=f"{obj.get_num_symbols()}"
             )
@@ -199,14 +198,21 @@ class AccessGraph:
             file_name_suffix=file_name_suffix,
         )
 
-        # G = networkx.complete_graph(15)
-        # networkx.draw(G, pos=networkx.multipartite_layout(G))
-
         networkx_graph = self.get_networkx_graph()
-        networkx.draw(networkx_graph, pos=networkx.multipartite_layout(networkx_graph))
+        networkx.draw(
+            networkx_graph,
+            pos=networkx.multipartite_layout(networkx_graph),
+            with_labels=True,
+            labels={
+                obj: f"{obj.get_networkx_label()}\n x {num_copies}"
+                for obj, num_copies in self.obj_to_num_copies_map.items()
+            },
+            node_color=["w" if num_copies == 0 else "0.8" for obj, num_copies in self.obj_to_num_copies_map.items()],
+            font_size=20,
+        )
 
-        plot.gcf().set_size_inches(4, 6)
-        plot.savefig(f"storage_graph_{file_name_suffix}.png", bbox_inches="tight")
+        # plot.gcf().set_size_inches(4, 6)
+        plot.savefig(f"plots/storage_graph_{file_name_suffix}.png", bbox_inches="tight")
         plot.gcf().clear()
 
         log(INFO, "Done")

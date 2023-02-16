@@ -95,7 +95,7 @@ def plot_capacity_region_2d(
     # )
     # plot.title(title, fontsize=fontsize, y=1.05)
     plot.gcf().set_size_inches(4, 3)
-    plot.savefig(f"plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
+    plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "Done.")
 
@@ -157,7 +157,7 @@ def plot_capacity_region_2d_when_k_g_2(
     )
     plot.suptitle(suptitle, fontsize=fontsize)  # , y=1.05
     fig.set_size_inches(figsize[0], figsize[1])
-    plot.savefig("plot_cap_2d_when_k_g_2.png", bbox_inches="tight")
+    plot.savefig("plots/plot_cap_2d_when_k_g_2.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")
@@ -231,7 +231,7 @@ def plot_capacity_region_3d(
 
     plot.title(r"$k= {}$, $n= {}$".format(self.k, self.m), fontsize=fontsize)
     plot.gcf().set_size_inches(7, 5)
-    plot.savefig(f"plot_cap_3d_{file_name_suffix}.png", bbox_inches="tight")
+    plot.savefig(f"plots/plot_cap_3d_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(INFO, "Done")

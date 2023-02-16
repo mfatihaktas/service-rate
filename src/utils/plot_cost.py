@@ -65,7 +65,7 @@ def plot_cost_2d(
     fig = plot.gcf()
     fig.set_size_inches(5, 3.5)
     plot.savefig(
-        f"plot_cost_2d_{file_name_suffix}.png", bbox_inches="tight"
+        f"plots/plot_cost_2d_{file_name_suffix}.png", bbox_inches="tight"
     )  # , bbox_extra_artists=[ax],
     fig.clear()
 

@@ -80,6 +80,6 @@ def plot_points(x_y_l, file_name):
         y_l.append(x_y[1])
 
     plot.plot(x_l, y_l, color=NICE_BLUE, marker="o", ls="None")
-    plot.savefig("{}.png".format(file_name), bbox_inches="tight")
+    plot.savefig("plots/{}.png".format(file_name), bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "done.")

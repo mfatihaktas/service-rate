@@ -93,7 +93,7 @@ def sim_frac_dropped_requests_vs_arrival_rate():
     # Save the plot
     plot.gcf().set_size_inches(10, 6)
     plot_name = (
-        "plot_frac_dropped_requests_vs_arrival_rate_w"
+        "plots/plot_frac_dropped_requests_vs_arrival_rate_w"
         f"_num_requests_to_serve_{num_requests_to_serve}"
         f"_num_sim_runs_{num_sim_runs}"
         ".png"
@@ -153,7 +153,7 @@ def plot_frac_dropped_requests_vs_arrival_rate():
     # Save the plot
     plot.gcf().set_size_inches(4, 4)
     plot_name = (
-        "plot_frac_dropped_requests_vs_arrival_rate_w_num"
+        "plots/plot_frac_dropped_requests_vs_arrival_rate_w_num"
         f"_requests_to_serve_{num_requests_to_serve}"
         f"_num_sim_runs_{num_sim_runs}"
         ".png"

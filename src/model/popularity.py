@@ -80,7 +80,7 @@ class PopModel_wZipf(object):
         plot.plot(self.values[0, :], self.values[1, :], "k.", markersize=2)
         fig = plot.gcf()
         fig.set_size_inches(5, 5)
-        plot.savefig("plot_scatter_2d.png", bbox_inches="tight")
+        plot.savefig("plots/plot_scatter_2d.png", bbox_inches="tight")
         fig.clear()
 
         data = pandas.DataFrame(self.demand_vector_list, columns=["a", "b"] )
@@ -93,7 +93,7 @@ class PopModel_wZipf(object):
         st = plot.suptitle(r"$k= {}$, $a \sim {}$, $\lambda \sim {}$".format(self.k, self.zipf_tail_index_rv, self.arrival_rate_rv) )
         fig = plot.gcf()
         fig.set_size_inches(5, 5)
-        plot.savefig("plot_heatmap_2d.png", bbox_extra_artists=[st], bbox_inches="tight")
+        plot.savefig("plots/plot_heatmap_2d.png", bbox_extra_artists=[st], bbox_inches="tight")
         fig.clear()
         log(INFO, "Done")
 
@@ -117,7 +117,7 @@ class PopModel_wZipf(object):
         prettify(plot.gca())
         fig = plot.gcf()
         fig.set_size_inches(4, 4)
-        plot.savefig("plot_kde_2d.png", bbox_inches="tight")
+        plot.savefig("plots/plot_kde_2d.png", bbox_inches="tight")
         fig.clear()
 
         log(INFO, "Done")
