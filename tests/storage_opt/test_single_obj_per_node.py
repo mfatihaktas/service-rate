@@ -1,8 +1,6 @@
 import pytest
 
-from src.storage_opt import (
-    single_obj_per_node as single_obj_per_node_module,
-)
+from src.storage_opt import single_obj_per_node as single_obj_per_node_module
 from src.model import demand as demand_module
 
 from src.utils.debug import *
@@ -33,7 +31,7 @@ def test_StorageOptimizerReplicationAndXOR_wSingleObjPerNode(demand_vector_list:
         demand_vector_list=demand_vector_list,
     )
 
-    object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+    obj_to_num_copies_map = storage_optimizer.access_graph.get_obj_to_num_copies_map()
     log(INFO, "",
-        object_to_num_copies_map=object_to_num_copies_map,
+        obj_to_num_copies_map=obj_to_num_copies_map,
     )

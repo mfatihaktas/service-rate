@@ -22,11 +22,11 @@ def plot_frac_demand_vector_covered_vs_d_for_different_replication_designs():
                 demand_vector_list=demand_vector_list,
             )
 
-            object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+            obj_to_num_copies_map = storage_optimizer.access_graph.get_obj_to_num_copies_map()
 
-            num_nodes = sum(object_to_num_copies_map.values())
+            num_nodes = sum(obj_to_num_copies_map.values())
             log(INFO, f"max_demand= {max_demand}",
-                object_to_num_copies_map=object_to_num_copies_map,
+                obj_to_num_copies_map=obj_to_num_copies_map,
                 num_nodes=num_nodes,
             )
 

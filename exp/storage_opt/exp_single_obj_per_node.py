@@ -7,7 +7,7 @@ from src.model import demand as demand_module
 from src.utils.plot import *
 
 
-def get_object_to_num_copies_map(
+def get_obj_to_num_copies_map(
     num_objs: int,
     max_demand: float,
 ) -> dict[single_obj_per_node_module.Object, int]:
@@ -26,7 +26,7 @@ def get_object_to_num_copies_map(
         demand_vector_list=demand_vector_list,
     )
 
-    obj_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+    obj_to_num_copies_map = storage_optimizer.access_graph.get_obj_to_num_copies_map()
     return obj_to_num_copies_map
 
 
@@ -41,7 +41,7 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
         num_nodes_list = []
 
         for max_demand in max_demand_list:
-            obj_to_num_copies_map = get_object_to_num_copies_map(
+            obj_to_num_copies_map = get_obj_to_num_copies_map(
                 num_objs=num_objs,
                 max_demand=max_demand,
             )

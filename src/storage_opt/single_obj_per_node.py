@@ -296,6 +296,12 @@ class AccessGraph:
             symbol_to_access_edges_map=self.symbol_to_access_edges_map,
         )
 
+    def get_obj_to_num_copies_map(self) -> dict[Object, int]:
+        return {
+            obj: round(float(num_copies_var.value))
+            for obj, num_copies_var in self.obj_to_num_copies_var_map.items()
+        }
+
 
 class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_module.StorageOptimizer):
     def __init__(
@@ -305,8 +311,9 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
         super().__init__(demand_vector_list=demand_vector_list)
 
         self.access_graph = AccessGraph(k=self.k)
+        self.optimize()
 
-    def get_object_to_num_copies_map(self) -> dict[Object, int]:
+    def optimize(self):
         k = self.k
         log(DEBUG, "Started", k=k)
 
@@ -378,7 +385,6 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
         )
 
         # objective = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.obj_to_num_copies_var_map.values())))
-
         num_copies_list = []
         for obj, num_copies in self.access_graph.obj_to_num_copies_var_map.items():
             num_copies_list.append(
@@ -391,13 +397,8 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!")
 
-        object_to_num_copies_map = {
-            obj: round(float(num_copies_var.value))
-            for obj, num_copies_var in self.access_graph.obj_to_num_copies_var_map.items()
-        }
         log(DEBUG, "",
             prob_value=prob.value,
-            obj_id_to_obj_to_num_touch_vars_map=obj_id_to_obj_to_num_touch_vars_map,
             obj_id_to_obj_to_num_touch_map={
                 obj_id: {
                     obj: sum(var.value for var in num_touch_var_list)
@@ -406,5 +407,3 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
                 for obj_id, obj_to_num_touch_vars_map in obj_id_to_obj_to_num_touch_vars_map.items()
             }
         )
-
-        return object_to_num_copies_map

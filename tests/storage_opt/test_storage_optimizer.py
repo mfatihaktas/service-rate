@@ -204,12 +204,7 @@ def test_StorageOptimizerReplicationAndXOR_wSingleObjPerNode(demand_vector_list:
         demand_vector_list=demand_vector_list,
     )
 
-    object_to_num_copies_map = storage_optimizer.get_object_to_num_copies_map()
+    obj_to_num_copies = storage_optimizer.access_graph.get_obj_to_num_copies_map()
     log(INFO, "",
-        object_to_num_copies_map=object_to_num_copies_map,
+        obj_to_num_copies=obj_to_num_copies,
     )
-
-    m = {}
-    m[single_obj_per_node_module.SysObject(symbol=0)] = 1
-    m[single_obj_per_node_module.XORedObject(symbols=(0, 1))] = 2
-    log(DEBUG, "", m=m)
