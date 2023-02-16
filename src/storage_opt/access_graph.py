@@ -193,7 +193,7 @@ class AccessGraph:
 
         return graph
 
-    def draw(self, file_name_suffix: str):
+    def draw(self, file_name_suffix: str = None):
         log(INFO, "Started",
             file_name_suffix=file_name_suffix,
         )
@@ -211,8 +211,8 @@ class AccessGraph:
             font_size=20,
         )
 
-        # plot.gcf().set_size_inches(4, 6)
-        plot.savefig(f"plots/storage_graph_{file_name_suffix}.png", bbox_inches="tight")
-        plot.gcf().clear()
+        if file_name_suffix:
+            plot.savefig(f"plots/storage_graph_{file_name_suffix}.png", bbox_inches="tight")
+            plot.gcf().clear()
 
         log(INFO, "Done")

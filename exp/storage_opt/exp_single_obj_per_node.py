@@ -32,6 +32,38 @@ def get_access_graph(
     return storage_optimizer.access_graph
 
 
+def plot_access_graphs(num_objs: int):
+    log(INFO, "Started", num_obj=num_objs)
+
+    max_demand_list = list(range(1, 21))
+
+    num_plots = len(max_demand_list)
+    fig, ax_list = plot.subplots(1, num_plots)
+
+    for i, max_demand in enumerate(max_demand_list):
+        ax = ax_list[i]
+        plot.sca(ax)
+
+        access_graph = get_access_graph(num_objs=num_objs, max_demand=max_demand)
+        access_graph.draw()
+
+    # Save to PNG
+    plot.subplots_adjust(wspace=0.2)
+    figsize = (num_plots * 6, 5)
+    fig.set_size_inches(figsize[0], figsize[1])
+
+    file_name = (
+        "plots/access_graphs"
+        + f"_k_{num_objs}"
+        + f"_max_demand_from_{min(max_demand_list)}_to_{max(max_demand_list)}"
+        + ".png"
+    )
+    plot.savefig(file_name, bbox_inches="tight")
+    plot.gcf().clear()
+
+    log(INFO, "Done", num_obj=num_objs)
+
+
 def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode():
     max_demand_list = list(range(1, 21))
 
@@ -45,14 +77,6 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
         for max_demand in max_demand_list:
             access_graph = get_access_graph(num_objs=num_objs, max_demand=max_demand)
             max_demand_to_object_to_num_copies_map[max_demand] = access_graph.obj_to_num_copies_map
-
-            if max_demand == 1:
-                file_name_suffix = (
-                    f"k_{num_objs}"
-                    + f"_max_demand_{max_demand}"
-                    + ".png"
-                )
-                access_graph.draw(file_name_suffix=file_name_suffix)
 
             num_nodes = sum(access_graph.obj_to_num_copies_map.values())
             log(INFO, f"max_demand= {max_demand}",
@@ -99,6 +123,6 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
     log(INFO, "Done")
 
 
-
 if __name__ == "__main__":
-    plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
+    # plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
+    plot_access_graphs(num_objs=3)
