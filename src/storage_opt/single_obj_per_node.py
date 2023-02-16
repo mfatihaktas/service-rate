@@ -261,29 +261,29 @@ class RecoveryEdge:
 class AccessGraph:
     k: int
 
-    object_to_num_copies_var_map: dict[Object, cvxpy.Variable] = dataclasses.field(default=None)
+    obj_to_num_copies_var_map: dict[Object, cvxpy.Variable] = dataclasses.field(default=None)
     symbol_to_access_edges_map: dict[int, list[AccessEdge]] = dataclasses.field(default=None)
 
     def __post_init__(self):
-        # Construct `object_to_num_copies_var_map`
-        self.object_to_num_copies_var_map = {}
+        # Construct `obj_to_num_copies_var_map`
+        self.obj_to_num_copies_var_map = {}
         # Systematic copies
         for s in range(self.k):
             obj = SysObject(symbol=s)
-            self.object_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
+            self.obj_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
 
         # XOR'ed copies
         for xor_size in range(2, self.k + 1):
             for symbol_combination in itertools.combinations(list(range(self.k)), xor_size):
                 obj = XORedObject(symbols=symbol_combination)
-                self.object_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
+                self.obj_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
 
         # Construct `symbol_to_access_edges_map`
         self.symbol_to_access_edges_map = collections.defaultdict(list)
         for symbol in range(self.k):
             self.symbol_to_access_edges_map[symbol].append(AccessLoop(obj=SysObject(symbol=symbol)))
 
-        for (obj_1, obj_2) in itertools.combinations(list(self.object_to_num_copies_var_map.keys()), 2):
+        for (obj_1, obj_2) in itertools.combinations(list(self.obj_to_num_copies_var_map.keys()), 2):
             recovered_symbol = get_symbol_recovered_by_object_pair(obj_1=obj_1, obj_2=obj_2)
             if recovered_symbol is None or not (0 <= recovered_symbol <= self.k):
                 # log(DEBUG, "Not a recovery group", recovered_symbol=recovered_symbol, obj_1=obj_1, obj_2=obj_2)
@@ -292,7 +292,7 @@ class AccessGraph:
             self.symbol_to_access_edges_map[recovered_symbol].append(RecoveryEdge(obj_1=obj_1, obj_2=obj_2))
 
         log(DEBUG, "Constructed",
-            object_to_num_copies_var_map=self.object_to_num_copies_var_map,
+            obj_to_num_copies_var_map=self.obj_to_num_copies_var_map,
             symbol_to_access_edges_map=self.symbol_to_access_edges_map,
         )
 
@@ -339,7 +339,7 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
                 for obj, num_touch_to_obj_list in obj_to_num_touch_vars_map.items():
                     constraint_list.append(
-                        cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.object_to_num_copies_var_map[obj]
+                        cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.obj_to_num_copies_var_map[obj]
                     )
 
                 constraint_list.append(
@@ -369,24 +369,31 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
             for obj, num_touch_to_obj_list in obj_to_num_touch_vars_map.items():
                 constraint_list.append(
-                    cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.object_to_num_copies_var_map[obj]
+                    cvxpy.sum(num_touch_to_obj_list) <= self.access_graph.obj_to_num_copies_var_map[obj]
                 )
 
         # All `num_copies_var`'s must be >= 0
         constraint_list.append(
-            cvxpy.vstack(list(self.access_graph.object_to_num_copies_var_map.values())) >= 0
+            cvxpy.vstack(list(self.access_graph.obj_to_num_copies_var_map.values())) >= 0
         )
 
-        obj = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.object_to_num_copies_var_map.values())))
+        # objective = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.obj_to_num_copies_var_map.values())))
 
-        prob = cvxpy.Problem(obj, constraint_list)
+        num_copies_list = []
+        for obj, num_copies in self.access_graph.obj_to_num_copies_var_map.items():
+            num_copies_list.append(
+                (1 + 0.01 * obj.get_num_symbols()) * num_copies
+            )
+        objective = cvxpy.Minimize(cvxpy.sum(num_copies_list))
+
+        prob = cvxpy.Problem(objective, constraint_list)
         prob.solve(solver="SCIP")
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!")
 
         object_to_num_copies_map = {
             obj: round(float(num_copies_var.value))
-            for obj, num_copies_var in self.access_graph.object_to_num_copies_var_map.items()
+            for obj, num_copies_var in self.access_graph.obj_to_num_copies_var_map.items()
         }
         log(DEBUG, "",
             prob_value=prob.value,
