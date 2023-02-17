@@ -241,7 +241,7 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
         check(prob.status == cvxpy.OPTIMAL, "Solution to optimization problem is NOT optimal!")
 
-        access_graph.set_obj_to_num_copies_map_after_optimization()
+        self.access_graph.set_obj_to_num_copies_map_after_optimization()
 
         log(DEBUG, "",
             prob_value=prob.value,
