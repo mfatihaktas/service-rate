@@ -38,7 +38,8 @@ def plot_access_graphs(num_objs: int):
     max_demand_list = list(range(1, 21))
 
     num_plots = len(max_demand_list)
-    fig, ax_list = plot.subplots(1, num_plots)
+    figsize = (num_plots * 3 * num_objs, 5)
+    fig, ax_list = plot.subplots(1, num_plots, figsize=figsize)
 
     for i, max_demand in enumerate(max_demand_list):
         ax = ax_list[i]
@@ -47,9 +48,12 @@ def plot_access_graphs(num_objs: int):
         access_graph = get_access_graph(num_objs=num_objs, max_demand=max_demand)
         access_graph.draw()
 
+        plot.title(f"Max demand= {max_demand}")
+        ax.set_xlim([1.1 * x for x in ax.get_xlim()])
+        ax.set_ylim([1.1 * y for y in ax.get_ylim()])
+
     # Save to PNG
-    plot.subplots_adjust(wspace=0.2)
-    figsize = (num_plots * 6, 5)
+    plot.subplots_adjust(wspace=1)
     fig.set_size_inches(figsize[0], figsize[1])
 
     file_name = (

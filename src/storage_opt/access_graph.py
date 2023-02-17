@@ -194,6 +194,10 @@ class AccessGraph:
         return graph
 
     def draw(self, file_name_suffix: str = None):
+        """Refs:
+        - https://networkx.org/documentation/stable/auto_examples/drawing/plot_labels_and_colors.html
+        """
+
         log(INFO, "Started",
             file_name_suffix=file_name_suffix,
         )
@@ -204,11 +208,13 @@ class AccessGraph:
             pos=networkx.multipartite_layout(networkx_graph),
             with_labels=True,
             labels={
-                obj: f"{obj.get_networkx_label()}\n x {num_copies}"
+                obj: f"{obj.get_networkx_label()}\n ({num_copies})"
                 for obj, num_copies in self.obj_to_num_copies_map.items()
             },
-            node_color=["w" if num_copies == 0 else "0.8" for obj, num_copies in self.obj_to_num_copies_map.items()],
+            node_color=["w" if num_copies == 0 else "tab:blue" for obj, num_copies in self.obj_to_num_copies_map.items()],
             font_size=20,
+            node_size=1300,
+            alpha=0.6,
         )
 
         if file_name_suffix:
