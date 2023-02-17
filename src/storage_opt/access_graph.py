@@ -177,6 +177,9 @@ class AccessGraph:
             for obj, num_copies_var in self.obj_to_num_copies_var_map.items()
         }
 
+    def get_total_num_nodes(self):
+        return sum(self.obj_to_num_copies_map.values())
+
     def get_networkx_graph(self):
         graph = networkx.Graph()
 

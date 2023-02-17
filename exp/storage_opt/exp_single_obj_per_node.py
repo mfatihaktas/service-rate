@@ -48,14 +48,14 @@ def plot_access_graphs(num_objs: int):
         access_graph = get_access_graph(num_objs=num_objs, max_demand=max_demand)
         access_graph.draw()
 
-        plot.title(f"Max demand= {max_demand}")
+        plot.title(f"Max demand= {max_demand}, Num nodes= {access_graph.get_total_num_nodes()}")
         # To keep graph nodes within the plot.
         # Ref: https://stackoverflow.com/questions/61520570/networkx-in-a-subplot-is-drawing-nodes-partially-outside-of-axes-frame
         ax.set_xlim([1.1 * x for x in ax.get_xlim()])
         ax.set_ylim([1.1 * y for y in ax.get_ylim()])
 
     # Save to PNG
-    plot.subplots_adjust(wspace=1)
+    plot.subplots_adjust(wspace=0.5)
     fig.set_size_inches(figsize[0], figsize[1])
 
     file_name = (
@@ -131,4 +131,4 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
 if __name__ == "__main__":
     # plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
-    plot_access_graphs(num_objs=3)
+    plot_access_graphs(num_objs=4)
