@@ -49,6 +49,8 @@ def plot_access_graphs(num_objs: int):
         access_graph.draw()
 
         plot.title(f"Max demand= {max_demand}")
+        # To keep graph nodes within the plot.
+        # Ref: https://stackoverflow.com/questions/61520570/networkx-in-a-subplot-is-drawing-nodes-partially-outside-of-axes-frame
         ax.set_xlim([1.1 * x for x in ax.get_xlim()])
         ax.set_ylim([1.1 * y for y in ax.get_ylim()])
 
