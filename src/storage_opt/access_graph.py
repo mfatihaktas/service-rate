@@ -188,7 +188,7 @@ class AccessGraph:
             graph.add_node(
                 obj,
                 multiplicity=num_copies,
-                subset=f"{obj.get_num_symbols()}"
+                level=obj.get_num_symbols(),
             )
 
         # Add edges
@@ -205,16 +205,21 @@ class AccessGraph:
             file_name_suffix=file_name_suffix,
         )
 
+        max_num_copies = max(self.obj_to_num_copies_map.values())
+
         networkx_graph = self.get_networkx_graph()
         networkx.draw(
             networkx_graph,
-            pos=networkx.multipartite_layout(networkx_graph),
+            pos=networkx.multipartite_layout(networkx_graph, subset_key="level"),
             with_labels=True,
             labels={
                 obj: f"{obj.get_networkx_label()}\n ({num_copies})"
                 for obj, num_copies in self.obj_to_num_copies_map.items()
             },
-            node_color=["w" if num_copies == 0 else "tab:blue" for obj, num_copies in self.obj_to_num_copies_map.items()],
+            node_color=[
+                lighten_color(color="tab:blue", amount=(num_copies / max_num_copies))
+                for _, num_copies in self.obj_to_num_copies_map.items()
+            ],
             font_size=20,
             node_size=1300,
             alpha=0.6,
