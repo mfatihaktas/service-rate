@@ -7,7 +7,8 @@ from src.utils.plot import *
 def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     num_popular_objs = 2
     cum_demand = 3
-    zipf_tail_index_list = [0, 1, 2]
+    # zipf_tail_index_list = [0, 1, 2]
+    zipf_tail_index_list = [0, 0.5, 1, 1.5, 2]
 
     log(INFO, "Started",
         num_popular_objs=num_popular_objs,
@@ -27,7 +28,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
             )
-            log(DEBUG, f"len(demand_vector_list)= {len(demand_vector_list)}")
+            # log(DEBUG, f"len(demand_vector_list)= {len(demand_vector_list)}")
 
             frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered(demand_vector_list=demand_vector_list)
 
@@ -43,9 +44,9 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         )
         plot.plot(zipf_tail_index_list, frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 6
+    k = 9
     n = k
-    d = 2
+    d = 3
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
         design.CyclicDesign(k=k, n=n, d=d),
