@@ -44,7 +44,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         )
         plot.plot(zipf_tail_index_list, frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 9
+    k = 21
     n = k
     d = 3
     replica_design_list = [

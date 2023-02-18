@@ -7,9 +7,9 @@ if [ $1 = "i" ]; then
   # srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=16000 --time=3:00:00 --export=ALL --pty bash -i
 
 elif [ $1 = "j" ]; then
-  # FILE="exp_mm1_stability"
-  FILE="exp_single_obj_per_node"
-  # FILE="exp_design"
+  # FILE="sim/exp_mm1_stability"
+  # FILE="storage_opt/exp_single_obj_per_node"
+  FILE="storage_overlap/exp_design"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
@@ -26,7 +26,7 @@ elif [ $1 = "j" ]; then
 
 cd ${HOME}/service-rate
 
-srun python ${PWD}/exp/storage_overlap/${FILE}.py
+srun python ${PWD}/exp/${FILE}.py
   " > job_script.sh
 
   # rm log/*

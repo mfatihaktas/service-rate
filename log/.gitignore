@@ -1,2 +1,5 @@
 *
 !.gitignore
+!sim/
+!storage_opt/
+!storage_overlap/
