@@ -65,6 +65,33 @@ class ReplicaDesign(StorageDesign):
 
         return num_demand_vector_covered / num_demand_vector
 
+    def sim_frac_of_demand_vectors_covered(
+        self,
+        num_popular_objs: int,
+        cum_demand: float,
+        zipf_tail_index: float,
+        num_samples: int,
+        num_sim_run: int = 1,
+    ) -> list[float]:
+        frac_of_demand_vectors_covered_list = []
+
+        for _ in num_sim_run:
+            num_covered = 0
+            for demand_vector_list in demand.sample_demand_vectors_w_zipf_law(
+                    num_objs=self.k,
+                    num_popular_objs=num_popular_objs,
+                    cum_demand=cum_demand,
+                    zipf_tail_index=zipf_tail_index,
+                    num_samples=num_samples,
+            ):
+                if self.is_demand_vector_covered(demand_vector=demand_vector):
+                    num_covered += 1
+
+                frac_of_demand_vectors_covered = num_covered / num_samples
+                frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
+
+        return frac_of_demand_vectors_covered_list
+
 
 @dataclasses.dataclass(repr=False)
 class ClusteringDesign(ReplicaDesign):

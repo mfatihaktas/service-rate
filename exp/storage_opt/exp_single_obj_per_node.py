@@ -100,8 +100,8 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
         plot.plot(max_demand_list, num_nodes_list, color=next(dark_color_cycle), label=fr"$k= {num_objs}$", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    num_objs_list = [3]
-    # num_objs_list = [4]
+    # num_objs_list = [3]
+    num_objs_list = [4]
     # num_objs_list = [5, 6]
     # num_objs_list = [3, 4, 5, 6]
     for num_objs in num_objs_list:
@@ -130,5 +130,5 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
 
 if __name__ == "__main__":
-    plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
-    # plot_access_graphs(num_objs=3)
+    # plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
+    plot_access_graphs(num_objs=4)

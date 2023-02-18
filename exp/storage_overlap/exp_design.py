@@ -22,23 +22,34 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         frac_of_demand_vectors_covered_list = []
 
         for zipf_tail_index in zipf_tail_index_list:
-            ## With `get_demand_vectors_w_zipf_law`
+            # With `get_demand_vectors_w_zipf_law`
             # demand_vector_list = demand.get_demand_vectors_w_zipf_law(
             #     num_objs=replica_design.k,
             #     num_popular_objs=num_popular_objs,
             #     cum_demand=cum_demand,
             #     zipf_tail_index=zipf_tail_index,
             # )
-            # frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered(demand_vector_list=demand_vector_list)
+            # frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered(
+            #     demand_vector_list=demand_vector_list
+            # )
 
-            ## With `frac_of_demand_vectors_covered_w_generator_input`
-            frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered_w_generator_input(
-                demand_vector_generator=demand.gen_demand_vector_w_zipf_law(
-                    num_objs=replica_design.k,
-                    num_popular_objs=num_popular_objs,
-                    cum_demand=cum_demand,
-                    zipf_tail_index=zipf_tail_index,
-                )
+            # With `frac_of_demand_vectors_covered_w_generator_input`
+            # frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered_w_generator_input(
+            #     demand_vector_generator=demand.gen_demand_vector_w_zipf_law(
+            #         num_objs=replica_design.k,
+            #         num_popular_objs=num_popular_objs,
+            #         cum_demand=cum_demand,
+            #         zipf_tail_index=zipf_tail_index,
+            #     )
+            # )
+
+            # With `sim_frac_of_demand_vectors_covered`
+            frac_of_demand_vectors_covered_list = replica_design.sim_frac_of_demand_vectors_covered(
+                num_popular_objs=num_popular_objs,
+                cum_demand=cum_demand,
+                zipf_tail_index=zipf_tail_index,
+                num_samples=500,
+                num_sim_run=3,
             )
 
             log(INFO, f"> zipf_tail_index= {zipf_tail_index}",

@@ -1,6 +1,7 @@
 import functools
 import itertools
 import math
+import random
 
 from typing import Tuple
 
@@ -35,13 +36,11 @@ def gen_demand_vector(
         yield list(p)
 
 
-@functools.cache
-def get_demand_vectors_w_zipf_law(
-    num_objs: int,
+def get_ordered_demand_vector(
     num_popular_objs: int,
     cum_demand: float,
     zipf_tail_index: float,
-) -> list[list[float]]:
+) -> list[float]:
     k, a = num_popular_objs, zipf_tail_index
 
     # kth generalized Harmonic number
@@ -49,11 +48,28 @@ def get_demand_vectors_w_zipf_law(
 
     ordered_prob_list = [math.pow(1 / i, a) / H_k_a for i in range(1, k + 1)]
     ordered_demand_vector = tuple([p * cum_demand for p in ordered_prob_list])
-    log(DEBUG, "",
-        ordered_demand_vector=ordered_demand_vector,
+
+    return ordered_demand_vector
+
+
+@functools.cache
+def get_demand_vectors_w_zipf_law(
+    num_objs: int,
+    num_popular_objs: int,
+    cum_demand: float,
+    zipf_tail_index: float,
+) -> list[list[float]]:
+    ordered_demand_vector = get_ordered_demand_vector(
+        num_popular_objs=num_popular_objs,
         cum_demand=cum_demand,
         zipf_tail_index=zipf_tail_index,
     )
+
+    # log(DEBUG, "",
+    #     ordered_demand_vector=ordered_demand_vector,
+    #     cum_demand=cum_demand,
+    #     zipf_tail_index=zipf_tail_index,
+    # )
 
     return get_demand_vectors(
         num_objs=num_objs,
@@ -67,21 +83,48 @@ def gen_demand_vector_w_zipf_law(
     cum_demand: float,
     zipf_tail_index: float,
 ) -> list[float]:
-    k, a = num_popular_objs, zipf_tail_index
-
-    # kth generalized Harmonic number
-    H_k_a = sum(math.pow(1 / i, a) for i in range(1, k + 1))
-
-    ordered_prob_list = [math.pow(1 / i, a) / H_k_a for i in range(1, k + 1)]
-    ordered_demand_vector = tuple([p * cum_demand for p in ordered_prob_list])
-    log(DEBUG, "",
-        ordered_demand_vector=ordered_demand_vector,
+    ordered_demand_vector = get_ordered_demand_vector(
+        num_popular_objs=num_popular_objs,
         cum_demand=cum_demand,
         zipf_tail_index=zipf_tail_index,
     )
+
+    # log(DEBUG, "",
+    #     ordered_demand_vector=ordered_demand_vector,
+    #     cum_demand=cum_demand,
+    #     zipf_tail_index=zipf_tail_index,
+    # )
 
     for demand_vector in gen_demand_vector(
         num_objs=num_objs,
         demand_ordered_for_most_popular_objs=ordered_demand_vector,
     ):
+        yield demand_vector
+
+
+def sample_demand_vectors_w_zipf_law(
+    num_objs: int,
+    num_popular_objs: int,
+    cum_demand: float,
+    zipf_tail_index: float,
+    num_samples: int,
+) -> list[float]:
+    ordered_demand_vector = get_ordered_demand_vector(
+        num_popular_objs=num_popular_objs,
+        cum_demand=cum_demand,
+        zipf_tail_index=zipf_tail_index,
+    )
+
+    # log(DEBUG, "",
+    #     ordered_demand_vector=ordered_demand_vector,
+    #     cum_demand=cum_demand,
+    #     zipf_tail_index=zipf_tail_index,
+    # )
+
+    for _ in range(num_samples):
+        demand_vector = num_objs * [0]
+        index_list = random.sample(list(range(num_objs)), num_popular_objs)
+        for i, index in enumerate(index_list):
+            demand_vector[index] = ordered_demand_vector[i]
+
         yield demand_vector
