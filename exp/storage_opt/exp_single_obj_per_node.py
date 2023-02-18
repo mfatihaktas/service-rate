@@ -12,17 +12,17 @@ def get_access_graph(
     num_objs: int,
     max_demand: float,
 ) -> access_graph_module.AccessGraph:
-    try:
-        obj_to_num_copies_map = data.NUM_OBJS_TO_MAX_DEMAND_TO_OBJ_TO_NUM_COPIES_MAP[num_objs][max_demand]
-        access_graph = access_graph_module.AccessGraph(k=num_objs, obj_to_num_copies_map=obj_to_num_copies_map)
-        return access_graph
+    # try:
+    #     obj_to_num_copies_map = data.NUM_OBJS_TO_MAX_DEMAND_TO_OBJ_TO_NUM_COPIES_MAP[num_objs][max_demand]
+    #     access_graph = access_graph_module.AccessGraph(k=num_objs, obj_to_num_copies_map=obj_to_num_copies_map)
+    #     return access_graph
 
-    except KeyError:
-        log(WARNING, "Data does not exist, will run optimization", num_objs=num_objs, max_demand=max_demand)
+    # except KeyError:
+    #     log(WARNING, "Data does not exist, will run optimization", num_objs=num_objs, max_demand=max_demand)
 
     demand_vector_list = demand_module.get_demand_vectors(
         num_objs=num_objs,
-        demand_ordered_for_most_popular_objs=[max_demand],
+        demand_ordered_for_most_popular_objs=(max_demand,),
     )
 
     storage_optimizer = single_obj_per_node_module.StorageOptimizerReplicationAndXOR_wSingleObjPerNode(
@@ -38,7 +38,7 @@ def plot_access_graphs(num_objs: int):
     max_demand_list = list(range(1, 21))
 
     num_plots = len(max_demand_list)
-    figsize = (num_plots * 3 * num_objs, 5)
+    figsize = (num_plots * 3 * num_objs, 10)
     fig, ax_list = plot.subplots(1, num_plots, figsize=figsize)
 
     for i, max_demand in enumerate(max_demand_list):
@@ -130,5 +130,5 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
 
 if __name__ == "__main__":
-    # plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
-    plot_access_graphs(num_objs=4)
+    plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
+    # plot_access_graphs(num_objs=3)

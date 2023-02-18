@@ -8,8 +8,8 @@ if [ $1 = "i" ]; then
 
 elif [ $1 = "j" ]; then
   # FILE="exp_mm1_stability"
-  # FILE="exp_single_obj_per_node"
-  FILE="exp_design"
+  FILE="exp_single_obj_per_node"
+  # FILE="exp_design"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)

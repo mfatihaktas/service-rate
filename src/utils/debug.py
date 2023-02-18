@@ -71,8 +71,8 @@ ERROR = 3
 CRITICAL = 4
 
 level_log_m = {
-    INFO: logger.info,
     DEBUG: logger.debug,
+    INFO: logger.info,
     WARNING: logger.warning,
     ERROR: logger.error,
     CRITICAL: logger.critical,
