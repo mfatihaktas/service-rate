@@ -224,8 +224,12 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
                 )
 
         # All `num_copies_var`'s must be >= 0
-        constraint_list.append(
-            cvxpy.vstack(list(self.access_graph.obj_to_num_copies_var_map.values())) >= 0
+        num_copies_var_hstack = cvxpy.hstack(list(self.access_graph.obj_to_num_copies_var_map.values()))
+        constraint_list.extend(
+            [
+                num_copies_var_hstack >= 0,
+                num_copies_var_hstack <= max(self.obj_id_set_to_min_span_size_map.values()),
+            ]
         )
 
         # objective = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.obj_to_num_copies_var_map.values())))
