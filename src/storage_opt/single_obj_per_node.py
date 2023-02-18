@@ -234,19 +234,21 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
         # objective = cvxpy.Minimize(cvxpy.sum(list(self.access_graph.obj_to_num_copies_var_map.values())))
 
+        # num_copies_var_list = list(self.access_graph.obj_to_num_copies_var_map.values())
         num_copies_var_list = []
         for obj, num_copies in self.access_graph.obj_to_num_copies_var_map.items():
             num_copies_var_list.append(
                 (1 + 0.01 * obj.get_num_symbols()) * num_copies
             )
-        # objective = cvxpy.Minimize(cvxpy.sum(num_copies_var_list))
 
-        # num_copies_var_list = list(self.access_graph.obj_to_num_copies_var_map.values())
+        num_copies_var_hstack = cvxpy.hstack(num_copies_var_list)
         objective = cvxpy.Minimize(
-            cvxpy.sum(num_copies_var_list)
-            + cvxpy.max(cvxpy.hstack(num_copies_var_list))
+            cvxpy.sum(num_copies_var_hstack)
+            # Fails with: `SCIP: maximal branching depth level exceeded!`
+            # cvxpy.sum(num_copies_var_hstack) + cvxpy.max(num_copies_var_hstack)
+            # cvxpy.sum(num_copies_var_hstack) + cvxpy.log_sum_exp(num_copies_var_hstack)
+            # cvxpy.sum_squares(num_copies_var_hstack)
         )
-        # objective = cvxpy.Minimize(cvxpy.max(cvxpy.hstack(num_copies_var_list)))
 
         prob = cvxpy.Problem(objective, constraint_list)
         prob.solve(solver="SCIP")
