@@ -8,7 +8,8 @@ if [ $1 = "i" ]; then
 
 elif [ $1 = "j" ]; then
   # FILE="exp_mm1_stability"
-  FILE="exp_single_obj_per_node"
+  # FILE="exp_single_obj_per_node"
+  FILE="exp_design"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
@@ -25,7 +26,7 @@ elif [ $1 = "j" ]; then
 
 cd ${HOME}/service-rate
 
-srun python ${PWD}/exp/storage_opt/${FILE}.py
+srun python ${PWD}/exp/storage_overlap/${FILE}.py
   " > job_script.sh
 
   # rm log/*
