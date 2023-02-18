@@ -2,6 +2,8 @@ import dataclasses
 import itertools
 import math
 
+from typing import Generator
+
 from src.utils.debug import *
 
 
@@ -49,7 +51,7 @@ class ReplicaDesign(StorageDesign):
 
     def frac_of_demand_vectors_covered_w_generator_input(
         self,
-        demand_vector_generator,
+        demand_vector_generator: Generator[list[float], None, None],
     ) -> float:
         num_demand_vector = 0
         num_demand_vector_covered = 0

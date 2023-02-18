@@ -33,7 +33,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
 
             ## With `frac_of_demand_vectors_covered_w_generator_input`
             frac_of_demand_vectors_covered = replica_design.frac_of_demand_vectors_covered_w_generator_input(
-                demand_vector_generator=demand.demand_vector_generator_w_zipf_law(
+                demand_vector_generator=demand.gen_demand_vector_w_zipf_law(
                     num_objs=replica_design.k,
                     num_popular_objs=num_popular_objs,
                     cum_demand=cum_demand,
@@ -52,7 +52,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         )
         plot.plot(zipf_tail_index_list, frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 9  # 21
+    k = 6  # 21
     n = k
     d = 3
     replica_design_list = [

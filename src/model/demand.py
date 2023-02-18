@@ -21,7 +21,7 @@ def get_demand_vectors(
     return [list(p) for p in itertools.permutations(base_demand_vector)]
 
 
-def demand_vector_generator(
+def gen_demand_vector(
     num_objs: int,
     demand_ordered_for_most_popular_objs: Tuple[float],
 ) -> list[float]:
@@ -61,7 +61,7 @@ def get_demand_vectors_w_zipf_law(
     )
 
 
-def demand_vector_generator_w_zipf_law(
+def gen_demand_vector_w_zipf_law(
     num_objs: int,
     num_popular_objs: int,
     cum_demand: float,
@@ -80,7 +80,7 @@ def demand_vector_generator_w_zipf_law(
         zipf_tail_index=zipf_tail_index,
     )
 
-    for demand_vector in demand_vector_generator(
+    for demand_vector in gen_demand_vector(
         num_objs=num_objs,
         demand_ordered_for_most_popular_objs=ordered_demand_vector,
     ):
