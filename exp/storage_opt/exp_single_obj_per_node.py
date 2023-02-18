@@ -102,8 +102,8 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
     # num_objs_list = [3]
     # num_objs_list = [4]
-    num_objs_list = [5, 6]
-    # num_objs_list = [3, 4, 5, 6]
+    # num_objs_list = [5, 6]
+    num_objs_list = [3, 4, 5, 6]
     for num_objs in num_objs_list:
         plot_(num_objs=num_objs)
 
