@@ -47,6 +47,22 @@ class ReplicaDesign(StorageDesign):
 
         return num_covered / len(demand_vector_list)
 
+    def frac_of_demand_vectors_covered_w_generator_input(
+        self,
+        demand_vector_generator,
+    ) -> float:
+        num_demand_vector = 0
+        num_demand_vector_covered = 0
+        for demand_vector in demand_vector_generator:
+            # log(DEBUG, "", demand_vector=demand_vector)
+
+            if self.is_demand_vector_covered(demand_vector=demand_vector):
+                num_demand_vector_covered += 1
+
+            num_demand_vector += 1
+
+        return num_demand_vector_covered / num_demand_vector
+
 
 @dataclasses.dataclass(repr=False)
 class ClusteringDesign(ReplicaDesign):
