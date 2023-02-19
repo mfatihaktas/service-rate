@@ -140,11 +140,11 @@ class ClusteringDesign(ReplicaDesign):
 
 @dataclasses.dataclass
 class CyclicDesign(ReplicaDesign):
-    def __post_init__(self):
+    def __post_init__(self, shift_size: int = 1):
         check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
 
         self.obj_id_to_node_id_set_map = {
-            obj_id: set(i % self.n for i in range(obj_id, obj_id + self.d))
+            obj_id: set(i % self.n for i in range(obj_id, obj_id + shift_size * self.d, shift_size))
             for obj_id in range(self.k)
         }
 
@@ -154,8 +154,9 @@ class CyclicDesign(ReplicaDesign):
             f"\t k= {self.k} \n"
             f"\t n= {self.n} \n"
             f"\t d= {self.d} \n"
+            f"\t shift_size= {shift_size} \n"
             ")"
         )
 
     def repr_for_plot(self):
-        return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d})"
+        return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.shift_size})"

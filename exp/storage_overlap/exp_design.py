@@ -82,7 +82,9 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     n = k
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
-        design.CyclicDesign(k=k, n=n, d=d),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=1),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=3),
     ]
 
     for replica_design in replica_design_list:
@@ -102,7 +104,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     )
 
     # Save the plot
-    plot.gcf().set_size_inches(6, 4)
+    plot.gcf().set_size_inches(8, 6)
     file_name = (
         "plots/plot_frac_demand_vectors_covered_vs_d"
         + f"_D_{cum_demand}"
