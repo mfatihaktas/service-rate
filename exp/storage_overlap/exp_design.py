@@ -1,3 +1,5 @@
+import numpy
+
 from src.storage_overlap import design
 from src.model import demand
 
@@ -19,7 +21,8 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     def plot_(replica_design: design.ReplicaDesign):
         log(INFO, f">> replica_design= {replica_design}")
 
-        frac_of_demand_vectors_covered_list = []
+        E_frac_of_demand_vectors_covered_list = []
+        std_frac_of_demand_vectors_covered_list = []
 
         for zipf_tail_index in zipf_tail_index_list:
             # With `get_demand_vectors_w_zipf_law`
@@ -48,22 +51,24 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
                 num_popular_objs=num_popular_objs,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
-                num_samples=500,
+                num_samples=5500,
                 num_sim_run=3,
             )
 
             log(INFO, f"> zipf_tail_index= {zipf_tail_index}",
-                frac_of_demand_vectors_covered=frac_of_demand_vectors_covered,
+                frac_of_demand_vectors_covered_list=frac_of_demand_vectors_covered_list,
             )
-            frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
+            E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
+            std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
         log(INFO, f"replica_design= {replica_design}",
             zipf_tail_index_list=zipf_tail_index_list,
-            frac_of_demand_vectors_covered_list=frac_of_demand_vectors_covered_list,
+            E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
+            std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
         )
-        plot.plot(zipf_tail_index_list, frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(zipf_tail_index_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 6  # 21
+    k = 21
     n = k
     d = 3
     replica_design_list = [

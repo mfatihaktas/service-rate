@@ -4,6 +4,8 @@ import math
 
 from typing import Generator
 
+from src.model import demand
+
 from src.utils.debug import *
 
 
@@ -22,19 +24,26 @@ class ReplicaDesign(StorageDesign):
     def is_demand_vector_covered(
         self,
         demand_vector: list[float],
+        num_nonneg_demand: None,
     ) -> bool:
+        log(DEBUG, "Started")
+
+        # Too slow ...
         k = len(demand_vector)
-        for combination_size in range(1, k + 1):
+        if num_nonneg_demand is None:
+            num_nonneg_demand = sum(1 for d in demand_vector if d > 0)
+
+        for combination_size in range(1, num_nonneg_demand + 1):
             for index_combination in itertools.combinations(list(range(k)), r=combination_size):
                 cum_demand = 0
                 node_id_set = set()
                 for i in index_combination:
                     node_id_set |= self.obj_id_to_node_id_set_map[i]
                     cum_demand += demand_vector[i]
-
                 if math.ceil(cum_demand) > len(node_id_set):
                     return False
 
+        log(DEBUG, "Done")
         return True
 
     def frac_of_demand_vectors_covered(
@@ -73,23 +82,34 @@ class ReplicaDesign(StorageDesign):
         num_samples: int,
         num_sim_run: int = 1,
     ) -> list[float]:
+        log(DEBUG, "Started",
+            num_popular_objs=num_popular_objs,
+            cum_demand=cum_demand,
+            zipf_tail_index=zipf_tail_index,
+            num_samples=num_samples,
+            num_sim_run=num_sim_run,
+        )
+
         frac_of_demand_vectors_covered_list = []
 
-        for _ in num_sim_run:
+        for sim_id in range(num_sim_run):
+            log(DEBUG, f"> sim_id= {sim_id}")
+
             num_covered = 0
-            for demand_vector_list in demand.sample_demand_vectors_w_zipf_law(
+            for demand_vector in demand.sample_demand_vectors_w_zipf_law(
                     num_objs=self.k,
                     num_popular_objs=num_popular_objs,
                     cum_demand=cum_demand,
                     zipf_tail_index=zipf_tail_index,
                     num_samples=num_samples,
             ):
-                if self.is_demand_vector_covered(demand_vector=demand_vector):
+                if self.is_demand_vector_covered(demand_vector=demand_vector, num_nonneg_demand=num_popular_objs):
                     num_covered += 1
 
-                frac_of_demand_vectors_covered = num_covered / num_samples
-                frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
+            frac_of_demand_vectors_covered = num_covered / num_samples
+            frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
 
+        log(DEBUG, "Done")
         return frac_of_demand_vectors_covered_list
 
 
