@@ -26,7 +26,7 @@ class ReplicaDesign(StorageDesign):
         demand_vector: list[float],
         num_nonneg_demand: None,
     ) -> bool:
-        log(DEBUG, "Started")
+        # log(DEBUG, "Started")
 
         k = len(demand_vector)
         if num_nonneg_demand is None:
@@ -42,7 +42,7 @@ class ReplicaDesign(StorageDesign):
                 if math.ceil(cum_demand) > len(node_id_set):
                     return False
 
-        log(DEBUG, "Done")
+        # log(DEBUG, "Done")
         return True
 
     def frac_of_demand_vectors_covered(
