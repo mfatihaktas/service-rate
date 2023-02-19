@@ -7,10 +7,12 @@ from src.utils.plot import *
 
 
 def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
-    num_popular_objs = 2
-    cum_demand = 3
+    num_popular_objs = 5
+    cum_demand = 5
     # zipf_tail_index_list = [0, 1, 2]
-    zipf_tail_index_list = [0, 0.5, 1, 1.5, 2]
+    # zipf_tail_index_list = [0, 0.5, 1, 1.5, 2]
+    # zipf_tail_index_list = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
+    zipf_tail_index_list = numpy.linspace(start=0, stop=4, num=20, endpoint=True)
 
     log(INFO, "Started",
         num_popular_objs=num_popular_objs,
@@ -51,7 +53,7 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
                 num_popular_objs=num_popular_objs,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
-                num_samples=5500,
+                num_samples=1000,
                 num_sim_run=3,
             )
 
@@ -68,9 +70,11 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         )
         plot.errorbar(zipf_tail_index_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 21
+    # k, d = 21, 3
+    # k, d = 111, 3
+    k, d = 30, 5
+    # k, d = 100, 5
     n = k
-    d = 3
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
         design.CyclicDesign(k=k, n=n, d=d),
@@ -85,7 +89,10 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     plot.ylabel("Frac of demands covered", fontsize=fontsize)
     plot.xlabel("Popularity skew index", fontsize=fontsize)
 
-    plot.title(f"D= {cum_demand}")
+    plot.title(
+        f"$D= {cum_demand}$"
+        + fr", $N_p= {num_popular_objs}$"
+    )
 
     # Save the plot
     plot.gcf().set_size_inches(6, 4)
@@ -93,6 +100,8 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         "plots/plot_frac_demand_vectors_covered_vs_d"
         + f"_D_{cum_demand}"
         + f"_k_{k}"
+        + f"_p_{num_popular_objs}"
+        + f"_d_{d}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
