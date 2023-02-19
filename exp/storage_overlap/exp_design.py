@@ -7,7 +7,7 @@ from src.utils.plot import *
 
 
 def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
-    num_popular_objs = 3
+    num_popular_objs = 2
     cum_demand = 3
     d = 3
     # zipf_tail_index_list = [0, 1, 2]
@@ -77,10 +77,9 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
         )
         plot.errorbar(zipf_tail_index_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    # k, d = 21, 3
-    # k, d = 111, 3
+    # k = 21
+    # k = 111
     k = 45
-    # k = 100
     n = k
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
