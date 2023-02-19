@@ -14,10 +14,15 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
     # zipf_tail_index_list = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
     zipf_tail_index_list = numpy.linspace(start=0, stop=4, num=20, endpoint=True)
 
+    num_samples = 100
+    num_sim_run = 3
+
     log(INFO, "Started",
         num_popular_objs=num_popular_objs,
         cum_demand=cum_demand,
         zipf_tail_index_list=zipf_tail_index_list,
+        num_samples=num_samples,
+        num_sim_run=num_sim_run,
     )
 
     def plot_(replica_design: design.ReplicaDesign):
@@ -53,8 +58,8 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
                 num_popular_objs=num_popular_objs,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
-                num_samples=1000,
-                num_sim_run=3,
+                num_samples=num_samples,
+                num_sim_run=num_sim_run,
             )
 
             log(INFO, f"> zipf_tail_index= {zipf_tail_index}",
@@ -91,7 +96,9 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
 
     plot.title(
         f"$D= {cum_demand}$"
-        + fr", $N_p= {num_popular_objs}$"
+        + r", $N_{\textrm{pop}}= $" + fr"$= {num_popular_objs}$"
+        + r", $N_{\textrm{sample}}= $" + fr"$= {num_samples}$"
+        + r", $N_{\textrm{sim}}= $" + fr"$= {num_popular_objs}$"
     )
 
     # Save the plot
