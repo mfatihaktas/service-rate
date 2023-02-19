@@ -124,7 +124,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     num_popular_obj_list = list(range(1, 10))
     demand_for_popular_obj = 3
 
-    num_sample = 1 # 200
+    num_sample = 200
     num_sim_run = 3
 
     log(INFO, "Started",
