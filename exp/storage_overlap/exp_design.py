@@ -181,10 +181,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     plot.xlabel("Number of popular objects", fontsize=fontsize)
 
     plot.title(
-        + r"$D_{\textrm{pop}}= $" + fr"$= {demand_for_popular_obj}$"
-        + r", $N_{\textrm{pop}}= $" + fr"$= {num_popular_obj}$"
-        + r", $N_{\textrm{sample}}= $" + fr"$= {num_sample}$"
-        + r", $N_{\textrm{sim}}= $" + fr"$= {num_sim_run}$"
+        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular_obj}$"
+        + r", $N_{\textrm{sample}}= $" + fr"${num_sample}$"
+        + r", $N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
     # Save the plot
@@ -194,7 +193,6 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
         + f"_Dpop_{demand_for_popular_obj}"
         + f"_k_{k}"
         + f"_d_{d}"
-        + f"_Np_{num_popular_obj}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")

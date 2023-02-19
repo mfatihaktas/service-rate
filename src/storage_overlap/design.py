@@ -24,21 +24,24 @@ class ReplicaDesign(StorageDesign):
     def is_demand_vector_covered(
         self,
         demand_vector: list[float],
-        num_nonneg_demand: None,
     ) -> bool:
         # log(DEBUG, "Started")
 
         k = len(demand_vector)
-        if num_nonneg_demand is None:
-            num_nonneg_demand = sum(1 for d in demand_vector if d > 0)
 
-        for combination_size in range(1, num_nonneg_demand + 1):
-            for index_combination in itertools.combinations(list(range(k)), r=combination_size):
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
+            for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
                 cum_demand = 0
                 node_id_set = set()
                 for i in index_combination:
                     node_id_set |= self.obj_id_to_node_id_set_map[i]
                     cum_demand += demand_vector[i]
+
                 if math.ceil(cum_demand) > len(node_id_set):
                     return False
 
@@ -102,7 +105,7 @@ class ReplicaDesign(StorageDesign):
                     zipf_tail_index=zipf_tail_index,
                     num_sample=num_sample,
             ):
-                if self.is_demand_vector_covered(demand_vector=demand_vector, num_nonneg_demand=num_popular_obj):
+                if self.is_demand_vector_covered(demand_vector=demand_vector):
                     num_covered += 1
 
             frac_of_demand_vectors_covered = num_covered / num_sample
