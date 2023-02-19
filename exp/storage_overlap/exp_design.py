@@ -7,19 +7,21 @@ from src.utils.plot import *
 
 
 def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
-    num_popular_objs = 5
-    cum_demand = 5
+    num_popular_objs = 3
+    cum_demand = 3
+    d = 3
     # zipf_tail_index_list = [0, 1, 2]
     # zipf_tail_index_list = [0, 0.5, 1, 1.5, 2]
     # zipf_tail_index_list = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
     zipf_tail_index_list = numpy.linspace(start=0, stop=4, num=20, endpoint=True)
 
-    num_samples = 100
+    num_samples = 200
     num_sim_run = 3
 
     log(INFO, "Started",
         num_popular_objs=num_popular_objs,
         cum_demand=cum_demand,
+        d=d,
         zipf_tail_index_list=zipf_tail_index_list,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
@@ -77,8 +79,8 @@ def plot_frac_demand_vectors_covered_vs_d_for_different_replication_designs():
 
     # k, d = 21, 3
     # k, d = 111, 3
-    k, d = 30, 5
-    # k, d = 100, 5
+    k = 45
+    # k = 100
     n = k
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
