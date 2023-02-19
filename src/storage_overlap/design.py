@@ -19,7 +19,7 @@ class StorageDesign:
 class ReplicaDesign(StorageDesign):
     d: int
 
-    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(default=None)
+    # obj_id_to_node_id_set_map: dict[int, set[int]] = None
 
     def is_demand_vector_covered(
         self,
@@ -28,7 +28,6 @@ class ReplicaDesign(StorageDesign):
     ) -> bool:
         log(DEBUG, "Started")
 
-        # Too slow ...
         k = len(demand_vector)
         if num_nonneg_demand is None:
             num_nonneg_demand = sum(1 for d in demand_vector if d > 0)
@@ -140,7 +139,7 @@ class ClusteringDesign(ReplicaDesign):
 
 @dataclasses.dataclass
 class CyclicDesign(ReplicaDesign):
-    shift_size: int = dataclasses.field(default=1)
+    shift_size: int
 
     def __post_init__(self):
         check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
@@ -159,7 +158,7 @@ class CyclicDesign(ReplicaDesign):
             f"\t k= {self.k} \n"
             f"\t n= {self.n} \n"
             f"\t d= {self.d} \n"
-            f"\t shift_size= {shift_size} \n"
+            f"\t shift_size= {self.shift_size} \n"
             ")"
         )
 
