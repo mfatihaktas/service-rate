@@ -75,17 +75,17 @@ class ReplicaDesign(StorageDesign):
 
     def sim_frac_of_demand_vectors_covered(
         self,
-        num_popular_objs: int,
+        num_popular_obj: int,
         cum_demand: float,
         zipf_tail_index: float,
-        num_samples: int,
+        num_sample: int,
         num_sim_run: int = 1,
     ) -> list[float]:
         log(DEBUG, "Started",
-            num_popular_objs=num_popular_objs,
+            num_popular_obj=num_popular_obj,
             cum_demand=cum_demand,
             zipf_tail_index=zipf_tail_index,
-            num_samples=num_samples,
+            num_sample=num_sample,
             num_sim_run=num_sim_run,
         )
 
@@ -96,16 +96,16 @@ class ReplicaDesign(StorageDesign):
 
             num_covered = 0
             for demand_vector in demand.sample_demand_vectors_w_zipf_law(
-                    num_objs=self.k,
-                    num_popular_objs=num_popular_objs,
+                    num_obj=self.k,
+                    num_popular_obj=num_popular_obj,
                     cum_demand=cum_demand,
                     zipf_tail_index=zipf_tail_index,
-                    num_samples=num_samples,
+                    num_sample=num_sample,
             ):
-                if self.is_demand_vector_covered(demand_vector=demand_vector, num_nonneg_demand=num_popular_objs):
+                if self.is_demand_vector_covered(demand_vector=demand_vector, num_nonneg_demand=num_popular_obj):
                     num_covered += 1
 
-            frac_of_demand_vectors_covered = num_covered / num_samples
+            frac_of_demand_vectors_covered = num_covered / num_sample
             frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
 
         log(DEBUG, "Done")
