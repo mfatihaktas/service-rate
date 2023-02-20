@@ -5,7 +5,7 @@ from src.storage_overlap import design
 from src.utils.plot import *
 
 
-def plot_frac_demand_vectors_covered_vs_tail_index_for_replica_design():
+def plot_frac_demand_vectors_covered_vs_tail_index():
     num_popular_obj = 2
     cum_demand = 3
     d = 3
@@ -119,21 +119,18 @@ def plot_frac_demand_vectors_covered_vs_tail_index_for_replica_design():
     log(INFO, "Done")
 
 
-def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
-    d = 3
+def plot_frac_demand_vectors_covered_vs_num_popular_objs(
+    d: int,
+    demand_for_popular: int,
+    num_sample: int = 300,
+    num_sim_run: int = 3,
+):
     num_popular_obj_list = list(range(1, 10))
-    # demand_for_popular_obj = 5
-    # demand_for_popular_obj = 4
-    # demand_for_popular_obj = 3
-    # demand_for_popular_obj = 2
-    demand_for_popular_obj = 1
-
-    num_sample = 300
-    num_sim_run = 3
 
     log(INFO, "Started",
         d=d,
         num_popular_obj_list=num_popular_obj_list,
+        demand_for_popular=demand_for_popular,
         num_sample=num_sample,
         num_sim_run=num_sim_run,
     )
@@ -147,7 +144,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
         for num_popular_obj in num_popular_obj_list:
             frac_of_demand_vectors_covered_list = replica_design.sim_frac_of_demand_vectors_covered(
                 num_popular_obj=num_popular_obj,
-                cum_demand=demand_for_popular_obj * num_popular_obj,
+                cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
                 num_sample=num_sample,
                 num_sim_run=num_sim_run,
@@ -187,7 +184,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     plot.xlabel("Number of popular objects", fontsize=fontsize)
 
     plot.title(
-        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular_obj}$"
+        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular}$"
         + r", $N_{\textrm{sample}}= $" + fr"${num_sample}$"
         + r", $N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -198,7 +195,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
         "plots/plot_frac_demand_vectors_covered_vs_num_popular_objs"
         + f"_k_{k}"
         + f"_d_{d}"
-        + f"_Dpop_{demand_for_popular_obj}"
+        + f"_Dpop_{demand_for_popular}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -207,6 +204,27 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     log(INFO, "Done")
 
 
+def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
+    log(INFO, "Started")
+
+    def plot_(d: int):
+        for demand_for_popular in range(1, d + 1):
+            plot_frac_demand_vectors_covered_vs_num_popular_objs(
+                d=d,
+                demand_for_popular=demand_for_popular,
+                num_sample=10,
+                num_sim_run=3,
+            )
+
+    plot_(d=2)
+    plot_(d=3)
+    plot_(d=4)
+    plot_(d=5)
+    plot_(d=6)
+
+    log(INFO, "Done")
+
+
 if __name__ == "__main__":
-    # plot_frac_demand_vectors_covered_vs_tail_index_for_replica_design()
-    plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design()
+    # plot_frac_demand_vectors_covered_vs_tail_index()
+    manage_plot_frac_demand_vectors_covered_vs_num_popular_objs()

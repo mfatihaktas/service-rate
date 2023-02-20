@@ -122,7 +122,7 @@ def sample_demand_vectors_w_zipf_law(
     # )
 
     for sample_id in range(num_sample):
-        log(DEBUG, f"> sample_id= {sample_id}")
+        # log(DEBUG, f"> sample_id= {sample_id}")
 
         demand_vector = num_obj * [0]
         index_list = random.sample(list(range(num_obj)), num_popular_obj)
