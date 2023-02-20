@@ -93,7 +93,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
     fontsize = 14
     plot.legend(fontsize=fontsize)
     # plot.yscale("log")
-    plot.ylabel("Fraction of demands covered", fontsize=fontsize)
+    plot.ylabel("Fraction of demand vectors covered", fontsize=fontsize)
     plot.xlabel("Popularity skew index", fontsize=fontsize)
 
     plot.title(
@@ -125,7 +125,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
-    num_popular_obj_list = list(range(1, 10))
+    num_popular_obj_list = list(range(1, 20))
 
     log(INFO, "Started",
         d=d,
@@ -170,7 +170,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
         design.CyclicDesign(k=k, n=n, d=d, shift_size=1),
-        # design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3),
         design.RandomDesign(k=k, n=n, d=d),
     ]
@@ -181,13 +181,14 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     fontsize = 14
     plot.legend(fontsize=fontsize)
     # plot.yscale("log")
-    plot.ylabel("Fraction of demands covered", fontsize=fontsize)
+    plot.ylabel("Fraction of demand vectors covered", fontsize=fontsize)
     plot.xlabel("Number of popular objects", fontsize=fontsize)
 
     plot.title(
-        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular}$"
-        + r", $N_{\textrm{sample}}= $" + fr"${num_sample}$"
-        + r", $N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
+        fr"$d= {d}$, "
+        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular}$, "
+        r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
+        r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
     # Save the plot
@@ -213,7 +214,7 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
             plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=10,  # 500,
+                num_sample=1000,
                 num_sim_run=3,
             )
 
