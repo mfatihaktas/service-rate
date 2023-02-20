@@ -243,9 +243,9 @@ class StorageOptimizerReplicationAndXOR_wSingleObjPerNode(storage_optimizer_modu
 
         num_copies_var_hstack = cvxpy.hstack(num_copies_var_list)
         objective = cvxpy.Minimize(
-            cvxpy.sum(num_copies_var_hstack)
+            # cvxpy.sum(num_copies_var_hstack)
             # Fails with: `SCIP: maximal branching depth level exceeded!`
-            # cvxpy.sum(num_copies_var_hstack) + cvxpy.max(num_copies_var_hstack)
+            cvxpy.sum(num_copies_var_hstack) + cvxpy.max(num_copies_var_hstack)
             # cvxpy.sum(num_copies_var_hstack) + cvxpy.log_sum_exp(num_copies_var_hstack)
             # cvxpy.sum_squares(num_copies_var_hstack)
         )
