@@ -1,6 +1,8 @@
+import collections
 import dataclasses
 import itertools
 import math
+import random
 
 from typing import Generator
 
@@ -169,3 +171,74 @@ class CyclicDesign(ReplicaDesign):
     def repr_for_plot(self):
         # return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.shift_size})"
         return f"Cyclic(s= {self.shift_size})"
+
+
+@dataclasses.dataclass
+class RandomDesign(ReplicaDesign):
+    def __post_init__(self):
+        self.obj_id_to_node_id_set_map = collections.defaultdict(set)
+
+        num_objs_per_node = (self.k * self.d) // self.n
+        log(DEBUG, f"num_objs_per_node= {num_objs_per_node}")
+        node_id_to_obj_id_set_map = collections.defaultdict(set)
+        # node_id_to_num_objs_map = {node_id: 0 for node_id in range(self.n)}
+
+        obj_id_queue = collections.deque(
+            [
+                obj_id
+                for _ in range(self.d)
+                for obj_id in range(self.k)
+            ]
+        )
+
+        for obj_id in obj_id_queue:
+            # log(DEBUG, f"> obj_id= {obj_id}, rep_id= {rep_id}")
+
+            node_id = random.randint(0, self.n - 1)
+            # log(DEBUG, f"node_id= {node_id}")
+
+            counter = 0
+            while (
+                len(node_id_to_obj_id_set_map[node_id]) == num_objs_per_node
+                or node_id in self.obj_id_to_node_id_set_map[obj_id]
+            ):
+                node_id = (node_id + 1) % self.n
+                # log(DEBUG, f"counter= {counter}",
+                #     node_id=node_id,
+                #     rep_id=rep_id,
+                # )
+
+                counter += 1
+                if counter == self.n:
+                    # check(False, f"Could not find node for obj_id= {obj_id}",
+                    #       node_id_to_num_objs_map=node_id_to_num_objs_map,
+                    #       obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
+                    # )
+
+                    for node_id in range(self.n):
+                        if node_id in self.obj_id_to_node_id_set_map[obj_id]:
+                            continue
+
+                        obj_id_to_swap_set = node_id_to_obj_id_set_map[node_id]
+                        obj_id_to_swap = next(iter(obj_id_to_swap_set))
+
+                        self.obj_id_to_node_id_set_map[obj_id_to_swap].remove(node_id)
+                        self.obj_id_to_node_id_set_map[obj_id].add(node_id)
+
+                        obj_id_queue.append(obj_id_to_swap)
+
+            self.obj_id_to_node_id_set_map[obj_id].add(node_id)
+            node_id_to_obj_id_set_map[node_id].add(obj_id)
+
+    def __repr__(self):
+        return (
+            "RandomDesign( \n"
+            f"\t k= {self.k} \n"
+            f"\t n= {self.n} \n"
+            f"\t d= {self.d} \n"
+            ")"
+        )
+
+    def repr_for_plot(self):
+        # return f"RandomDesign(k= {self.k}, n= {self.n}, d= {self.d})"
+        return "RandomDesign"

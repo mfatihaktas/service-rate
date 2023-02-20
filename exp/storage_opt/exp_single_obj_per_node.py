@@ -22,8 +22,8 @@ def get_access_graph(
 
     demand_vector_list = demand_module.get_demand_vectors(
         num_obj=num_obj,
-        # demand_ordered_for_most_popular_objs=(max_demand,),
-        demand_ordered_for_most_popular_objs=(max_demand, 1, 1),
+        demand_ordered_for_most_popular_objs=(max_demand,),
+        # demand_ordered_for_most_popular_objs=(max_demand, 1, 1),
     )
 
     storage_optimizer = single_obj_per_node_module.StorageOptimizerReplicationAndXOR_wSingleObjPerNode(
