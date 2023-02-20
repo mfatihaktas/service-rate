@@ -107,9 +107,9 @@ def plot_frac_demand_vectors_covered_vs_tail_index_for_replica_design():
     plot.gcf().set_size_inches(8, 6)
     file_name = (
         "plots/plot_frac_demand_vectors_covered_vs_tail_index"
-        + f"_D_{cum_demand}"
         + f"_k_{k}"
         + f"_d_{d}"
+        + f"_D_{cum_demand}"
         + f"_Np_{num_popular_obj}"
         + ".png"
     )
@@ -122,9 +122,13 @@ def plot_frac_demand_vectors_covered_vs_tail_index_for_replica_design():
 def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     d = 3
     num_popular_obj_list = list(range(1, 10))
-    demand_for_popular_obj = 3
+    # demand_for_popular_obj = 5
+    # demand_for_popular_obj = 4
+    # demand_for_popular_obj = 3
+    # demand_for_popular_obj = 2
+    demand_for_popular_obj = 1
 
-    num_sample = 200
+    num_sample = 300
     num_sim_run = 3
 
     log(INFO, "Started",
@@ -162,7 +166,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
         )
         plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    k = 45
+    # k = 45
+    # k = 111
+    k = 120
     n = k
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
@@ -190,9 +196,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_replica_design():
     plot.gcf().set_size_inches(8, 6)
     file_name = (
         "plots/plot_frac_demand_vectors_covered_vs_num_popular_objs"
-        + f"_Dpop_{demand_for_popular_obj}"
         + f"_k_{k}"
         + f"_d_{d}"
+        + f"_Dpop_{demand_for_popular_obj}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
