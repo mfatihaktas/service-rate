@@ -140,7 +140,7 @@ class ClusteringDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Clustering(k= {self.k}, n= {self.n}, d= {self.d})"
-        return "Clustering"
+        return r"$\textrm{Clustering}$"
 
 
 @dataclasses.dataclass
@@ -170,7 +170,7 @@ class CyclicDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.shift_size})"
-        return f"Cyclic(s= {self.shift_size})"
+        return r"$\textrm{Cyclic}$" + fr"$(s={self.shift_size})$"
 
 
 @dataclasses.dataclass
@@ -241,4 +241,4 @@ class RandomDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"RandomDesign(k= {self.k}, n= {self.n}, d= {self.d})"
-        return "RandomDesign"
+        return r"$\textrm{Random}$"
