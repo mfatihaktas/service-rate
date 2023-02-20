@@ -125,7 +125,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
-    num_popular_obj_list = list(range(1, 20))
+    num_popular_obj_list = list(range(1, 10))
 
     log(INFO, "Started",
         d=d,
