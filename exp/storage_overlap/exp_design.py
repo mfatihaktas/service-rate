@@ -1,3 +1,4 @@
+import joblib
 import numpy
 
 from src.storage_overlap import design
@@ -228,6 +229,24 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
     log(INFO, "Done")
 
 
+def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
+    log(INFO, "Started")
+
+    joblib.Parallel(n_jobs=-1, prefer="threads")(
+        joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
+            d=d,
+            demand_for_popular=demand_for_popular,
+            num_sample=1000,
+            num_sim_run=3,
+        )
+        for d in range(2, 7)
+        for demand_for_popular in range(1, d + 1)
+    )
+
+    log(INFO, "Done")
+
+
 if __name__ == "__main__":
     # plot_frac_demand_vectors_covered_vs_tail_index()
-    manage_plot_frac_demand_vectors_covered_vs_num_popular_objs()
+    # manage_plot_frac_demand_vectors_covered_vs_num_popular_objs()
+    manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib()
