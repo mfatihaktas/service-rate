@@ -232,7 +232,7 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
 def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
     log(INFO, "Started")
 
-    joblib.Parallel(n_jobs=-1, prefer="threads")(
+    joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
