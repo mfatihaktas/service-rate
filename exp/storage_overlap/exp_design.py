@@ -167,12 +167,13 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     # k = 111
     k = 120
     n = k
+    use_cvxpy = False
     replica_design_list = [
-        design.ClusteringDesign(k=k, n=n, d=d),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=1),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
-        # design.CyclicDesign(k=k, n=n, d=d, shift_size=3),
-        design.RandomDesign(k=k, n=n, d=d),
+        design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
+        design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
     ]
 
     for replica_design in replica_design_list:

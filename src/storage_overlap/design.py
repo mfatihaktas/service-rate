@@ -7,6 +7,10 @@ import random
 from typing import Generator
 
 from src.model import demand
+from src.service_rate import (
+    service_rate,
+    storage_scheme as storage_scheme_module,
+)
 
 from src.utils.debug import *
 
@@ -20,16 +24,43 @@ class StorageDesign:
 @dataclasses.dataclass
 class ReplicaDesign(StorageDesign):
     d: int
+    use_cvxpy: bool
 
-    # obj_id_to_node_id_set_map: dict[int, set[int]] = None
+    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        log(WARNING, "", use_cvxpy=self.use_cvxpy)
+
+        if self.use_cvxpy:
+            self.service_rate_inspector = self.get_service_rate_inspector()
+
+    def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
+        node_id_to_objs_list = [[] for _ in range(self.n)]
+        for obj_id, node_id_set in self.obj_id_to_node_id_set_map.items():
+            for node_id in node_id_set:
+                node_id_to_objs_list[node_id].append(
+                    storage_scheme_module.PlainObj(id_str=f"{obj_id}")
+                )
+
+        storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
+        log(DEBUG, "", storage_scheme=storage_scheme)
+
+        return service_rate.ServiceRateInspector(
+            m=len(node_id_to_objs_list),
+            C=1,
+            G=storage_scheme.obj_encoding_matrix,
+            obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
+            redundancy_w_two_xors=False,
+            max_repair_set_size=1,
+        )
 
     def is_demand_vector_covered(
         self,
         demand_vector: list[float],
     ) -> bool:
-        # log(DEBUG, "Started")
-
-        k = len(demand_vector)
+        if self.use_cvxpy:
+            # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
+            return self.service_rate_inspector.is_in_cap_region(demand_vector)
 
         nonneg_demand_index_list = []
         for i, d in enumerate(demand_vector):
@@ -129,6 +160,8 @@ class ClusteringDesign(ReplicaDesign):
             for obj_id in range(self.k)
         }
 
+        super().__post_init__()
+
     def __repr__(self):
         return (
             "ClusteringDesign( \n"
@@ -157,6 +190,8 @@ class CyclicDesign(ReplicaDesign):
             )
             for obj_id in range(self.k)
         }
+
+        super().__post_init__()
 
     def __repr__(self):
         return (
