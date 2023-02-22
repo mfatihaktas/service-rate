@@ -170,11 +170,12 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     n = k
     use_cvxpy = False
     replica_design_list = [
-        design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
+        # design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
-        design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        # design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.TwoXORDesign(k=124, n=124, d=d),
     ]
 
     for replica_design in replica_design_list:
@@ -239,8 +240,9 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(2, 7)
+        for d in range(3, 4)
         for demand_for_popular in range(1, d + 1)
+        # for d in range(2, 7)
     )
 
     log(INFO, "Done")

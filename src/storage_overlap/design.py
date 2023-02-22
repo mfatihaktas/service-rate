@@ -287,106 +287,17 @@ class RandomDesign(ReplicaDesign):
 class TwoXORDesign(StorageDesign):
     d: int
 
-    """
     def __post_init__(self):
         check(self.k == self.n, f"k= {self.k} and n= {self.n} must be equal")
 
         num_objs_per_node = self.d
 
         # Place the systematic copies
-        node_id_to_obj_set_map = {
+        self.node_id_to_obj_set_map = {
             node_id: {storage_object.SysObject(symbol=node_id)} for node_id in range(self.n)
         }
         obj_id_to_num_service_choice_map = {obj_id: 1 for obj_id in range(self.k)}
-        disjoint_obj_id_sets_for_service_choice = data_structures.DisjointSets(n=self.k)
-        disjoint_obj_id_sets_for_node = data_structures.DisjointSets(n=self.k)
-
-        # Place the XOR copies
-        node_id = 0
-        for obj_id in range(self.k):
-            # num_service_choices_for_obj_id = disjoint_obj_id_sets_for_service_choice.get_connected_component_size(obj_id)
-            # if num_service_choices_for_obj_id == self.d:
-            #     continue
-            if obj_id_to_num_service_choice_map[obj_id] == self.d:
-                continue
-
-            found_other_obj_id = False
-            for other_obj_id in range(self.k):
-                # num_service_choices_for_other_obj_id = disjoint_obj_id_sets_for_service_choice.get_connected_component_size(other_obj_id)
-                # if num_service_choices_for_other_obj_id == self.d:
-                #     continue
-                if obj_id_to_num_service_choice_map[other_obj_id] == self.d:
-                    continue
-                elif disjoint_obj_id_sets_for_service_choice.is_connected(obj_id, other_obj_id):
-                    continue
-                elif disjoint_obj_id_sets_for_node.is_connected(obj_id, other_obj_id):
-                    continue
-
-                xor_obj = storage_object.XORedObject(symbols=(obj_id, other_obj_id))
-                found_other_obj_id = True
-
-                found_node_for_xor = False
-                for _ in range(self.n):
-                    node_id = (node_id + 1) % self.n
-                    log(DEBUG, "***", node_id=node_id)
-
-                    obj_set = node_id_to_obj_set_map[node_id]
-                    if len(obj_set) == num_objs_per_node:
-                        continue
-
-                    obj_id_on_node_set = set()
-                    for obj in obj_set:
-                        for obj_id_ in obj.get_symbols():
-                            obj_id_on_node_set.add(obj_id_)
-                    log(DEBUG, "", node_id=node_id, obj_set=obj_set, obj_id_on_node_set=obj_id_on_node_set)
-
-                    if disjoint_obj_id_sets_for_service_choice.do_intersect(
-                        x_set=set(xor_obj.get_symbols()),
-                        y_set=obj_id_on_node_set,
-                    ):
-                        continue
-
-                    log(DEBUG, "Adding", node_id=node_id, xor_obj=xor_obj)
-                    # node_id_to_obj_set_map[node_id].add(xor_obj)
-                    obj_set.add(xor_obj)
-                    obj_id_to_num_service_choice_map[obj_id] += 1
-                    obj_id_to_num_service_choice_map[other_obj_id] += 1
-
-                    disjoint_obj_id_sets_for_service_choice.union(obj_id, other_obj_id)
-                    for obj_id_on_node in obj_id_on_node_set:
-                        disjoint_obj_id_sets_for_node.union(obj_id, obj_id_on_node)
-                        disjoint_obj_id_sets_for_node.union(other_obj_id, obj_id_on_node)
-
-                    found_node_for_xor = True
-                    break
-
-                log(DEBUG, "", node_id=node_id)
-                check(found_node_for_xor, f"Could not find node for xor_obj= {xor_obj}",
-                      node_id_to_obj_set_map=node_id_to_obj_set_map
-                )
-                break
-
-            check(found_other_obj_id, "Could not find `other_obj_id` for `obj_id`!",
-                  node_id_to_obj_set_map=node_id_to_obj_set_map,
-            )
-
-        log(DEBUG, "", node_id_to_obj_set_map=node_id_to_obj_set_map)
-    """
-
-    def __post_init__(self):
-        check(self.k == self.n, f"k= {self.k} and n= {self.n} must be equal")
-
-        num_objs_per_node = self.d
-
-        # Place the systematic copies
-        node_id_to_obj_set_map = {
-            node_id: {storage_object.SysObject(symbol=node_id)} for node_id in range(self.n)
-        }
-        obj_id_to_num_service_choice_map = {obj_id: 1 for obj_id in range(self.k)}
-        # obj_id_to_node_id_in_service_choice_set_map = {obj_id: set(obj_id) for obj_id in range(self.k)}
         obj_id_to_cannot_xor_with_set_map = {obj_id: {obj_id} for obj_id in range(self.k)}
-
-        # disjoint_obj_id_sets = data_structures.DisjointSets(n=self.k)
 
         # Place the XOR copies
         node_id = 0
@@ -400,8 +311,6 @@ class TwoXORDesign(StorageDesign):
                     continue
                 elif other_obj_id in obj_id_to_cannot_xor_with_set_map[obj_id]:
                     continue
-                # elif disjoint_obj_id_sets.is_connected(obj_id, other_obj_id):
-                #     continue
 
                 xor_obj = storage_object.XORedObject(symbols=(obj_id, other_obj_id))
                 found_other_obj_id = True
@@ -411,7 +320,7 @@ class TwoXORDesign(StorageDesign):
                     node_id = (node_id + 1) % self.n
                     log(DEBUG, "***", node_id=node_id)
 
-                    obj_set = node_id_to_obj_set_map[node_id]
+                    obj_set = self.node_id_to_obj_set_map[node_id]
                     if len(obj_set) == num_objs_per_node:
                         continue
 
@@ -421,11 +330,6 @@ class TwoXORDesign(StorageDesign):
                             obj_id_on_node_set.add(obj_id_)
                     log(DEBUG, "", node_id=node_id, obj_set=obj_set, obj_id_on_node_set=obj_id_on_node_set)
 
-                    # if disjoint_obj_id_sets_for_service_choice.do_intersect(
-                    #     x_set=set(xor_obj.get_symbols()),
-                    #     y_set=obj_id_on_node_set,
-                    # ):
-                    #     continue
                     skip_node = False
                     for obj_id_ in obj_id_on_node_set:
                         if (
@@ -436,16 +340,12 @@ class TwoXORDesign(StorageDesign):
                     if skip_node:
                         continue
 
-                    log(DEBUG, "Adding", node_id=node_id, xor_obj=xor_obj)
-                    # node_id_to_obj_set_map[node_id].add(xor_obj)
+                    # log(DEBUG, "Adding", node_id=node_id, xor_obj=xor_obj)
+                    # self.node_id_to_obj_set_map[node_id].add(xor_obj)
                     obj_set.add(xor_obj)
                     obj_id_to_num_service_choice_map[obj_id] += 1
                     obj_id_to_num_service_choice_map[other_obj_id] += 1
 
-                    # disjoint_obj_id_sets_for_service_choice.union(obj_id, other_obj_id)
-                    # for obj_id_on_node in obj_id_on_node_set:
-                    #     disjoint_obj_id_sets_for_node.union(obj_id, obj_id_on_node)
-                    #     disjoint_obj_id_sets_for_node.union(other_obj_id, obj_id_on_node)
                     for obj_id_ in obj_id_on_node_set | {obj_id, other_obj_id}:
                         obj_id_to_cannot_xor_with_set_map[obj_id].add(obj_id_)
                         obj_id_to_cannot_xor_with_set_map[other_obj_id].add(obj_id_)
@@ -455,15 +355,51 @@ class TwoXORDesign(StorageDesign):
 
                 log(DEBUG, "", node_id=node_id)
                 check(found_node_for_xor, f"Could not find node for xor_obj= {xor_obj}",
-                      node_id_to_obj_set_map=node_id_to_obj_set_map
+                      node_id_to_obj_set_map=self.node_id_to_obj_set_map
                 )
                 break
 
             check(found_other_obj_id, "Could not find `other_obj_id` for `obj_id`!",
                   obj_id=obj_id,
-                  node_id_to_obj_set_map=node_id_to_obj_set_map,
+                  node_id_to_obj_set_map=self.node_id_to_obj_set_map,
                   obj_id_to_cannot_xor_with_set_map=obj_id_to_cannot_xor_with_set_map,
                   obj_id_to_num_service_choice_map=obj_id_to_num_service_choice_map,
             )
 
-        log(DEBUG, "", node_id_to_obj_set_map=node_id_to_obj_set_map)
+        log(DEBUG, "", node_id_to_obj_set_map=self.node_id_to_obj_set_map)
+
+        self.service_rate_inspector = self.get_service_rate_inspector()
+
+    def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
+        node_id_to_objs_list = [[] for _ in range(self.n)]
+        for node_id, obj_set in self.node_id_to_obj_set_map:
+            for obj in obj_set:
+                if isinstance(obj, storage_object.SysObject):
+                    obj_ = storage_scheme_module.PlainObj(id_str=f"{obj.symbol}")
+                elif isinstance(obj, storage_object.XORedObject):
+                    symbol_list = obj.get_symbols()
+                    obj_ = storage_scheme_module.CodedObj(
+                        coeff_obj_list=[
+                            (1, storage_scheme_module.PlainObj(id_str=f"{symbol_list[0]}")),
+                            (1, storage_scheme_module.PlainObj(id_str=f"{symbol_list[1]}")),
+                        ]
+                    )
+
+                node_id_to_objs_list[node_id].append(obj_)
+
+        storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
+        log(DEBUG, "", storage_scheme=storage_scheme)
+
+        return service_rate.ServiceRateInspector(
+            m=len(node_id_to_objs_list),
+            C=1,
+            G=storage_scheme.obj_encoding_matrix,
+            obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
+            redundancy_w_two_xors=True,
+        )
+
+    def is_demand_vector_covered(
+        self,
+        demand_vector: list[float],
+    ) -> bool:
+        return self.service_rate_inspector.is_in_cap_region(demand_vector)

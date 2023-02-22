@@ -42,7 +42,8 @@ def test_CyclicDesign(k_n_d: Tuple[int, int, int]):
 def test_TwoXORDesign():
     # k, n = 7, 7
     # k = 106
-    k = 124
+    k = 121
+    # k = 124
     n = k
     xor_design = design.TwoXORDesign(k=k, n=n, d=3)
 
