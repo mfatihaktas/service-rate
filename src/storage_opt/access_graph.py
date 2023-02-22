@@ -2,96 +2,16 @@ import abc
 import collections
 import cvxpy
 import dataclasses
-import functools
 import itertools
 import networkx
-import operator
+
+from src.utils import storage_object
 
 from src.utils.debug import *
 from src.utils.plot import *
 
 
-@dataclasses.dataclass
-class Object:
-    @abc.abstractmethod
-    def get_num_symbols(self):
-        pass
-
-    @abc.abstractmethod
-    def get_symbols(self):
-        pass
-
-    @abc.abstractmethod
-    def get_networkx_label(self):
-        pass
-
-
-@dataclasses.dataclass
-class SysObject(Object):
-    symbol: int
-
-    # def __eq__(self, other_obj: Object):
-    #     return isinstance(other_obj, SysObject) and self.symbol == other_obj.symbol
-
-    def __cmp__(self, other_obj: Object):
-        if self.symbol == other_obj.symbol:
-            return 0
-        elif self.symbol < other_obj.symbol:
-            return -1
-        else:
-            return 1
-
-    def __hash__(self):
-        return hash(self.symbol)
-
-    def get_symbols(self) -> list[int]:
-        return [self.symbol]
-
-    def get_xor(self) -> int:
-        return self.symbol
-
-    def get_num_symbols(self) -> int:
-        return 1
-
-    def get_networkx_label(self) -> str:
-        return str(self.symbol)
-
-
-@dataclasses.dataclass
-class XORedObject(Object):
-    symbols: tuple[int]
-
-    # def __eq__(self, other_obj: Object):
-    #     return (
-    #         isinstance(other_obj, XORedObject)
-    #         and self.symbols == other_obj.symbols
-    #     )
-
-    def __cmp__(self, other_obj: Object):
-        if self.symbols == other_obj.symbols:
-            return 0
-        elif self.symbols < other_obj.symbols:
-            return -1
-        else:
-            return 1
-
-    def __hash__(self):
-        return hash(self.symbols)
-
-    def get_symbols(self) -> list[int]:
-        return self.symbols
-
-    def get_xor(self) -> int:
-        return functools.reduce(operator.ixor, self.symbols)
-
-    def get_num_symbols(self) -> int:
-        return len(self.symbols)
-
-    def get_networkx_label(self) -> str:
-        return "+".join(str(sym) for sym in self.symbols)
-
-
-def get_symbol_recovered_by_object_pair(obj_1: Object, obj_2: Object) -> int:
+def get_symbol_recovered_by_object_pair(obj_1: storage_object.Object, obj_2: storage_object.Object) -> int:
     if abs(obj_1.get_num_symbols() - obj_2.get_num_symbols()) != 1:
         return None
 
@@ -115,26 +35,26 @@ class AccessEdge:
 
 @dataclasses.dataclass
 class AccessLoop:
-    obj: Object
+    obj: storage_object.Object
 
-    def get_touched_objects(self) -> list[Object]:
+    def get_touched_objects(self) -> list[storage_object.Object]:
         return [self.obj]
 
 @dataclasses.dataclass
 class RecoveryEdge:
-    obj_1: Object
-    obj_2: Object
+    obj_1: storage_object.Object
+    obj_2: storage_object.Object
 
-    def get_touched_objects(self) -> list[Object]:
+    def get_touched_objects(self) -> list[storage_object.Object]:
         return [self.obj_1, self.obj_2]
 
 
 @dataclasses.dataclass
 class AccessGraph:
     k: int
-    obj_to_num_copies_map: dict[Object, int] = dataclasses.field(default=None)
+    obj_to_num_copies_map: dict[storage_object.Object, int] = dataclasses.field(default=None)
 
-    obj_to_num_copies_var_map: dict[Object, cvxpy.Variable] = dataclasses.field(default=None)
+    obj_to_num_copies_var_map: dict[storage_object.Object, cvxpy.Variable] = dataclasses.field(default=None)
     symbol_to_access_edges_map: dict[int, list[AccessEdge]] = dataclasses.field(default=None)
 
     def __post_init__(self):
@@ -143,19 +63,19 @@ class AccessGraph:
             self.obj_to_num_copies_var_map = {}
             # Systematic copies
             for s in range(self.k):
-                obj = SysObject(symbol=s)
+                obj = storage_object.SysObject(symbol=s)
                 self.obj_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
 
             # XOR'ed copies
             for xor_size in range(2, self.k + 1):
                 for symbol_combination in itertools.combinations(list(range(self.k)), xor_size):
-                    obj = XORedObject(symbols=symbol_combination)
+                    obj = storage_object.XORedObject(symbols=symbol_combination)
                     self.obj_to_num_copies_var_map[obj] = cvxpy.Variable(integer=True)
 
         # Construct `symbol_to_access_edges_map`
         self.symbol_to_access_edges_map = collections.defaultdict(list)
         for symbol in range(self.k):
-            self.symbol_to_access_edges_map[symbol].append(AccessLoop(obj=SysObject(symbol=symbol)))
+            self.symbol_to_access_edges_map[symbol].append(AccessLoop(obj=storage_object.SysObject(symbol=symbol)))
 
         obj_list = list(self.obj_to_num_copies_map.keys()) if self.obj_to_num_copies_map else list(self.obj_to_num_copies_var_map.keys())
         for (obj_1, obj_2) in itertools.combinations(obj_list, 2):
