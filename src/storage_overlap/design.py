@@ -11,10 +11,7 @@ from src.service_rate import (
     service_rate,
     storage_scheme as storage_scheme_module,
 )
-from src.utils import (
-    data_structures,
-    storage_object,
-)
+from src.utils import storage_object
 
 from src.utils.debug import *
 
@@ -23,67 +20,6 @@ from src.utils.debug import *
 class StorageDesign:
     k: int
     n: int
-
-
-@dataclasses.dataclass
-class ReplicaDesign(StorageDesign):
-    d: int
-    use_cvxpy: bool
-
-    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
-
-    def __post_init__(self):
-        log(WARNING, "", use_cvxpy=self.use_cvxpy)
-
-        if self.use_cvxpy:
-            self.service_rate_inspector = self.get_service_rate_inspector()
-
-    def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
-        node_id_to_objs_list = [[] for _ in range(self.n)]
-        for obj_id, node_id_set in self.obj_id_to_node_id_set_map.items():
-            for node_id in node_id_set:
-                node_id_to_objs_list[node_id].append(
-                    storage_scheme_module.PlainObj(id_str=f"{obj_id}")
-                )
-
-        storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
-        log(DEBUG, "", storage_scheme=storage_scheme)
-
-        return service_rate.ServiceRateInspector(
-            m=len(node_id_to_objs_list),
-            C=1,
-            G=storage_scheme.obj_encoding_matrix,
-            obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
-            redundancy_w_two_xors=False,
-            max_repair_set_size=1,
-        )
-
-    def is_demand_vector_covered(
-        self,
-        demand_vector: list[float],
-    ) -> bool:
-        if self.use_cvxpy:
-            # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
-            return self.service_rate_inspector.is_in_cap_region(demand_vector)
-
-        nonneg_demand_index_list = []
-        for i, d in enumerate(demand_vector):
-            if d > 0:
-                nonneg_demand_index_list.append(i)
-
-        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
-            for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
-                cum_demand = 0
-                node_id_set = set()
-                for i in index_combination:
-                    node_id_set |= self.obj_id_to_node_id_set_map[i]
-                    cum_demand += demand_vector[i]
-
-                if math.ceil(cum_demand) > len(node_id_set):
-                    return False
-
-        # log(DEBUG, "Done")
-        return True
 
     def frac_of_demand_vectors_covered(
         self,
@@ -152,6 +88,69 @@ class ReplicaDesign(StorageDesign):
         return frac_of_demand_vectors_covered_list
 
 
+@dataclasses.dataclass
+class ReplicaDesign(StorageDesign):
+    d: int
+    use_cvxpy: bool
+
+    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
+
+    def __post_init__(self):
+        log(WARNING, "", use_cvxpy=self.use_cvxpy)
+
+        if self.use_cvxpy:
+            self.service_rate_inspector = self.get_service_rate_inspector()
+
+    def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
+        node_id_to_objs_list = [[] for _ in range(self.n)]
+        for obj_id, node_id_set in self.obj_id_to_node_id_set_map.items():
+            for node_id in node_id_set:
+                node_id_to_objs_list[node_id].append(
+                    storage_scheme_module.PlainObj(id_str=f"{obj_id}")
+                )
+
+        storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list=node_id_to_objs_list)
+        log(DEBUG, "", storage_scheme=storage_scheme)
+
+        return service_rate.ServiceRateInspector(
+            m=len(node_id_to_objs_list),
+            C=1,
+            G=storage_scheme.obj_encoding_matrix,
+            obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
+            redundancy_w_two_xors=False,
+            max_repair_set_size=1,
+        )
+
+    def is_demand_vector_covered(
+        self,
+        demand_vector: list[float],
+    ) -> bool:
+        log(DEBUG, "Called", demand_vector=demand_vector)
+
+        if self.use_cvxpy:
+            # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
+            return self.service_rate_inspector.is_in_cap_region(demand_vector)
+
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
+            for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
+                cum_demand = 0
+                node_id_set = set()
+                for i in index_combination:
+                    node_id_set |= self.obj_id_to_node_id_set_map[i]
+                    cum_demand += demand_vector[i]
+
+                if math.ceil(cum_demand) > len(node_id_set):
+                    return False
+
+        # log(DEBUG, "Done")
+        return True
+
+
 @dataclasses.dataclass(repr=False)
 class ClusteringDesign(ReplicaDesign):
     def __post_init__(self):
@@ -218,7 +217,7 @@ class RandomDesign(ReplicaDesign):
         self.obj_id_to_node_id_set_map = collections.defaultdict(set)
 
         num_objs_per_node = (self.k * self.d) // self.n
-        log(DEBUG, f"num_objs_per_node= {num_objs_per_node}")
+        # log(DEBUG, f"num_objs_per_node= {num_objs_per_node}")
         node_id_to_obj_id_set_map = collections.defaultdict(set)
         # node_id_to_num_objs_map = {node_id: 0 for node_id in range(self.n)}
 
@@ -287,6 +286,10 @@ class RandomDesign(ReplicaDesign):
 class TwoXORDesign(StorageDesign):
     d: int
 
+    def repr_for_plot(self):
+        # return f"TwoXORDesign(k= {self.k}, n= {self.n}, d= {self.d})"
+        return r"$\textrm{2-XOR Design}$"
+
     def __post_init__(self):
         check(self.k == self.n, f"k= {self.k} and n= {self.n} must be equal")
 
@@ -318,7 +321,7 @@ class TwoXORDesign(StorageDesign):
                 found_node_for_xor = False
                 for _ in range(self.n):
                     node_id = (node_id + 1) % self.n
-                    log(DEBUG, "***", node_id=node_id)
+                    # log(DEBUG, "***", node_id=node_id)
 
                     obj_set = self.node_id_to_obj_set_map[node_id]
                     if len(obj_set) == num_objs_per_node:
@@ -328,7 +331,7 @@ class TwoXORDesign(StorageDesign):
                     for obj in obj_set:
                         for obj_id_ in obj.get_symbols():
                             obj_id_on_node_set.add(obj_id_)
-                    log(DEBUG, "", node_id=node_id, obj_set=obj_set, obj_id_on_node_set=obj_id_on_node_set)
+                    # log(DEBUG, "", node_id=node_id, obj_set=obj_set, obj_id_on_node_set=obj_id_on_node_set)
 
                     skip_node = False
                     for obj_id_ in obj_id_on_node_set:
@@ -353,7 +356,7 @@ class TwoXORDesign(StorageDesign):
                     found_node_for_xor = True
                     break
 
-                log(DEBUG, "", node_id=node_id)
+                # log(DEBUG, "", node_id=node_id)
                 check(found_node_for_xor, f"Could not find node for xor_obj= {xor_obj}",
                       node_id_to_obj_set_map=self.node_id_to_obj_set_map
                 )
@@ -372,7 +375,7 @@ class TwoXORDesign(StorageDesign):
 
     def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
         node_id_to_objs_list = [[] for _ in range(self.n)]
-        for node_id, obj_set in self.node_id_to_obj_set_map:
+        for node_id, obj_set in self.node_id_to_obj_set_map.items():
             for obj in obj_set:
                 if isinstance(obj, storage_object.SysObject):
                     obj_ = storage_scheme_module.PlainObj(id_str=f"{obj.symbol}")
