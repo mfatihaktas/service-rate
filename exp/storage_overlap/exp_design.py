@@ -270,8 +270,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(4, 5)
-        # for d in range(2, 7)
+        # for d in range(4, 5)
+        for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
 
