@@ -141,6 +141,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
+        E_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
+        std_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
 
         for num_popular_obj in num_popular_obj_list:
             frac_of_demand_vectors_covered_list = replica_design.sim_frac_of_demand_vectors_covered(
@@ -151,30 +153,43 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 num_sim_run=num_sim_run,
             )
 
+            frac_of_demand_vectors_covered_list_w_combination_size_2 = replica_design.sim_frac_of_demand_vectors_covered(
+                num_popular_obj=num_popular_obj,
+                cum_demand=demand_for_popular * num_popular_obj,
+                zipf_tail_index=0,
+                num_sample=num_sample,
+                num_sim_run=num_sim_run,
+                combination_size_for_is_demand_vector_covered=2,
+            )
+
             log(INFO, f"> num_popular_obj= {num_popular_obj}",
                 frac_of_demand_vectors_covered_list=frac_of_demand_vectors_covered_list,
             )
             E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
+            E_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_2))
+            std_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_2))
 
         log(INFO, f"replica_design= {replica_design}",
             num_popular_obj_list=num_popular_obj_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+            E_frac_of_demand_vectors_covered_list_w_combination_size_2=E_frac_of_demand_vectors_covered_list_w_combination_size_2,
+            std_frac_of_demand_vectors_covered_list_w_combination_size_2=std_frac_of_demand_vectors_covered_list_w_combination_size_2,
         )
         plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_w_combination_size_2, yerr=std_frac_of_demand_vectors_covered_list_w_combination_size_2, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}, C=2", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     # k = 45
     # k = 111
     k = 120
     n = k
-    use_cvxpy = False
     replica_design_list = [
-        design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-        # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
-        # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
-        design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.ClusteringDesign(k=k, n=n, d=d),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=1),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=3),
+        design.RandomDesign(k=k, n=n, d=d),
         # design.TwoXORDesign(k=124, n=124, d=d),
     ]
 
@@ -237,13 +252,13 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            num_sample=300,
-            # num_sample=1000,
+            # num_sample=300,
+            num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(3, 4)
-        for demand_for_popular in range(1, d + 1)
-        # for d in range(2, 7)
+        # for d in range(4, 5)
+        for d in range(2, 7)
+        for demand_for_popular in range(2, d + 1)
     )
 
     log(INFO, "Done")

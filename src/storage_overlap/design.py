@@ -56,6 +56,7 @@ class StorageDesign:
         zipf_tail_index: float,
         num_sample: int,
         num_sim_run: int = 1,
+        combination_size_for_is_demand_vector_covered: int = None,
     ) -> list[float]:
         log(DEBUG, "Started",
             num_popular_obj=num_popular_obj,
@@ -78,7 +79,16 @@ class StorageDesign:
                     zipf_tail_index=zipf_tail_index,
                     num_sample=num_sample,
             ):
-                if self.is_demand_vector_covered(demand_vector=demand_vector):
+                if (
+                    combination_size_for_is_demand_vector_covered is not None
+                    and self.is_demand_vector_covered_for_given_combination_size(
+                        demand_vector=demand_vector,
+                        combination_size=combination_size_for_is_demand_vector_covered,
+                    )
+                ):
+                    num_covered += 1
+
+                elif self.is_demand_vector_covered(demand_vector=demand_vector):
                     num_covered += 1
 
             frac_of_demand_vectors_covered = num_covered / num_sample
@@ -144,6 +154,34 @@ class ReplicaDesign(StorageDesign):
 
                 if len(node_id_set) < math.ceil(cum_demand):
                     return False
+
+        # log(DEBUG, "Done")
+        return True
+
+    def is_demand_vector_covered_for_given_combination_size(
+        self,
+        demand_vector: list[float],
+        combination_size: int,
+    ) -> bool:
+        """Implements a "looser" version of is_demand_vector_covered().
+        Returns True whenever is_demand_vector_covered() returns True.
+        Might return True when is_demand_vector_covered() returns False.
+        """
+
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
+            cum_demand = 0
+            node_id_set = set()
+            for i in index_combination:
+                node_id_set |= self.obj_id_to_node_id_set_map[i]
+                cum_demand += demand_vector[i]
+
+            if len(node_id_set) < math.ceil(cum_demand):
+                return False
 
         # log(DEBUG, "Done")
         return True
