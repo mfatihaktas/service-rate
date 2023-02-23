@@ -91,15 +91,15 @@ class StorageDesign:
 @dataclasses.dataclass
 class ReplicaDesign(StorageDesign):
     d: int
-    use_cvxpy: bool
+    # use_cvxpy: bool
 
     obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
 
     def __post_init__(self):
-        log(WARNING, "", use_cvxpy=self.use_cvxpy)
-
-        if self.use_cvxpy:
-            self.service_rate_inspector = self.get_service_rate_inspector()
+        pass
+        # log(WARNING, "", use_cvxpy=self.use_cvxpy)
+        # if self.use_cvxpy:
+        #     self.service_rate_inspector = self.get_service_rate_inspector()
 
     def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
         node_id_to_objs_list = [[] for _ in range(self.n)]
@@ -125,11 +125,9 @@ class ReplicaDesign(StorageDesign):
         self,
         demand_vector: list[float],
     ) -> bool:
-        log(DEBUG, "Called", demand_vector=demand_vector)
-
-        if self.use_cvxpy:
-            # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
-            return self.service_rate_inspector.is_in_cap_region(demand_vector)
+        # if self.use_cvxpy:
+        #     # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
+        #     return self.service_rate_inspector.is_in_cap_region(demand_vector)
 
         nonneg_demand_index_list = []
         for i, d in enumerate(demand_vector):
@@ -144,11 +142,50 @@ class ReplicaDesign(StorageDesign):
                     node_id_set |= self.obj_id_to_node_id_set_map[i]
                     cum_demand += demand_vector[i]
 
-                if math.ceil(cum_demand) > len(node_id_set):
+                if len(node_id_set) < math.ceil(cum_demand):
                     return False
 
         # log(DEBUG, "Done")
         return True
+
+    def is_demand_vector_covered_alternative(
+        self,
+        demand_vector: list[float],
+    ) -> bool:
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for nonneg_demand_index_list_ in itertools.permutations(nonneg_demand_index_list):
+            cum_demand = 0
+            node_id_set = set()
+            for i in nonneg_demand_index_list_:
+                node_id_set |= self.obj_id_to_node_id_set_map[i]
+                cum_demand += demand_vector[i]
+
+                if len(node_id_set) < math.ceil(cum_demand):
+                    return False
+
+        # log(DEBUG, "Done")
+        return True
+
+    def get_node_overlap_size_to_counter_map(self) -> dict[int, int]:
+        node_overlap_size_to_counter_map = collections.defaultdict(int)
+
+        for obj_id_1 in range(self.k):
+            # for obj_id_2 in range(obj_id_1 + 1, self.k):
+            for obj_id_2 in range(self.k):
+                if obj_id_2 == obj_id_1:
+                    continue
+
+                node_id_set_1 = self.obj_id_to_node_id_set_map[obj_id_1]
+                node_id_set_2 = self.obj_id_to_node_id_set_map[obj_id_2]
+                overlap_size = len(node_id_set_1.intersection(node_id_set_2))
+                if overlap_size > 0:
+                    node_overlap_size_to_counter_map[overlap_size] += 1
+
+        return node_overlap_size_to_counter_map
 
 
 @dataclasses.dataclass(repr=False)
