@@ -1,7 +1,9 @@
 import collections
 import dataclasses
+import functools
 import itertools
 import math
+import numpy
 import random
 
 from typing import Generator
@@ -64,6 +66,7 @@ class StorageDesign:
             zipf_tail_index=zipf_tail_index,
             num_sample=num_sample,
             num_sim_run=num_sim_run,
+            combination_size_for_is_demand_vector_covered=combination_size_for_is_demand_vector_covered,
         )
 
         frac_of_demand_vectors_covered_list = []
@@ -96,6 +99,55 @@ class StorageDesign:
 
         log(DEBUG, "Done")
         return frac_of_demand_vectors_covered_list
+
+    def sim_frac_of_demand_vectors_covered_lower_bound(
+        self,
+        num_popular_obj: int,
+        cum_demand: float,
+        zipf_tail_index: float,
+        num_sample: int,
+        num_sim_run: int = 1,
+    ) -> list[float]:
+        log(DEBUG, "Started",
+            num_popular_obj=num_popular_obj,
+            cum_demand=cum_demand,
+            zipf_tail_index=zipf_tail_index,
+            num_sample=num_sample,
+            num_sim_run=num_sim_run,
+        )
+
+        combination_size_to_frac_demand_vectors_covered_list_map = collections.defaultdict(list)
+        for sim_id in range(num_sim_run):
+            log(DEBUG, f"> sim_id= {sim_id}")
+
+            combination_size_to_num_covered_map = collections.defaultdict(int)
+            for demand_vector in demand.sample_demand_vectors_w_zipf_law(
+                    num_obj=self.k,
+                    num_popular_obj=num_popular_obj,
+                    cum_demand=cum_demand,
+                    zipf_tail_index=zipf_tail_index,
+                    num_sample=num_sample,
+            ):
+                for combination_size in range(1, num_popular_obj + 1):
+                    if self.is_demand_vector_covered_for_given_combination_size(
+                        demand_vector=demand_vector,
+                        combination_size=combination_size,
+                    ):
+                        combination_size_to_num_covered_map[combination_size] += 1
+
+            for combination_size, num_covered in combination_size_to_num_covered_map.items():
+                frac_of_demand_vectors_covered = num_covered / num_sample
+                combination_size_to_frac_demand_vectors_covered_list_map[combination_size].append(frac_of_demand_vectors_covered)
+
+        log(DEBUG, "Done",
+            combination_size_to_frac_demand_vectors_covered_list_map=combination_size_to_frac_demand_vectors_covered_list_map,
+        )
+
+        E_frac_demand_vectors_covered_list = [
+            numpy.mean(frac_demand_vectors_covered_list)
+            for frac_demand_vectors_covered_list in combination_size_to_frac_demand_vectors_covered_list_map.values()
+        ]
+        return functools.reduce(lambda x, y: x * y, E_frac_demand_vectors_covered_list)
 
 
 @dataclasses.dataclass
@@ -222,6 +274,21 @@ class ReplicaDesign(StorageDesign):
                     node_overlap_size_to_counter_map[overlap_size] += 1
 
         return node_overlap_size_to_counter_map
+
+    def get_num_obj_to_span_size_map(self, num_popular_obj: int) -> dict[int, int, int]:
+        num_obj_to_span_size_to_count_map = collections.defaultdict(lambda: collections.defaultdict(int))
+
+        obj_id_list = list(range(self.k))
+        for num_obj in range(2, num_popular_obj + 1):
+            for obj_id_tuple in itertools.combinations(obj_id_list, r=num_obj):
+                node_id_set = set()
+                for obj_id in obj_id_tuple:
+                    node_id_set |= self.obj_id_to_node_id_set_map[obj_id]
+
+                span_size = len(node_id_set)
+                num_obj_to_span_size_to_count_map[num_obj][span_size] += 1
+
+        return num_obj_to_span_size_to_count_map
 
 
 @dataclasses.dataclass(repr=False)

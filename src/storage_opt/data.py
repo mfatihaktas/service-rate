@@ -1,4 +1,4 @@
-from src.storage_opt.access_graph import SysObject, XORedObject
+from src.utils.storage_object import SysObject, XORedObject
 
 
 NUM_OBJS_TO_MAX_DEMAND_TO_OBJ_TO_NUM_COPIES_MAP = {

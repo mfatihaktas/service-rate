@@ -132,4 +132,4 @@ def plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleOb
 
 if __name__ == "__main__":
     # plot_num_nodes_vs_max_demand_for_StorageOptimizerReplicationAndXOR_wSingleObjPerNode()
-    plot_access_graphs(num_obj=3)
+    plot_access_graphs(num_obj=4)

@@ -1,3 +1,4 @@
+import collections
 import pytest
 
 from typing import Tuple
@@ -114,3 +115,71 @@ def test_is_demand_vector_covered():
     # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
     replica_design = design.RandomDesign(k=k, n=n, d=d)
     check_is_demand_vector_covered_alternative(replica_design=replica_design)
+
+
+def test_combination_size_to_is_demand_covered_map():
+    def check_combination_size_to_is_demand_covered_map(replica_design: design.ReplicaDesign):
+        num_sample = 1000
+
+        for popular_obj_demand in range(2, replica_design.d + 1):
+            combination_size_and_is_demand_covered_tuple_to_counter_map = collections.defaultdict(int)
+
+            for num_popular_obj in range(1, 10):
+                # log(DEBUG, "> ",
+                #     num_popular_obj=num_popular_obj,
+                #     popular_obj_demand=popular_obj_demand,
+                # )
+
+                for demand_vector in demand.sample_demand_vectors_w_zipf_law(
+                    num_obj=replica_design.k,
+                    num_popular_obj=num_popular_obj,
+                    cum_demand=num_popular_obj * popular_obj_demand,
+                    zipf_tail_index=0,
+                    num_sample=num_sample,
+                ):
+                    combination_size_and_is_demand_covered_tuple = tuple(
+                        [
+                            (
+                                combination_size,
+                                replica_design.is_demand_vector_covered_for_given_combination_size(
+                                    demand_vector=demand_vector,
+                                    combination_size=combination_size
+                                )
+                            )
+                            for combination_size in range(2, replica_design.d + 1)
+                        ]
+                    )
+                    combination_size_and_is_demand_covered_tuple_to_counter_map[combination_size_and_is_demand_covered_tuple] += 1
+
+            log(DEBUG, "",
+                d=replica_design.d,
+                popular_obj_demand=popular_obj_demand,
+                combination_size_and_is_demand_covered_tuple_to_counter_map=combination_size_and_is_demand_covered_tuple_to_counter_map,
+            )
+
+    k = 120
+    n = k
+    d = 4
+
+    # replica_design = design.ClusteringDesign(k=k, n=n, d=d)
+    replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
+    # replica_design = design.RandomDesign(k=k, n=n, d=d)
+    check_combination_size_to_is_demand_covered_map(replica_design=replica_design)
+
+
+def test_get_num_objs_to_span_size_map():
+    k = 12
+    # k = 120
+    n = k
+    d = 3
+
+    # replica_design = design.ClusteringDesign(k=k, n=n, d=d)
+    # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
+    replica_design = design.RandomDesign(k=k, n=n, d=d)
+
+    num_popular_obj = 5
+    num_obj_to_span_size_map = replica_design.get_num_obj_to_span_size_map(num_popular_obj=num_popular_obj)
+    log(DEBUG, "",
+        replica_design=replica_design,
+        num_obj_to_span_size_map=num_obj_to_span_size_map
+    )
