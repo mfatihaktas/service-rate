@@ -155,7 +155,6 @@ class ReplicaDesign(StorageDesign):
                 if len(node_id_set) < math.ceil(cum_demand):
                     return False
 
-        # log(DEBUG, "Done")
         return True
 
     def is_demand_vector_covered_for_given_combination_size(
@@ -183,7 +182,6 @@ class ReplicaDesign(StorageDesign):
             if len(node_id_set) < math.ceil(cum_demand):
                 return False
 
-        # log(DEBUG, "Done")
         return True
 
     def is_demand_vector_covered_alternative(

@@ -141,10 +141,10 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
-        E_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
-        std_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
-        E_frac_of_demand_vectors_covered_list_w_combination_size_3 = []
-        std_frac_of_demand_vectors_covered_list_w_combination_size_3 = []
+        # E_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
+        # std_frac_of_demand_vectors_covered_list_w_combination_size_2 = []
+        # E_frac_of_demand_vectors_covered_list_w_combination_size_3 = []
+        # std_frac_of_demand_vectors_covered_list_w_combination_size_3 = []
 
         for num_popular_obj in num_popular_obj_list:
             log(INFO, f"> num_popular_obj= {num_popular_obj}")
@@ -159,40 +159,40 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            frac_of_demand_vectors_covered_list_w_combination_size_2 = replica_design.sim_frac_of_demand_vectors_covered(
-                num_popular_obj=num_popular_obj,
-                cum_demand=demand_for_popular * num_popular_obj,
-                zipf_tail_index=0,
-                num_sample=num_sample,
-                num_sim_run=num_sim_run,
-                combination_size_for_is_demand_vector_covered=2,
-            )
-            E_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_2))
-            std_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_2))
+            # frac_of_demand_vectors_covered_list_w_combination_size_2 = replica_design.sim_frac_of_demand_vectors_covered(
+            #     num_popular_obj=num_popular_obj,
+            #     cum_demand=demand_for_popular * num_popular_obj,
+            #     zipf_tail_index=0,
+            #     num_sample=num_sample,
+            #     num_sim_run=num_sim_run,
+            #     combination_size_for_is_demand_vector_covered=2,
+            # )
+            # E_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_2))
+            # std_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_2))
 
-            frac_of_demand_vectors_covered_list_w_combination_size_3 = replica_design.sim_frac_of_demand_vectors_covered(
-                num_popular_obj=num_popular_obj,
-                cum_demand=demand_for_popular * num_popular_obj,
-                zipf_tail_index=0,
-                num_sample=num_sample,
-                num_sim_run=num_sim_run,
-                combination_size_for_is_demand_vector_covered=3,
-            )
-            E_frac_of_demand_vectors_covered_list_w_combination_size_3.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_3))
-            std_frac_of_demand_vectors_covered_list_w_combination_size_3.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_3))
+            # frac_of_demand_vectors_covered_list_w_combination_size_3 = replica_design.sim_frac_of_demand_vectors_covered(
+            #     num_popular_obj=num_popular_obj,
+            #     cum_demand=demand_for_popular * num_popular_obj,
+            #     zipf_tail_index=0,
+            #     num_sample=num_sample,
+            #     num_sim_run=num_sim_run,
+            #     combination_size_for_is_demand_vector_covered=3,
+            # )
+            # E_frac_of_demand_vectors_covered_list_w_combination_size_3.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_3))
+            # std_frac_of_demand_vectors_covered_list_w_combination_size_3.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_3))
 
         log(INFO, f"replica_design= {replica_design}",
             num_popular_obj_list=num_popular_obj_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
-            E_frac_of_demand_vectors_covered_list_w_combination_size_2=E_frac_of_demand_vectors_covered_list_w_combination_size_2,
-            std_frac_of_demand_vectors_covered_list_w_combination_size_2=std_frac_of_demand_vectors_covered_list_w_combination_size_2,
-            E_frac_of_demand_vectors_covered_list_w_combination_size_3=E_frac_of_demand_vectors_covered_list_w_combination_size_3,
-            std_frac_of_demand_vectors_covered_list_w_combination_size_3=std_frac_of_demand_vectors_covered_list_w_combination_size_3,
+            # E_frac_of_demand_vectors_covered_list_w_combination_size_2=E_frac_of_demand_vectors_covered_list_w_combination_size_2,
+            # std_frac_of_demand_vectors_covered_list_w_combination_size_2=std_frac_of_demand_vectors_covered_list_w_combination_size_2,
+            # E_frac_of_demand_vectors_covered_list_w_combination_size_3=E_frac_of_demand_vectors_covered_list_w_combination_size_3,
+            # std_frac_of_demand_vectors_covered_list_w_combination_size_3=std_frac_of_demand_vectors_covered_list_w_combination_size_3,
         )
         plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_w_combination_size_2, yerr=std_frac_of_demand_vectors_covered_list_w_combination_size_2, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}, C=2", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_w_combination_size_3, yerr=std_frac_of_demand_vectors_covered_list_w_combination_size_3, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}, C=3", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_w_combination_size_2, yerr=std_frac_of_demand_vectors_covered_list_w_combination_size_2, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}, C=2", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_w_combination_size_3, yerr=std_frac_of_demand_vectors_covered_list_w_combination_size_3, color=next(dark_color_cycle), label=f"{replica_design.repr_for_plot()}, C=3", marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     # k = 45
     # k = 111
