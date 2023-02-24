@@ -6,7 +6,7 @@ import math
 import numpy
 import random
 
-from typing import Generator
+from typing import Generator, Tuple
 
 from src.model import demand
 from src.service_rate import (
@@ -100,14 +100,14 @@ class StorageDesign:
         log(DEBUG, "Done")
         return frac_of_demand_vectors_covered_list
 
-    def sim_frac_of_demand_vectors_covered_lower_bound(
+    def sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
         self,
         num_popular_obj: int,
         cum_demand: float,
         zipf_tail_index: float,
         num_sample: int,
         num_sim_run: int = 1,
-    ) -> list[float]:
+    ) -> Tuple[float, float]:
         log(DEBUG, "Started",
             num_popular_obj=num_popular_obj,
             cum_demand=cum_demand,
@@ -147,7 +147,12 @@ class StorageDesign:
             numpy.mean(frac_demand_vectors_covered_list)
             for frac_demand_vectors_covered_list in combination_size_to_frac_demand_vectors_covered_list_map.values()
         ]
-        return functools.reduce(lambda x, y: x * y, E_frac_demand_vectors_covered_list)
+        # lower_bound = functools.reduce(lambda x, y: x * y, E_frac_demand_vectors_covered_list)
+        lower_bound = max(0, 1 - sum(1 - p for p in E_frac_demand_vectors_covered_list))
+
+        upper_bound = min(E_frac_demand_vectors_covered_list)
+
+        return lower_bound, upper_bound
 
 
 @dataclasses.dataclass
