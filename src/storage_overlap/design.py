@@ -147,8 +147,8 @@ class StorageDesign:
             numpy.mean(frac_demand_vectors_covered_list)
             for frac_demand_vectors_covered_list in combination_size_to_frac_demand_vectors_covered_list_map.values()
         ]
-        # lower_bound = functools.reduce(lambda x, y: x * y, E_frac_demand_vectors_covered_list)
-        lower_bound = max(0, 1 - sum(1 - p for p in E_frac_demand_vectors_covered_list))
+        lower_bound = functools.reduce(lambda x, y: x * y, E_frac_demand_vectors_covered_list)
+        # lower_bound = max(0, 1 - sum(1 - p for p in E_frac_demand_vectors_covered_list))
 
         upper_bound = min(E_frac_demand_vectors_covered_list)
 
