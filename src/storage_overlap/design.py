@@ -1,3 +1,4 @@
+import abc
 import collections
 import dataclasses
 import itertools
@@ -19,6 +20,21 @@ from src.utils.debug import *
 class StorageDesign:
     k: int
     n: int
+
+    @abc.abstractmethod
+    def is_demand_vector_covered(
+        self,
+        demand_vector: list[float],
+    ):
+        pass
+
+    @abc.abstractmethod
+    def is_demand_vector_covered_for_given_combination_size(
+        self,
+        demand_vector: list[float],
+        combination_size: int,
+    ):
+        pass
 
     def frac_of_demand_vectors_covered(
         self,
@@ -319,6 +335,35 @@ class RandomDesign(ReplicaDesign):
     def repr_for_plot(self):
         # return f"RandomDesign(k= {self.k}, n= {self.n}, d= {self.d})"
         return r"$\textrm{Random}$"
+
+    def is_demand_vector_covered_for_given_combination_size_w_random_expander_approx(
+        self,
+        demand_vector: list[float],
+        combination_size: int,
+    ) -> bool:
+        # Construct `obj_id_to_node_id_set_map` as a random expander
+        node_id_list = list(range(self.n))
+        obj_id_to_node_id_set_map = {
+            obj_id: set(random.sample(node_id_list, self.d))
+            for obj_id in range(self.k)
+        }
+
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
+            cum_demand = 0
+            node_id_set = set()
+            for i in index_combination:
+                node_id_set |= obj_id_to_node_id_set_map[i]
+                cum_demand += demand_vector[i]
+
+            if len(node_id_set) < math.ceil(cum_demand):
+                return False
+
+        return True
 
 
 @dataclasses.dataclass
