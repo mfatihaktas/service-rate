@@ -1,7 +1,10 @@
 import joblib
 import numpy
 
-from src.storage_overlap import design
+from src.storage_overlap import (
+    design,
+    sim,
+)
 
 from src.utils.plot import *
 
@@ -56,7 +59,8 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
             # )
 
             # With `sim_frac_of_demand_vectors_covered`
-            frac_of_demand_vectors_covered_list = replica_design.sim_frac_of_demand_vectors_covered(
+            frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                storage_design=replica_design,
                 num_popular_obj=num_popular_obj,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
@@ -151,7 +155,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         for num_popular_obj in num_popular_obj_list:
             log(INFO, f"> num_popular_obj= {num_popular_obj}")
 
-            frac_of_demand_vectors_covered_list = replica_design.sim_frac_of_demand_vectors_covered(
+            frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                storage_design=replica_design,
                 num_popular_obj=num_popular_obj,
                 cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
@@ -161,7 +166,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            frac_of_demand_vectors_covered_lower_bound, frac_of_demand_vectors_covered_upper_bound = replica_design.sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
+            frac_of_demand_vectors_covered_lower_bound, frac_of_demand_vectors_covered_upper_bound = sim.sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
+                storage_design=replica_design,
                 num_popular_obj=num_popular_obj,
                 cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
@@ -171,7 +177,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             frac_of_demand_vectors_covered_lower_bound_list.append(frac_of_demand_vectors_covered_lower_bound)
             frac_of_demand_vectors_covered_upper_bound_list.append(frac_of_demand_vectors_covered_upper_bound)
 
-            # frac_of_demand_vectors_covered_list_w_combination_size_2 = replica_design.sim_frac_of_demand_vectors_covered(
+            # frac_of_demand_vectors_covered_list_w_combination_size_2 = sim.sim_frac_of_demand_vectors_covered(
+            #     storage_design=replica_design,
             #     num_popular_obj=num_popular_obj,
             #     cum_demand=demand_for_popular * num_popular_obj,
             #     zipf_tail_index=0,
@@ -182,7 +189,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             # E_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.mean(frac_of_demand_vectors_covered_list_w_combination_size_2))
             # std_frac_of_demand_vectors_covered_list_w_combination_size_2.append(numpy.std(frac_of_demand_vectors_covered_list_w_combination_size_2))
 
-            # frac_of_demand_vectors_covered_list_w_combination_size_3 = replica_design.sim_frac_of_demand_vectors_covered(
+            # frac_of_demand_vectors_covered_list_w_combination_size_3 = sim.sim_frac_of_demand_vectors_covered(
+            #     storage_design=replica_design,
             #     num_popular_obj=num_popular_obj,
             #     cum_demand=demand_for_popular * num_popular_obj,
             #     zipf_tail_index=0,
@@ -287,8 +295,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             # num_sample=1000,
             num_sim_run=3,
         )
-        # for d in range(3, 4)
-        for d in range(2, 7)
+        for d in range(3, 4)
+        # for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
 
