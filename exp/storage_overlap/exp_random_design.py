@@ -145,8 +145,8 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
             plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=300,
-                # num_sample=1000,
+                # num_sample=300,
+                num_sample=1000,
                 num_sim_run=3,
             )
 
@@ -170,9 +170,10 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
             num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(2, 3)
+        # for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(4, 5)
+        for d in range(3, 5)
         # for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
@@ -181,4 +182,5 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
 
 
 if __name__ == "__main__":
-    manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs()
+    # manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs()
+    manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_w_joblib()
