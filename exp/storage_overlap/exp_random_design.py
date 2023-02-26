@@ -22,7 +22,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     block_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     random_expander_design = design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
 
-    num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.2, 0.3]]
+    num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.15, 0.2, 0.25]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
 
     log(INFO, "Started",
@@ -105,8 +105,8 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         )
 
         color = next(dark_color_cycle)
-        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_for_block_design, yerr=std_frac_of_demand_vectors_covered_list_for_block_design, label=f"{block_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_for_expander_design, yerr=std_frac_of_demand_vectors_covered_list_for_expander_design, label=f"{random_expander_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_for_block_design, yerr=std_frac_of_demand_vectors_covered_list_for_block_design, label=f"{block_design.repr_for_plot()}, C={combination_size}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list_for_expander_design, yerr=std_frac_of_demand_vectors_covered_list_for_expander_design, label=f"{random_expander_design.repr_for_plot()}, C={combination_size}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         # plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{replica_design.repr_for_plot()}-LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         # plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{replica_design.repr_for_plot()}-UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
