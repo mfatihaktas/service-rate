@@ -18,7 +18,6 @@ def sim_frac_of_demand_vectors_covered(
     num_sample: int,
     num_sim_run: int = 1,
     combination_size_for_is_demand_vector_covered: int = None,
-    w_random_expander_approx: bool = False,
 ) -> list[float]:
     log(DEBUG, "Started",
         num_popular_obj=num_popular_obj,
@@ -43,19 +42,11 @@ def sim_frac_of_demand_vectors_covered(
                 num_sample=num_sample,
         ):
             if combination_size_for_is_demand_vector_covered is not None:
-                if w_random_expander_approx:
-                    if storage_design.is_demand_vector_covered_for_given_combination_size_w_random_expander_approx(
-                            demand_vector=demand_vector,
-                            combination_size=combination_size_for_is_demand_vector_covered,
-                    ):
-                        num_covered += 1
-
-                else:
-                    if storage_design.is_demand_vector_covered_for_given_combination_size(
-                            demand_vector=demand_vector,
-                            combination_size=combination_size_for_is_demand_vector_covered,
-                    ):
-                        num_covered += 1
+                if storage_design.is_demand_vector_covered_for_given_combination_size(
+                        demand_vector=demand_vector,
+                        combination_size=combination_size_for_is_demand_vector_covered,
+                ):
+                    num_covered += 1
 
             elif storage_design.is_demand_vector_covered(demand_vector=demand_vector):
                 num_covered += 1

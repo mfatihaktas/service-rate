@@ -226,7 +226,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     replica_design_list = [
         design.ClusteringDesign(k=k, n=n, d=d),
         design.CyclicDesign(k=k, n=n, d=d, shift_size=1),
-        design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
+        # design.CyclicDesign(k=k, n=n, d=d, shift_size=2),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3),
         design.RandomDesign(k=k, n=n, d=d),
         # design.TwoXORDesign(k=124, n=124, d=d),
@@ -254,7 +254,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         "plots/plot_frac_demand_vectors_covered_vs_num_popular_objs"
         + f"_k_{k}"
         + f"_d_{d}"
-        + f"_Dpop_{demand_for_popular}"
+        + f"_lambda_{demand_for_popular}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -275,11 +275,11 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
                 num_sim_run=3,
             )
 
-    plot_(d=2)
-    plot_(d=3)
+    # plot_(d=2)
+    # plot_(d=3)
     plot_(d=4)
-    plot_(d=5)
-    plot_(d=6)
+    # plot_(d=5)
+    # plot_(d=6)
 
     log(INFO, "Done")
 
@@ -295,8 +295,10 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             num_sample=1000,
             num_sim_run=3,
         )
+        for d in range(2, 3)
         # for d in range(3, 4)
-        for d in range(2, 7)
+        # for d in range(4, 5)
+        # for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
 
