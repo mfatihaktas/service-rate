@@ -1,3 +1,4 @@
+import joblib
 import numpy
 
 from src.storage_overlap import (
@@ -17,8 +18,9 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
 ):
     k = 120
     n = k
-    block_design = design.RandomDesign(k=k, n=n, d=d)
-    random_expander_design = design.RandomExpanderDesign(k=k, n=n, d=d)
+    use_cvxpy = True
+    block_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    random_expander_design = design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
 
     num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.2, 0.3]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
