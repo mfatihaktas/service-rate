@@ -2,6 +2,7 @@ import abc
 import collections
 import dataclasses
 import itertools
+import joblib
 import math
 import random
 
@@ -111,15 +112,12 @@ class ReplicaDesign(StorageDesign):
                 nonneg_demand_index_list.append(i)
 
         for combination_size in range(1, len(nonneg_demand_index_list) + 1):
-            for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
-                cum_demand = 0
-                node_id_set = set()
-                for i in index_combination:
-                    node_id_set |= self.obj_id_to_node_id_set_map[i]
-                    cum_demand += demand_vector[i]
-
-                if len(node_id_set) < math.ceil(cum_demand):
-                    return False
+            if self.is_demand_vector_covered_for_given_combination_size(
+                demand_vector=demand_vector,
+                combination_size=combination_size,
+                nonneg_demand_index_list=nonneg_demand_index_list,
+            ) is False:
+                return False
 
         return True
 
@@ -127,16 +125,15 @@ class ReplicaDesign(StorageDesign):
         self,
         demand_vector: list[float],
         combination_size: int,
+        nonneg_demand_index_list: list[float] = None,
     ) -> bool:
         """Implements a "looser" version of is_demand_vector_covered().
         Returns True whenever is_demand_vector_covered() returns True.
         Might return True when is_demand_vector_covered() returns False.
         """
 
-        nonneg_demand_index_list = []
-        for i, d in enumerate(demand_vector):
-            if d > 0:
-                nonneg_demand_index_list.append(i)
+        if nonneg_demand_index_list is None:
+            nonneg_demand_index_list = [i for i, d in enumerate(demand_vector) if d > 0]
 
         for index_combination in itertools.combinations(nonneg_demand_index_list, r=combination_size):
             cum_demand = 0
@@ -149,6 +146,23 @@ class ReplicaDesign(StorageDesign):
                 return False
 
         return True
+
+    def is_demand_vector_covered_w_joblib(
+        self,
+        demand_vector: list[float],
+    ) -> bool:
+        nonneg_demand_index_list = [i for i, d in enumerate(demand_vector) if d > 0]
+
+        is_demand_vector_covered_for_given_combination_size_list = joblib.Parallel(n_jobs=-1, prefer="threads")(
+            joblib.delayed(self.is_demand_vector_covered_for_given_combination_size)(
+                demand_vector=demand_vector,
+                combination_size=combination_size,
+                nonneg_demand_index_list=nonneg_demand_index_list,
+            )
+            for combination_size in range(1, len(nonneg_demand_index_list) + 1)
+        )
+
+        return all(is_demand_vector_covered_for_given_combination_size_list)
 
     def is_demand_vector_covered_alternative(
         self,

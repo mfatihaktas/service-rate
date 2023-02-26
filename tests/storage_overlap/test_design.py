@@ -20,9 +20,17 @@ def k_n_d(request) -> Tuple[int, int, int]:
     return request.param
 
 
-def test_ClusteringDesign(k_n_d: Tuple[int, int, int]):
+@pytest.fixture
+def use_cvxpy() -> bool:
+    return False
+
+
+def test_ClusteringDesign(
+    k_n_d: Tuple[int, int, int],
+    use_cvxpy: bool,
+):
     k, n, d = k_n_d
-    clustering_design = design.ClusteringDesign(k=k, n=n, d=d)
+    clustering_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
 
     log(INFO, "",
         clustering_design=clustering_design,
@@ -30,10 +38,13 @@ def test_ClusteringDesign(k_n_d: Tuple[int, int, int]):
     )
 
 
-def test_CyclicDesign(k_n_d: Tuple[int, int, int]):
+def test_CyclicDesign(
+    k_n_d: Tuple[int, int, int],
+    use_cvxpy: bool,
+):
     k, n, d = k_n_d
 
-    cyclic_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
+    cyclic_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
 
     log(INFO, "",
         cyclic_design=cyclic_design,
@@ -54,30 +65,33 @@ def test_TwoXORDesign():
     )
 
 
-def test_get_node_overlap_size_to_counter_map(k_n_d: Tuple[int, int, int]):
+def test_get_node_overlap_size_to_counter_map(
+    k_n_d: Tuple[int, int, int],
+    use_cvxpy: bool,
+):
     k, n, d = k_n_d
 
-    clustering_design = design.ClusteringDesign(k=k, n=n, d=d)
+    clustering_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     log(INFO, "clustering_design: ",
         clustering_design=clustering_design,
         node_overlap_size_to_counter_map=clustering_design.get_node_overlap_size_to_counter_map()
     )
 
-    cyclic_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
+    cyclic_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
     log(INFO, "cycling_design: ",
         cyclic_design=cyclic_design,
         node_overlap_size_to_counter_map=cyclic_design.get_node_overlap_size_to_counter_map()
     )
 
-    random_design = design.RandomDesign(k=k, n=n, d=d)
+    random_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     log(INFO, "random_design: ",
         random_design=random_design,
         node_overlap_size_to_counter_map=random_design.get_node_overlap_size_to_counter_map()
     )
 
 
-def test_is_demand_vector_covered():
-    def check_is_demand_vector_covered_alternative(replica_design: design.ReplicaDesign):
+def test_is_demand_vector_covered(use_cvxpy: bool):
+    def check_is_demand_vector_covered_equality(replica_design: design.ReplicaDesign):
         num_sample = 100
 
         for num_popular_obj in range(1, 10):
@@ -97,9 +111,10 @@ def test_is_demand_vector_covered():
                     check(
                         (
                             replica_design.is_demand_vector_covered(demand_vector=demand_vector)
-                            == replica_design.is_demand_vector_covered_alternative(demand_vector=demand_vector)
+                            == replica_design.is_demand_vector_covered_w_joblib(demand_vector=demand_vector)
+                            # == replica_design.is_demand_vector_covered_alternative(demand_vector=demand_vector)
                         ),
-                        "is_demand_vector_covered_alternative() is different from is_demand_vector_covered()",
+                        "is_demand_vector_covered()'s returned different results",
                         replica_design=replica_design,
                         obj_id_to_node_id_set_map=replica_design.obj_id_to_node_id_set_map,
                         num_popular_obj=num_popular_obj,
@@ -109,15 +124,15 @@ def test_is_demand_vector_covered():
 
     k = 12
     n = k
-    d = 3
+    d = 4
 
-    # replica_design = design.ClusteringDesign(k=k, n=n, d=d)
-    # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
-    replica_design = design.RandomDesign(k=k, n=n, d=d)
-    check_is_demand_vector_covered_alternative(replica_design=replica_design)
+    # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
+    replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    check_is_demand_vector_covered_equality(replica_design=replica_design)
 
 
-def test_combination_size_to_is_demand_covered_map():
+def test_combination_size_to_is_demand_covered_map(use_cvxpy: bool):
     def check_combination_size_to_is_demand_covered_map(replica_design: design.ReplicaDesign):
         num_sample = 1000
 
@@ -161,21 +176,21 @@ def test_combination_size_to_is_demand_covered_map():
     n = k
     d = 4
 
-    # replica_design = design.ClusteringDesign(k=k, n=n, d=d)
-    replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
-    # replica_design = design.RandomDesign(k=k, n=n, d=d)
+    # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
+    # replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     check_combination_size_to_is_demand_covered_map(replica_design=replica_design)
 
 
-def test_get_num_objs_to_span_size_map():
+def test_get_num_objs_to_span_size_map(use_cvxpy: bool):
     k = 12
     # k = 120
     n = k
     d = 3
 
-    # replica_design = design.ClusteringDesign(k=k, n=n, d=d)
-    # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1)
-    replica_design = design.RandomDesign(k=k, n=n, d=d)
+    # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
+    replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
 
     num_popular_obj = 5
     num_obj_to_span_size_map = replica_design.get_num_obj_to_span_size_map(num_popular_obj=num_popular_obj)

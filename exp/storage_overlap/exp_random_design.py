@@ -95,6 +95,8 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
             # frac_of_demand_vectors_covered_upper_bound_list.append(frac_of_demand_vectors_covered_upper_bound)
 
         log(INFO, "",
+            d=d,
+            demand_for_popular=demand_for_popular,
             num_popular_obj_list=num_popular_obj_list,
             E_frac_of_demand_vectors_covered_list_for_block_design=E_frac_of_demand_vectors_covered_list_for_block_design,
             std_frac_of_demand_vectors_covered_list_for_block_design=std_frac_of_demand_vectors_covered_list_for_block_design,
