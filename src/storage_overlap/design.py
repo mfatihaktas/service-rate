@@ -68,15 +68,14 @@ class StorageDesign:
 @dataclasses.dataclass
 class ReplicaDesign(StorageDesign):
     d: int
-    # use_cvxpy: bool
+    use_cvxpy: bool
 
     obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
 
     def __post_init__(self):
-        pass
-        # log(WARNING, "", use_cvxpy=self.use_cvxpy)
-        # if self.use_cvxpy:
-        #     self.service_rate_inspector = self.get_service_rate_inspector()
+        log(WARNING, "", use_cvxpy=self.use_cvxpy)
+        if self.use_cvxpy:
+            self.service_rate_inspector = self.get_service_rate_inspector()
 
     def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
         node_id_to_objs_list = [[] for _ in range(self.n)]
@@ -102,9 +101,9 @@ class ReplicaDesign(StorageDesign):
         self,
         demand_vector: list[float],
     ) -> bool:
-        # if self.use_cvxpy:
-        #     # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
-        #     return self.service_rate_inspector.is_in_cap_region(demand_vector)
+        if self.use_cvxpy:
+            # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
+            return self.service_rate_inspector.is_in_cap_region(demand_vector)
 
         nonneg_demand_index_list = []
         for i, d in enumerate(demand_vector):

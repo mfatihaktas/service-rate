@@ -21,6 +21,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     random_expander_design = design.RandomExpanderDesign(k=k, n=n, d=d)
 
     num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.2, 0.3]]
+    # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
 
     log(INFO, "Started",
         block_design=block_design,
@@ -105,7 +106,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         # plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{replica_design.repr_for_plot()}-LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         # plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{replica_design.repr_for_plot()}-UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    for combination_size in range(2, d):
+    for combination_size in range(2, d + 1):
         plot_(combination_size=combination_size)
 
     fontsize = 14
