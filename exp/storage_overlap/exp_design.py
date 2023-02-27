@@ -230,6 +230,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
         design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
     ]
 

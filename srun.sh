@@ -9,8 +9,8 @@ if [ $1 = "i" ]; then
 elif [ $1 = "j" ]; then
   # FILE="sim/exp_mm1_stability"
   # FILE="storage_opt/exp_single_obj_per_node"
-  # FILE="storage_overlap/exp_design"
-  FILE="storage_overlap/exp_random_design"
+  FILE="storage_overlap/exp_design"
+  # FILE="storage_overlap/exp_random_design"
   NTASKS=1
   echo "#!/bin/bash
 #SBATCH --partition=main             # Partition (job queue)
