@@ -61,7 +61,7 @@ def plot_capacity_region_sequence_for_a__b__a_plus_b__a_minus_b(
     )
 
     num_a_plus_b_and_num_a_minus_b_list = []
-    for num_a_plus_b in range(1, num_coded):
+    for num_a_plus_b in range(1, num_coded + 1):
         num_a_minus_b = num_coded - num_a_plus_b
         num_a_plus_b_and_num_a_minus_b_list.append((num_a_plus_b, num_a_minus_b))
 
@@ -70,9 +70,8 @@ def plot_capacity_region_sequence_for_a__b__a_plus_b__a_minus_b(
     fig, ax_list = plot.subplots(1, num_plots, figsize=fig_size)
 
     def plot_(plot_index: int):
-        log(DEBUG, "Started", plot_index=plot_index)
-
         num_a_plus_b, num_a_minus_b = num_a_plus_b_and_num_a_minus_b_list[plot_index]
+        log(DEBUG, "Started", plot_index=plot_index, num_a_plus_b=num_a_plus_b, num_a_minus_b=num_a_minus_b)
 
         node_id_to_objs_list = get_node_id_to_objs_list(
             num_a=num_a,
@@ -81,14 +80,14 @@ def plot_capacity_region_sequence_for_a__b__a_plus_b__a_minus_b(
             num_a_minus_b=num_a_minus_b,
         )
 
-        scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list)
-        # log(DEBUG, "", storage_scheme=scheme)
+        storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list)
+        log(DEBUG, "", storage_scheme=storage_scheme)
 
         service_rate_inspector = service_rate.ServiceRateInspector(
             m=len(node_id_to_objs_list),
             C=1,
-            G=scheme.obj_encoding_matrix,
-            obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
+            G=storage_scheme.obj_encoding_matrix,
+            obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
             compute_halfspace_intersections=True,
             max_repair_set_size=2,
         )
@@ -123,5 +122,5 @@ if __name__ == "__main__":
     plot_capacity_region_sequence_for_a__b__a_plus_b__a_minus_b(
         num_a=3,
         num_b=3,
-        num_coded=5,
+        num_coded=2,
     )

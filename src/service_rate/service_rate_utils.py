@@ -46,12 +46,12 @@ def get_halfspaces(
     node_capacity: float,
     M: numpy.array,
 ) -> scipy.spatial.HalfspaceIntersection:
-    # log(DEBUG, "",
-    #     num_nodes=num_nodes,
-    #     total_num_repair_sets=total_num_repair_sets,
-    #     node_capacity=node_capacity,
-    #     M=M,
-    # )
+    log(DEBUG, "",
+        num_nodes=num_nodes,
+        total_num_repair_sets=total_num_repair_sets,
+        node_capacity=node_capacity,
+        M=M,
+    )
 
     halfspaces = numpy.zeros(
         (num_nodes + total_num_repair_sets, total_num_repair_sets + 1)
@@ -109,6 +109,7 @@ def get_orig_obj_id_to_repair_sets_w_obj_ids_map(
         for repair_size in range(1, max_repair_set_size + 1):
             for subset in itertools.combinations(range(n), repair_size):
                 subset = set(subset)
+                # log(DEBUG, f"obj= {obj}", subset=subset)
 
                 # Check if subset contains any previously registered smaller repair group
                 skip_rg = False
@@ -125,10 +126,10 @@ def get_orig_obj_id_to_repair_sets_w_obj_ids_map(
                 x, residuals, _, _ = numpy.linalg.lstsq(A, y)
                 residuals = y - numpy.dot(A, x)
                 # log(INFO, "", A=A, y=y, x=x, residuals=residuals)
-                if (
-                    numpy.sum(numpy.absolute(residuals)) < 0.0001
-                ):  # residuals.size > 0 and
+                # log(DEBUG, f"obj= {obj}", subset=subset, residuals=residuals)
+                if (numpy.sum(numpy.absolute(residuals)) < 0.0001):  # residuals.size > 0 and
                     repair_set_list.append(subset)
+
         orig_obj_id_to_repair_sets_w_obj_ids_map[obj] = repair_set_list
 
     return orig_obj_id_to_repair_sets_w_obj_ids_map

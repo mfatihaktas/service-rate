@@ -200,21 +200,22 @@ class StorageScheme:
 
     def __repr__(self):
         s = "StorageScheme( \n"
-        # for node_id, obj_list in enumerate(self.node_id_to_objs_list):
-        #     s += f"node-{node_id}: [\n"
-        #     for obj in obj_list:
-        #         s += f"{obj} \n"
-        #     s += "] \n"
         for node_id, obj_list in enumerate(self.node_id_to_objs_list):
-            # s += f"\t node-{node_id}: {len(obj_list)} objs \n"
-            num_plain, num_coded = 0, 0
+            s += f"node-{node_id}: ["
             for obj in obj_list:
-                if isinstance(obj, PlainObj):
-                    num_plain += 1
-                elif isinstance(obj, CodedObj):
-                    num_coded += 1
-            s += f"\t node-{node_id}: {num_plain} plain, {num_coded} coded objs \n"
-        s += ") \n"
+                s += f"{obj}, "
+            s += "] \n"
+
+        # for node_id, obj_list in enumerate(self.node_id_to_objs_list):
+        #     # s += f"\t node-{node_id}: {len(obj_list)} objs \n"
+        #     num_plain, num_coded = 0, 0
+        #     for obj in obj_list:
+        #         if isinstance(obj, PlainObj):
+        #             num_plain += 1
+        #         elif isinstance(obj, CodedObj):
+        #             num_coded += 1
+        #     s += f"\t node-{node_id}: {num_plain} plain, {num_coded} coded objs \n"
+        # s += ") \n"
 
         return s
 

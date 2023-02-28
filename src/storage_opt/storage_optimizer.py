@@ -5,7 +5,6 @@ import numpy
 
 from typing import Tuple
 
-from src.service_rate import storage_scheme as storage_scheme_module
 from src.utils.debug import *
 
 

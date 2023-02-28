@@ -3,6 +3,7 @@ import scipy
 
 from src.service_rate import service_rate
 from src.utils import plot_polygon
+
 from src.utils.debug import *
 from src.utils.plot import *
 
@@ -44,26 +45,31 @@ def plot_capacity_region_2d(
     service_rate_inspector: service_rate.ServiceRateInspector,
     file_name_suffix: str = None,
 ):
+    log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
+
     check(
         service_rate_inspector.compute_halfspace_intersections,
         "To plot capacity region, `compute_halfspace_intersections` should have been set",
     )
 
-    # log(INFO, "", halfspaces_intersections=service_rate_inspector.halfspaces.intersections)
-    x_l, y_l = [], []
-    for x in service_rate_inspector.halfspaces.intersections:
-        y = numpy.matmul(service_rate_inspector.T, x)
-        x_l.append(y[0])
-        y_l.append(y[1])
+    hull = service_rate_inspector.hull
+    points = service_rate_inspector.boundary_points_in_rows
+    # # log(INFO, "", halfspaces_intersections=service_rate_inspector.halfspaces.intersections)
+    # x_l, y_l = [], []
+    # for x in service_rate_inspector.halfspaces.intersections:
+    #     y = numpy.matmul(service_rate_inspector.T, x)
+    #     x_l.append(y[0])
+    #     y_l.append(y[1])
+    # # log(DEBUG, "", x_l=x_l, y_l=y_l)
+    # log(DEBUG, "Will call scipy.spatial.ConvexHull", len_x_l=len(x_l), len_y_l=len(y_l))
+    # points = numpy.column_stack((x_l, y_l))
+    # hull = scipy.spatial.ConvexHull(points)
 
-    points = numpy.column_stack((x_l, y_l))
-    hull = scipy.spatial.ConvexHull(points)
     # for simplex in hull.simplices:
     #     simplex = numpy.append(
     #         simplex, simplex[0]
     #     )  # https://stackoverflow.com/questions/27270477/3d-convex-hull-from-point-cloud
     #     plot.plot(points[simplex, 0], points[simplex, 1], c=NICE_BLUE, marker="o")
-    log(DEBUG, "", x_l=x_l, y_l=y_l)
     plot.fill(
         points[hull.vertices, 0], points[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
     )

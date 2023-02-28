@@ -23,7 +23,7 @@ class ServiceRateInspector:
         C: float,
         G: numpy.ndarray,
         obj_id_to_node_id_map: dict,
-        redundancy_w_two_xors: bool = True,
+        redundancy_w_two_xors: bool = False,
         compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
     ):
@@ -68,7 +68,7 @@ class ServiceRateInspector:
                 max_repair_set_size=max_repair_set_size,
             )
 
-        # log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
+        log(DEBUG, "", orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map)
 
         self.orig_obj_id_to_repair_sets_w_node_ids_map = service_rate_utils.get_orig_obj_id_to_repair_sets_w_node_ids_map(
             orig_obj_id_to_repair_sets_w_obj_ids_map=self.orig_obj_id_to_repair_sets_w_obj_ids_map,
@@ -120,6 +120,7 @@ class ServiceRateInspector:
                 self.boundary_point_list
             ).reshape((len(self.boundary_point_list), self.k))
 
+            log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=self.boundary_points_in_rows.shape)
             self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
             log(DEBUG, "scipy.spatial.ConvexHull is done.")
 
