@@ -42,7 +42,7 @@ def plot_capacity_region(
 
 def plot_capacity_region_2d(
     service_rate_inspector: service_rate.ServiceRateInspector,
-    file_name_suffix: str,
+    file_name_suffix: str = None,
 ):
     check(
         service_rate_inspector.compute_halfspace_intersections,
@@ -67,6 +67,9 @@ def plot_capacity_region_2d(
     plot.fill(
         points[hull.vertices, 0], points[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
     )
+
+    if file_name_suffix is None:
+        return
 
     fontsize = 24
 
