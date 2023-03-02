@@ -131,3 +131,14 @@ def test_w_frac_of_demand_vectors_in_cap_region(
         input_dict_for_round_robin_design=input_dict_for_round_robin_design,
         frac_of_demand_vectors_in_cap_region=num_in_cap_region / NUM_DEMAND_VECTORS,
     )
+
+
+def test_find_vertices_on_cap_region_boundary(service_rate_inspector: service_rate.ServiceRateInspector):
+    obj_id_list = [0, 1]
+    num_points_to_use_on_each_axis = 5
+    vertex_list = service_rate_inspector.find_vertices_on_cap_region_boundary(
+        obj_id_list=obj_id_list,
+        num_points_to_use_on_each_axis=num_points_to_use_on_each_axis,
+    )
+
+    log(DEBUG, "", vertex_list=vertex_list)

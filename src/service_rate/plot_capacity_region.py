@@ -109,6 +109,37 @@ def plot_capacity_region_2d(
     log(INFO, "Done.")
 
 
+def plot_capacity_region_2d_alternative(
+    service_rate_inspector: service_rate.ServiceRateInspector,
+    file_name_suffix: str = None,
+):
+    log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
+
+
+    plot.fill(
+        points[hull.vertices, 0], points[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
+    )
+
+    fontsize = 24
+    plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
+    # plot.xlim(xmin=0)
+    plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
+    # plot.ylim(ymin=0)
+
+    # title = (
+    #     r"$k= {}$, $m= {}$, $C= {}$, ".format(
+    #         service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+    #     )
+    #     + "Volume= {0:.2f} \n".format(hull.volume)
+    #     + service_rate_inspector.to_sysrepr()
+    # )
+    # plot.title(title, fontsize=fontsize, y=1.05)
+    plot.gcf().set_size_inches(4, 3)
+    plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
+    plot.gcf().clear()
+    log(INFO, "Done.")
+
+
 def plot_capacity_region_2d_when_k_g_2(
     service_rate_inspector: service_rate.ServiceRateInspector,
     file_name_suffix: str,

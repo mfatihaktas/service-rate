@@ -168,6 +168,63 @@ class ServiceRateInspector:
 
         return opt_value is not None
 
+    def find_max_demand_for_obj(self, obj_id: int) -> float:
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        log(DEBUG, f"T[{obj_id}]= {self.T[obj_id]}")
+        obj = cvxpy.Maximize(self.T[obj_id] @ x)
+        constraints = [self.M @ x <= self.C, x >= 0]
+
+        prob = cvxpy.Problem(obj, constraints)
+        opt_value = service_rate_utils.solve_prob(prob)
+
+        return opt_value
+
+    def find_vertices_on_cap_region_boundary(
+        self,
+        obj_id_list: list[int],
+        num_points_to_use_on_each_axis: int = 5,
+    ) -> list[numpy.array]:
+        # log(DEBUG, "Started", obj_id_list=obj_id_list, num_points_to_use_on_each_axis=num_points_to_use_on_each_axis)
+
+        # check(self.k == 2, "Only defined for k= 2")
+
+        obj_id_to_max_demand_map = {
+            obj_id: self.find_max_demand_for_obj(obj_id=obj_id)
+            for obj_id in range(self.k)
+        }
+
+        def find_vertex(obj_id: int, obj_demand: float) -> numpy.array:
+            obj_demand_vector = numpy.zeros(shape=(self.k, 1))
+            for i in range(self.k):
+                obj_demand_vector[i, 0] = obj_id_to_max_demand_map[i]
+            obj_demand_vector[obj_id, 0] = obj_demand
+            log(DEBUG, f"> obj_id= {obj_id}, obj_demand= {obj_demand}", obj_demand_vector=obj_demand_vector)
+
+            x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+            obj = cvxpy.Minimize(cvxpy.norm(self.T @ x - obj_demand_vector))
+            # constraints = [self.M @ x <= self.C, x >= 0]
+            constraints = [self.M @ x == self.C, x >= 0]
+
+            prob = cvxpy.Problem(obj, constraints)
+            opt_value = service_rate_utils.solve_prob(prob)
+            check(opt_value is not None, "Optimization problem could not be solved!",
+                  obj_id=obj_id, obj_demand=obj_demand
+            )
+
+            return numpy.matmul(self.T, x.value)
+
+        vertex_list = []
+        for obj_id in obj_id_list:
+            max_demand = obj_id_to_max_demand_map[obj_id]
+            for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_to_use_on_each_axis, endpoint=True):
+                vertex = find_vertex(obj_id=obj_id, obj_demand=obj_demand)
+                vertex_list.append(vertex)
+
+        # log(DEBUG, "Done", vertex_list=vertex_list)
+        return vertex_list
+
     def min_cost(self, obj_demand_list: list[float]):
         # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)
 
