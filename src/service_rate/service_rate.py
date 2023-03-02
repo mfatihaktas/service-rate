@@ -4,7 +4,7 @@ import scipy.spatial
 import string
 import sys
 
-from typing import Union
+from typing import Tuple, Union
 
 from src.service_rate import service_rate_utils
 
@@ -24,8 +24,8 @@ class ServiceRateInspector:
         G: numpy.ndarray,
         obj_id_to_node_id_map: dict,
         redundancy_w_two_xors: bool = False,
-        compute_halfspace_intersections: bool = False,
         max_repair_set_size: int = None,
+        compute_halfspace_intersections: bool = False,
     ):
         # Number of buckets
         self.m = m
@@ -104,25 +104,8 @@ class ServiceRateInspector:
         )
         # log(DEBUG, f"M= \n{self.M}")
 
-        # Halfspaces
-        if compute_halfspace_intersections:
-            self.halfspaces = service_rate_utils.get_halfspaces(
-                num_nodes=self.m,
-                total_num_repair_sets=self.l,
-                node_capacity=self.C,
-                M=self.M,
-            )
-
-            self.boundary_point_list = [
-                list(numpy.matmul(self.T, p)) for p in self.halfspaces.intersections
-            ]
-            self.boundary_points_in_rows = numpy.array(
-                self.boundary_point_list
-            ).reshape((len(self.boundary_point_list), self.k))
-
-            log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=self.boundary_points_in_rows.shape)
-            self.hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
-            log(DEBUG, "scipy.spatial.ConvexHull is done.")
+        if self.compute_halfspace_intersections:
+            self.hull, self.boundary_points_in_rows = self.get_convex_hull_and_boundary_points()
 
     def __repr__(self):
         return (
@@ -135,6 +118,29 @@ class ServiceRateInspector:
             f"\t T= \n{self.T} \n"
             ")"
         )
+
+    def get_convex_hull_and_boundary_points(self) -> Tuple[scipy.spatial.ConvexHull, numpy.array]:
+        log(DEBUG, "Started")
+
+        halfspaces = service_rate_utils.get_halfspaces(
+            num_nodes=self.m,
+            total_num_repair_sets=self.l,
+            node_capacity=self.C,
+            M=self.M,
+        )
+
+        self.boundary_point_list = [
+            list(numpy.matmul(self.T, p)) for p in halfspaces.intersections
+        ]
+        self.boundary_points_in_rows = numpy.array(
+            self.boundary_point_list
+        ).reshape((len(self.boundary_point_list), self.k))
+
+        log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=self.boundary_points_in_rows.shape)
+        hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
+        log(DEBUG, "scipy.spatial.ConvexHull is done.")
+
+        return hull
 
     def to_sysrepr(self):
         sym_list = string.ascii_lowercase[: self.k]
@@ -183,29 +189,28 @@ class ServiceRateInspector:
     def find_vertices_on_cap_region_boundary(
         self,
         obj_id_list: list[int],
-        num_points_to_use_on_each_axis: int = 5,
+        num_points_on_each_axis_to_query_boundary: int = 5,
     ) -> list[numpy.array]:
-        # log(DEBUG, "Started", obj_id_list=obj_id_list, num_points_to_use_on_each_axis=num_points_to_use_on_each_axis)
+        # log(DEBUG, "Started", obj_id_list=obj_id_list, num_points_on_each_axis_to_query_boundary=num_points_on_each_axis_to_query_boundary)
 
         # check(self.k == 2, "Only defined for k= 2")
 
-        obj_id_to_max_demand_map = {
-            obj_id: self.find_max_demand_for_obj(obj_id=obj_id)
+        obj_id_to_max_demand_plust_epsilon_map = {
+            obj_id: 1.1 * self.find_max_demand_for_obj(obj_id=obj_id)
             for obj_id in range(self.k)
         }
 
         def find_vertex(obj_id: int, obj_demand: float) -> numpy.array:
             obj_demand_vector = numpy.zeros(shape=(self.k, 1))
             for i in range(self.k):
-                obj_demand_vector[i, 0] = obj_id_to_max_demand_map[i]
+                obj_demand_vector[i, 0] = obj_id_to_max_demand_plust_epsilon_map[i]
             obj_demand_vector[obj_id, 0] = obj_demand
             log(DEBUG, f"> obj_id= {obj_id}, obj_demand= {obj_demand}", obj_demand_vector=obj_demand_vector)
 
             x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
             obj = cvxpy.Minimize(cvxpy.norm(self.T @ x - obj_demand_vector))
-            # constraints = [self.M @ x <= self.C, x >= 0]
-            constraints = [self.M @ x == self.C, x >= 0]
+            constraints = [self.M @ x <= self.C, x >= 0]
 
             prob = cvxpy.Problem(obj, constraints)
             opt_value = service_rate_utils.solve_prob(prob)
@@ -217,13 +222,13 @@ class ServiceRateInspector:
 
         vertex_list = []
         for obj_id in obj_id_list:
-            max_demand = obj_id_to_max_demand_map[obj_id]
-            for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_to_use_on_each_axis, endpoint=True):
+            max_demand = obj_id_to_max_demand_plust_epsilon_map[obj_id]
+            for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_on_each_axis_to_query_boundary, endpoint=True):
                 vertex = find_vertex(obj_id=obj_id, obj_demand=obj_demand)
-                vertex_list.append(vertex)
+                vertex_list.append(numpy.concatenate(vertex).ravel().tolist())
 
         # log(DEBUG, "Done", vertex_list=vertex_list)
-        return vertex_list
+        return sorted(vertex_list)
 
     def min_cost(self, obj_demand_list: list[float]):
         # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)

@@ -47,13 +47,13 @@ def plot_capacity_region_2d(
 ):
     log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
 
-    check(
-        service_rate_inspector.compute_halfspace_intersections,
-        "To plot capacity region, `compute_halfspace_intersections` should have been set",
-    )
+    check(service_rate_inspector.k == 2, "Defined ONLY for k= 2")
 
-    hull = service_rate_inspector.hull
-    points = service_rate_inspector.boundary_points_in_rows
+    if hasattr(service_rate_inspector, "hull"):
+        hull, boundary_points = service_rate_inspector.hull, service_rate_inspector.boundary_points
+    else:
+        hull, boundary_points = service_rate_inspector.get_convex_hull_and_boundary_points()
+
     # # log(INFO, "", halfspaces_intersections=service_rate_inspector.halfspaces.intersections)
     # x_l, y_l = [], []
     # for x in service_rate_inspector.halfspaces.intersections:
@@ -106,38 +106,44 @@ def plot_capacity_region_2d(
     plot.gcf().set_size_inches(4, 3)
     plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
-    log(INFO, "Done.")
+    log(INFO, "Done")
 
 
 def plot_capacity_region_2d_alternative(
     service_rate_inspector: service_rate.ServiceRateInspector,
+    obj_id_list: list[int],
     file_name_suffix: str = None,
 ):
     log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
 
-
-    plot.fill(
-        points[hull.vertices, 0], points[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
+    boundary_point_list = service_rate_inspector.find_vertices_on_cap_region_boundary(
+        obj_id_list=obj_id_list,
+        num_points_on_each_axis_to_query_boundary=5,
     )
+    log(DEBUG, "", boundary_point_list=boundary_point_list)
 
-    fontsize = 24
-    plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
+    x_list = [0] + [p[0] for p in boundary_point_list]
+    y_list = [0] + [p[1] for p in boundary_point_list]
+    plot.fill(x_list, y_list, c=NICE_BLUE, alpha=0.5)
+
+    fontsize = 14
+    plot.xlabel(fr"$\lambda_{obj_id_list[0]}$", fontsize=fontsize)
     # plot.xlim(xmin=0)
-    plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
+    plot.ylabel(fr"$\lambda_{obj_id_list[1]}$", fontsize=fontsize)
     # plot.ylim(ymin=0)
 
-    # title = (
-    #     r"$k= {}$, $m= {}$, $C= {}$, ".format(
-    #         service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
-    #     )
-    #     + "Volume= {0:.2f} \n".format(hull.volume)
-    #     + service_rate_inspector.to_sysrepr()
-    # )
-    # plot.title(title, fontsize=fontsize, y=1.05)
-    plot.gcf().set_size_inches(4, 3)
+    title = (
+        r"$k= {}$, $m= {}$, $C= {}$, ".format(
+            service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+        )
+        # + "Volume= {0:.2f} \n".format(hull.volume)
+        + service_rate_inspector.to_sysrepr()
+    )
+    plot.title(title, fontsize=fontsize)  # , y=1.05
+    plot.gcf().set_size_inches(5, 5)
     plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
-    log(INFO, "Done.")
+    log(INFO, "Done")
 
 
 def plot_capacity_region_2d_when_k_g_2(
