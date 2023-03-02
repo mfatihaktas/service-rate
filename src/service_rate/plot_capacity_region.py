@@ -133,11 +133,9 @@ def plot_capacity_region_2d_alternative(
     # plot.ylim(ymin=0)
 
     title = (
-        r"$k= {}$, $m= {}$, $C= {}$, ".format(
-            service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
-        )
+        fr"$k= {service_rate_inspector.k}$, $m= {service_rate_inspector.m}$, $C= {service_rate_inspector.C}$"
         # + "Volume= {0:.2f} \n".format(hull.volume)
-        + service_rate_inspector.to_sysrepr()
+        + "\n" + service_rate_inspector.to_sysrepr()
     )
     plot.title(title, fontsize=fontsize)  # , y=1.05
     plot.gcf().set_size_inches(5, 5)
