@@ -114,7 +114,7 @@ def plot_capacity_region_2d_alternative(
     obj_id_list: list[int],
     file_name_suffix: str = None,
 ):
-    log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
+    # log(DEBUG, "Started", service_rate_inspector=service_rate_inspector)
 
     boundary_point_list = service_rate_inspector.find_vertices_on_cap_region_boundary(
         obj_id_list=obj_id_list,
@@ -128,9 +128,12 @@ def plot_capacity_region_2d_alternative(
 
     fontsize = 14
     plot.xlabel(fr"$\lambda_{obj_id_list[0]}$", fontsize=fontsize)
-    # plot.xlim(xmin=0)
+    plot.xlim(xmin=0)
     plot.ylabel(fr"$\lambda_{obj_id_list[1]}$", fontsize=fontsize)
-    # plot.ylim(ymin=0)
+    plot.ylim(ymin=0)
+
+    if file_name_suffix is None:
+        return
 
     title = (
         fr"$k= {service_rate_inspector.k}$, $m= {service_rate_inspector.m}$, $C= {service_rate_inspector.C}$"
@@ -141,7 +144,7 @@ def plot_capacity_region_2d_alternative(
     plot.gcf().set_size_inches(5, 5)
     plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
-    log(INFO, "Done")
+    # log(INFO, "Done")
 
 
 def plot_capacity_region_2d_when_k_g_2(

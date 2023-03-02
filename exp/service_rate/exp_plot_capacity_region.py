@@ -64,7 +64,7 @@ def plot_capacity_region_for_a__b__a_plus_b__a_minus_b(
     )
 
     conf_list = []
-    for num_a_plus_b in range(1, num_coded + 1):
+    for num_a_plus_b in range(0, num_coded // 2 + 1):
         num_a_minus_b = num_coded - num_a_plus_b
         conf_list.append((num_a_plus_b, num_a_minus_b))
 
@@ -91,14 +91,14 @@ def plot_capacity_region_for_a__b__a_plus_b__a_minus_b(
             C=1,
             G=storage_scheme.obj_encoding_matrix,
             obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
-            compute_halfspace_intersections=True,
             max_repair_set_size=2,
         )
 
         ax = ax_list[plot_index]
         plot.sca(ax)
-        plot_capacity_region.plot_capacity_region_2d(
+        plot_capacity_region.plot_capacity_region_2d_alternative(
             service_rate_inspector=service_rate_inspector,
+            obj_id_list=[0, 1],
         )
 
         fontsize = 14
@@ -195,14 +195,14 @@ def plot_capacity_region_for_a_b_mds(
             C=1,
             G=storage_scheme.obj_encoding_matrix,
             obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
-            compute_halfspace_intersections=True,
             max_repair_set_size=2,
         )
 
         ax = ax_list[plot_index]
         plot.sca(ax)
-        plot_capacity_region.plot_capacity_region_2d(
+        plot_capacity_region.plot_capacity_region_2d_alternative(
             service_rate_inspector=service_rate_inspector,
+            obj_id_list=[0, 1],
         )
 
         fontsize = 14
@@ -226,10 +226,10 @@ def plot_capacity_region_for_a_b_mds(
 
 
 if __name__ == "__main__":
-    # plot_capacity_region_for_a__b__a_plus_b__a_minus_b(
-    #     num_a=3,
-    #     num_b=3,
-    #     num_coded=2,
-    # )
+    plot_capacity_region_for_a__b__a_plus_b__a_minus_b(
+        num_a=5,
+        num_b=5,
+        num_coded=20,
+    )
 
-    plot_capacity_region_for_a_b_mds(num_nodes=8)
+    # plot_capacity_region_for_a_b_mds(num_nodes=20)
