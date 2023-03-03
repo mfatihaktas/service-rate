@@ -1,4 +1,5 @@
 import abc
+import copy
 import numpy
 
 from src.utils.debug import *
@@ -24,6 +25,12 @@ class Obj(abc.ABC):
 
     def __eq__(self, other):
         return self.__hash__() == other.__hash__()
+
+    def __copy__(self):
+        cls = self.__class__
+        result = cls.__new__(cls)
+        result.__dict__.update(self.__dict__)
+        return result
 
 
 class PlainObj(Obj):
@@ -100,6 +107,20 @@ name_to_node_objs_list_map = {
     "a_a_b_b": [
         [PlainObj(id_str="a")],
         [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+        [PlainObj(id_str="b")],
+    ],
+
+    "a_a_a_b": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
+    ],
+
+    "a_b_b_b": [
+        [PlainObj(id_str="a")],
+        [PlainObj(id_str="b")],
         [PlainObj(id_str="b")],
         [PlainObj(id_str="b")],
     ],
@@ -208,6 +229,20 @@ name_to_node_objs_list_map = {
         ],
     ],
 }
+
+
+def copy_node_id_to_objs_list(
+    node_id_to_objs_list: list[list[Obj]],
+) -> list[list[Obj]]:
+    node_id_to_objs_list_ = []
+    for obj_list in node_id_to_objs_list:
+        node_id_to_objs_list_.append(
+            [
+                copy.copy(obj) for obj in obj_list
+            ]
+        )
+
+    return node_id_to_objs_list_
 
 
 class StorageScheme:

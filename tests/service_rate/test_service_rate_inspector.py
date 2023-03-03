@@ -25,6 +25,43 @@ def test_is_in_cap_region():
     assert inspector.is_in_cap_region([1, 2.3]) is False
 
 
+def test_is_in_cap_region_2():
+    node_id_to_objs_list = storage_scheme.name_to_node_objs_list_map["a_b_b_b"]
+
+    scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
+    log(DEBUG, "", storage_scheme=scheme)
+
+    inspector = service_rate.ServiceRateInspector(
+        m=len(node_id_to_objs_list),
+        C=1,
+        G=scheme.obj_encoding_matrix,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
+    )
+
+    assert inspector.is_in_cap_region([1, 2.9]) is True
+
+
+def test_get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
+    service_rate_inspector: service_rate.ServiceRateInspector
+):
+    node_id_to_objs_list = storage_scheme.name_to_node_objs_list_map["a_b_b_b"]
+
+    scheme = storage_scheme.StorageScheme(node_id_to_objs_list)
+    log(DEBUG, "", storage_scheme=scheme)
+
+    service_rate_inspector = service_rate.ServiceRateInspector(
+        m=len(node_id_to_objs_list),
+        C=1,
+        G=scheme.obj_encoding_matrix,
+        obj_id_to_node_id_map=scheme.obj_id_to_node_id_map,
+    )
+
+    in_cap_region, min_distance = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
+        obj_demand_list=[1, 2.9],
+    )
+    log(DEBUG, "", in_cap_region=in_cap_region, min_distance=min_distance)
+
+
 def test_plot_cap_2d(service_rate_inspector: service_rate.ServiceRateInspector):
     plot_capacity_region.plot_capacity_region(service_rate_inspector=service_rate_inspector)
 

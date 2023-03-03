@@ -119,29 +119,6 @@ class ServiceRateInspector:
             ")"
         )
 
-    def get_convex_hull_and_boundary_points(self) -> Tuple[scipy.spatial.ConvexHull, numpy.array]:
-        log(DEBUG, "Started")
-
-        halfspaces = service_rate_utils.get_halfspaces(
-            num_nodes=self.m,
-            total_num_repair_sets=self.l,
-            node_capacity=self.C,
-            M=self.M,
-        )
-
-        self.boundary_point_list = [
-            list(numpy.matmul(self.T, p)) for p in halfspaces.intersections
-        ]
-        self.boundary_points_in_rows = numpy.array(
-            self.boundary_point_list
-        ).reshape((len(self.boundary_point_list), self.k))
-
-        log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=self.boundary_points_in_rows.shape)
-        hull = scipy.spatial.ConvexHull(self.boundary_points_in_rows)
-        log(DEBUG, "scipy.spatial.ConvexHull is done.")
-
-        return hull
-
     def to_sysrepr(self):
         sym_list = string.ascii_lowercase[: self.k]
         node_list = [[] for _ in range(self.m)]
@@ -159,6 +136,29 @@ class ServiceRateInspector:
             node_list[ni].append("+".join(l))
 
         return str(node_list)
+
+    def get_convex_hull_and_boundary_points(self) -> Tuple[scipy.spatial.ConvexHull, numpy.array]:
+        log(DEBUG, "Started")
+
+        halfspaces = service_rate_utils.get_halfspaces(
+            num_nodes=self.m,
+            total_num_repair_sets=self.l,
+            node_capacity=self.C,
+            M=self.M,
+        )
+
+        boundary_point_list = [
+            list(numpy.matmul(self.T, p)) for p in halfspaces.intersections
+        ]
+        boundary_points_in_rows = numpy.array(
+            boundary_point_list
+        ).reshape((len(boundary_point_list), self.k))
+
+        log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=boundary_points_in_rows.shape)
+        hull = scipy.spatial.ConvexHull(boundary_points_in_rows)
+        log(DEBUG, "scipy.spatial.ConvexHull is done.")
+
+        return hull, boundary_points_in_rows
 
     def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
@@ -271,14 +271,17 @@ class ServiceRateInspector:
         # cost = cost / numpy.sum(x.value)
         return cost
 
-    def min_distance_to_boundary_w_cvxpy(self, obj_demand_list: list[float]) -> float:
+    def get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
+        self,
+        obj_demand_list: list[float],
+    ) -> Tuple[bool, float]:
         """Returns the min distance from obj_demand_list to the service rate boundary."""
 
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
         x = cvxpy.Variable(shape=(self.l, 1), name="x")
 
         obj = cvxpy.Minimize(cvxpy.sum_squares(self.T @ x - demand_vector))
-        in_cap_region = self.is_in_cap_region(numpy.array(obj_demand_list))
+        in_cap_region = self.is_in_cap_region(obj_demand_list)
         if in_cap_region:
             constraints = [self.M @ x >= self.C, x >= 0]
         else:
@@ -295,7 +298,7 @@ class ServiceRateInspector:
         distance = numpy.sqrt(
             numpy.sum((point_closest_to_demand_vector - demand_vector) ** 2)
         )
-        return distance
+        return in_cap_region, distance
 
     def min_distance_to_boundary_w_cvxpy_for_oleg(
         self, obj_demand_list: list[Union[float, str]]
