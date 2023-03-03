@@ -69,7 +69,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
         min_distance = float("Inf")
         for demand_vector in self.demand_vector_list:
             in_cap_region_, min_distance_ = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
-                obj_demand_list=demand_vector
+                obj_demand_list=demand_vector,
             )
             log(DEBUG, "",
                 node_id_to_objs_list=node_id_to_objs_list,
@@ -102,7 +102,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
         while q:
             node_id_to_objs_list = q.popleft()
             count += 1
-            log(DEBUG, "Iteration started", count=count, node_id_to_objs_list=node_id_to_objs_list)
+            log(DEBUG, "Started iteration", count=count, node_id_to_objs_list=node_id_to_objs_list)
 
             # if len(node_id_to_objs_list) > 4:
             #     return
@@ -132,25 +132,21 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
     def get_node_id_to_objs_list(self) -> list[list[storage_scheme_module.Obj]]:
         node_id_to_objs_list = [
             [
-                storage_scheme_module.PlainObj(id_str=f"{obj_id}")
+                storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}")
             ]
             for obj_id in range(self.k)
         ]
 
-        q = collections.deque()
-        q.append(node_id_to_objs_list)
-
         count = 0
-        while q:
-            node_id_to_objs_list = q.popleft()
+        while True:
             count += 1
-            log(DEBUG, "Iteration started", count=count, node_id_to_objs_list=node_id_to_objs_list)
+            log(DEBUG, "Started iteration", count=count, node_id_to_objs_list=node_id_to_objs_list)
 
             are_all_demand_vectors_covered = False
             min_distance = float("Inf")
             obj_to_add = None
             for obj_to_add_ in self.obj_to_add_list:
-                node_id_to_objs_list.append([obj_to_add_])
+                node_id_to_objs_list.append([copy.copy(obj_to_add_)])
 
                 are_all_demand_vectors_covered, min_distance_ = self.get_are_all_demand_vectors_covered_and_min_distance_to_demand_vectors(
                     node_id_to_objs_list=node_id_to_objs_list,
@@ -172,8 +168,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
 
                 node_id_to_objs_list.pop()
 
-            node_id_to_objs_list.append([obj_to_add])
-            q.append(node_id_to_objs_list)
+            node_id_to_objs_list.append([copy.copy(obj_to_add)])
 
-        log(DEBUG, "Done")
-        return node_id_to_objs_list_to_return
+        log(DEBUG, "Failed to find storage")
+        return None

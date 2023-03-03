@@ -247,19 +247,26 @@ def copy_node_id_to_objs_list(
 
 class StorageScheme:
     def __init__(self, node_id_to_objs_list: list[list[Obj]]):
-        self._node_id_to_objs_list = node_id_to_objs_list
+        self.node_id_to_objs_list = node_id_to_objs_list
 
         # Refers to `k`
         self._num_original_objs = self.get_num_original_objs()
         # Refers to `n`
         self._total_num_objs = sum(len(obj_list) for obj_list in node_id_to_objs_list)
         # Refers to `m`
-        self._num_nodes = len(self._node_id_to_objs_list)
+        self._num_nodes = len(self.node_id_to_objs_list)
 
         self._plain_obj_to_orig_id_map = self.get_plain_obj_to_orig_id_map()
 
         self._obj_id_to_node_id_map = self.get_obj_id_to_node_id_map()
-        # log(DEBUG, "", obj_id_to_node_id_map=self.obj_id_to_node_id_map)
+        # log(DEBUG, "",
+        #     obj_id_to_node_id_map=self.obj_id_to_node_id_map,
+        #     obj_index_to_id_map={
+        #         node_id: obj.id_
+        #         for node_id, obj_list in enumerate(self.node_id_to_objs_list)
+        #         for obj in obj_list
+        #     }
+        # )
 
         # This refers to G
         self._obj_encoding_matrix = self.get_obj_encoding_matrix()
@@ -286,10 +293,6 @@ class StorageScheme:
         return s
 
     @property
-    def node_id_to_objs_list(self):
-        return self._node_id_to_objs_list
-
-    @property
     def num_original_objs(self):
         return self._num_original_objs
 
@@ -312,19 +315,27 @@ class StorageScheme:
     def get_obj_encoding_matrix(self):
         G = numpy.zeros((self.num_original_objs, self.total_num_objs))
 
-        # log(DEBUG, "", _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map)
+        log(DEBUG, "",
+            _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map,
+            node_id_to_objs_list=self.node_id_to_objs_list,
+        )
 
         for node, obj_list in enumerate(self.node_id_to_objs_list):
-            for obj in obj_list:
+            log(DEBUG, "", node=node, obj_list=obj_list)
 
+            for obj in obj_list:
+                log(DEBUG, "", obj=obj, obj_id_=obj.id_)
                 if isinstance(obj, PlainObj):
                     G[self._plain_obj_to_orig_id_map[obj], obj.id_] = 1
+
                 elif isinstance(obj, CodedObj):
                     for coeff, plain_obj in obj.coeff_obj_list:
                         G[self._plain_obj_to_orig_id_map[plain_obj], obj.id_] = coeff
+
                 else:
                     raise ValueError("Unexpected obj")
 
+        log(DEBUG, "Done", G=G)
         return G
 
     def get_obj_id_to_node_id_map(self):

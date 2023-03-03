@@ -116,6 +116,6 @@ def test_SearchStorageWithReplicasAndTwoXORs(demand_vector_list: list[list[float
         demand_vector_list=demand_vector_list
     )
 
-    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
-    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
