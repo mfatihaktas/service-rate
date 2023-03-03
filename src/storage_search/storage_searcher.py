@@ -56,7 +56,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
         node_id_to_objs_list: list[list[storage_scheme_module.Obj]],
     ) -> Tuple[bool, float]:
         storage_scheme = storage_scheme_module.StorageScheme(node_id_to_objs_list)
-        log(DEBUG, "", storage_scheme=storage_scheme)
+        # log(DEBUG, "", storage_scheme=storage_scheme)
 
         service_rate_inspector = service_rate.ServiceRateInspector(
             m=len(node_id_to_objs_list),
@@ -71,12 +71,12 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
             in_cap_region_, min_distance_ = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
                 obj_demand_list=demand_vector,
             )
-            log(DEBUG, "",
-                node_id_to_objs_list=node_id_to_objs_list,
-                demand_vector=demand_vector,
-                in_cap_region=in_cap_region_,
-                min_distance=min_distance_,
-            )
+            # log(DEBUG, "",
+            #     node_id_to_objs_list=node_id_to_objs_list,
+            #     demand_vector=demand_vector,
+            #     in_cap_region=in_cap_region_,
+            #     min_distance=min_distance_,
+            # )
 
             min_distance = min(min_distance, min_distance_)
             are_all_demand_vectors_covered = (are_all_demand_vectors_covered and in_cap_region_)
@@ -146,6 +146,8 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
             min_distance = float("Inf")
             obj_to_add = None
             for obj_to_add_ in self.obj_to_add_list:
+                log(DEBUG, "Testing out", obj_to_add_=obj_to_add_)
+
                 node_id_to_objs_list.append([copy.copy(obj_to_add_)])
 
                 are_all_demand_vectors_covered, min_distance_ = self.get_are_all_demand_vectors_covered_and_min_distance_to_demand_vectors(

@@ -315,16 +315,13 @@ class StorageScheme:
     def get_obj_encoding_matrix(self):
         G = numpy.zeros((self.num_original_objs, self.total_num_objs))
 
-        log(DEBUG, "",
-            _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map,
-            node_id_to_objs_list=self.node_id_to_objs_list,
-        )
+        # log(DEBUG, "Started",
+        #     _plain_obj_to_orig_id_map=self._plain_obj_to_orig_id_map,
+        #     node_id_to_objs_list=self.node_id_to_objs_list,
+        # )
 
         for node, obj_list in enumerate(self.node_id_to_objs_list):
-            log(DEBUG, "", node=node, obj_list=obj_list)
-
             for obj in obj_list:
-                log(DEBUG, "", obj=obj, obj_id_=obj.id_)
                 if isinstance(obj, PlainObj):
                     G[self._plain_obj_to_orig_id_map[obj], obj.id_] = 1
 
@@ -335,7 +332,7 @@ class StorageScheme:
                 else:
                     raise ValueError("Unexpected obj")
 
-        log(DEBUG, "Done", G=G)
+        # log(DEBUG, "Done", G=G)
         return G
 
     def get_obj_id_to_node_id_map(self):
