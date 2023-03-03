@@ -51,7 +51,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
 
         return obj_to_add_list
 
-    def get_are_all_demand_vectors_covered_and_min_distance_to_demand_vectors(
+    def get_are_all_demand_vectors_covered_and_max_of_min_distances_to_demand_vectors(
         self,
         node_id_to_objs_list: list[list[storage_scheme_module.Obj]],
     ) -> Tuple[bool, float]:
@@ -66,7 +66,7 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
         )
 
         are_all_demand_vectors_covered = True
-        min_distance = float("Inf")
+        max_of_min_distances = float("-Inf")
         for demand_vector in self.demand_vector_list:
             in_cap_region_, min_distance_ = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
                 obj_demand_list=demand_vector,
@@ -75,13 +75,13 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
             #     node_id_to_objs_list=node_id_to_objs_list,
             #     demand_vector=demand_vector,
             #     in_cap_region=in_cap_region_,
-            #     min_distance=min_distance_,
+            #     max_of_min_distances=min_distance_,
             # )
 
-            min_distance = min(min_distance, min_distance_)
+            max_of_min_distances = max(max_of_min_distances, min_distance_)
             are_all_demand_vectors_covered = (are_all_demand_vectors_covered and in_cap_region_)
 
-        return are_all_demand_vectors_covered, min_distance
+        return are_all_demand_vectors_covered, max_of_min_distances
 
     def get_node_id_to_objs_list_w_brute_force(self) -> list[list[storage_scheme_module.Obj]]:
         node_id_to_objs_list = [
@@ -107,12 +107,12 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
             # if len(node_id_to_objs_list) > 4:
             #     return
 
-            are_all_demand_vectors_covered, min_distance = self.get_are_all_demand_vectors_covered_and_min_distance_to_demand_vectors(
+            are_all_demand_vectors_covered, max_of_min_distances = self.get_are_all_demand_vectors_covered_and_max_of_min_distances_to_demand_vectors(
                 node_id_to_objs_list=node_id_to_objs_list,
             )
             log(DEBUG, "",
                 are_all_demand_vectors_covered=are_all_demand_vectors_covered,
-                min_distance=min_distance,
+                max_of_min_distances=max_of_min_distances,
                 node_id_to_objs_list=node_id_to_objs_list,
             )
 
@@ -143,26 +143,35 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
             log(DEBUG, "Started iteration", count=count, node_id_to_objs_list=node_id_to_objs_list)
 
             are_all_demand_vectors_covered = False
-            min_distance = float("Inf")
+            max_of_min_distances = float("Inf")
             obj_to_add = None
+            obj_to_distance_map = {}
             for obj_to_add_ in self.obj_to_add_list:
-                log(DEBUG, "Testing out", obj_to_add_=obj_to_add_)
+                log(DEBUG, "Testing out", count=count, obj_to_add_=obj_to_add_)
 
                 node_id_to_objs_list.append([copy.copy(obj_to_add_)])
 
-                are_all_demand_vectors_covered, min_distance_ = self.get_are_all_demand_vectors_covered_and_min_distance_to_demand_vectors(
+                are_all_demand_vectors_covered, min_distance_ = self.get_are_all_demand_vectors_covered_and_max_of_min_distances_to_demand_vectors(
+                    node_id_to_objs_list=node_id_to_objs_list,
+                )
+                obj_to_distance_map[obj_to_add_] = min_distance_
+                log(DEBUG, "",
+                    count=count,
+                    are_all_demand_vectors_covered=are_all_demand_vectors_covered,
+                    min_distance_=min_distance_,
                     node_id_to_objs_list=node_id_to_objs_list,
                 )
 
                 if are_all_demand_vectors_covered:
-                    log(DEBUG, "Found storage")
+                    log(DEBUG, "Found storage", count=count)
                     return node_id_to_objs_list
 
-                elif min_distance_ < min_distance:
-                    min_distance = min_distance_
+                elif min_distance_ < max_of_min_distances:
+                    max_of_min_distances = min_distance_
                     obj_to_add = obj_to_add_
                     log(DEBUG, "Updated",
-                        min_distance=min_distance,
+                        count=count,
+                        max_of_min_distances=max_of_min_distances,
                         min_distance_=min_distance_,
                         obj_to_add=obj_to_add,
                         obj_to_add_=obj_to_add_,
@@ -171,6 +180,12 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
                 node_id_to_objs_list.pop()
 
             node_id_to_objs_list.append([copy.copy(obj_to_add)])
+            log(DEBUG, "Decision",
+                count=count,
+                obj_to_add=obj_to_add,
+                obj_to_distance_map=obj_to_distance_map,
+                node_id_to_objs_list=node_id_to_objs_list,
+            )
 
         log(DEBUG, "Failed to find storage")
         return None
