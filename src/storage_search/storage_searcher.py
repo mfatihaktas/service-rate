@@ -1,7 +1,6 @@
 import abc
 import collections
 import copy
-import functools
 import itertools
 
 from typing import Tuple
@@ -148,17 +147,17 @@ class StorageSearcher:
 
                 node_id_to_objs_list.pop()
 
-            distance_and_obj_list.sort(key=lambda distance_and_obj: (distance_and_obj[0], len(distance_and_obj[1])))
-            # def compare(distance_and_obj_1, distance_and_obj_2):
-            #     distance_1, obj_1 = distance_and_obj_1
-            #     distance_2, obj_2 = distance_and_obj_2
+            # distance_and_obj_list.sort(key=lambda distance_and_obj: (distance_and_obj[0], len(distance_and_obj[1])))
+            def compare(distance_and_obj_1, distance_and_obj_2):
+                distance_1, obj_1 = distance_and_obj_1
+                distance_2, obj_2 = distance_and_obj_2
 
-            #     if abs(distance_1 - distance_2) < 0.0001:
-            #         return len(obj_1) - len(obj_2)
-            #     else:
-            #         return distance_1 - distance_2
+                if abs(distance_1 - distance_2) < 0.0001:
+                    return len(obj_1) - len(obj_2)
+                else:
+                    return distance_1 - distance_2
 
-            # distance_and_obj_list = sorted(distance_and_obj_list, key=functools.cmp_to_key(compare))
+            distance_and_obj_list = sorted(distance_and_obj_list, key=functools.cmp_to_key(compare))
 
             obj_to_add = distance_and_obj_list[0][1]
             node_id_to_objs_list.append([copy.copy(obj_to_add)])
