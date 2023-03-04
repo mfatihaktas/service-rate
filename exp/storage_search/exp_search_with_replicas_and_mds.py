@@ -57,14 +57,21 @@ def plot_num_nodes_vs_num_independent_mds_objs(
 
 if __name__ == "__main__":
     demand_vector_lists = []
-    for high_demand in range(3, 8):
-        for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
-            demand_vector_lists.append(
-                [
-                    [low_demand, high_demand],
-                    [high_demand, low_demand],
-                ]
-            )
+    # for high_demand in range(3, 8):
+    #     for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
+    #         demand_vector_lists.append(
+    #             [
+    #                 [high_demand, low_demand],
+    #                 [low_demand, high_demand],
+    #             ]
+    #         )
+    for high_demand in range(2, 20):
+        demand_vector_lists.append(
+            [
+                [high_demand, 0],
+                [0, high_demand],
+            ]
+        )
 
     plot_num_nodes_vs_num_independent_mds_objs(
         demand_vector_lists=demand_vector_lists,
