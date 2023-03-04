@@ -43,8 +43,8 @@ class StorageSearcher:
         )
 
         are_all_demand_vectors_covered = True
-        # distance = float("-Inf")
-        distance = 0
+        distance = float("-Inf")
+        # distance = 0
         for demand_vector in self.demand_vector_list:
             in_cap_region_, min_distance_ = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
                 obj_demand_list=demand_vector,
@@ -59,8 +59,8 @@ class StorageSearcher:
             #     distance=min_distance_,
             # )
 
-            # distance = max(distance, min_distance_)
-            distance += min_distance_
+            distance = max(distance, min_distance_)
+            # distance += min_distance_
             are_all_demand_vectors_covered = (are_all_demand_vectors_covered and in_cap_region_)
 
         return are_all_demand_vectors_covered, distance
