@@ -24,6 +24,10 @@ class StorageSearcher:
         self.obj_to_add_list = self.get_obj_to_add_list()
         log(DEBUG, "", obj_to_add_list=self.obj_to_add_list)
 
+    @abc.abstractmethod
+    def get_obj_to_add_list(self):
+        pass
+
     def get_are_all_demand_vectors_covered_and_distance_to_demand_vectors(
         self,
         node_id_to_objs_list: list[list[storage_scheme_module.Obj]],
@@ -185,6 +189,34 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
                     coeff_obj_list=[
                         (1, storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id_pair[0])}")),
                         (1, storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id_pair[1])}")),
+                    ]
+                )
+            )
+
+        return obj_to_add_list
+
+
+class SearchStorageWithReplicasAndMDS(StorageSearcher):
+    def __init__(
+        self,
+        demand_vector_list: list[list[float]],
+        num_independent_mds_objs: int,
+    ):
+        self.num_independent_mds_objs = num_independent_mds_objs
+        super().__init__(demand_vector_list=demand_vector_list)
+
+    def get_obj_to_add_list(self) -> list[storage_scheme_module.Obj]:
+        obj_to_add_list = [
+            storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}")
+            for obj_id in range(self.k)
+        ]
+
+        for i in range(self.num_independent_mds_objs):
+            obj_to_add_list.append(
+                storage_scheme_module.CodedObj(
+                    coeff_obj_list=[
+                        ((obj_id + 1)**i, storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}"))
+                        for obj_id in range(self.k)
                     ]
                 )
             )

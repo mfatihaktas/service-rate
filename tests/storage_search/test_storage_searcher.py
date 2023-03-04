@@ -15,10 +15,10 @@ from src.utils.debug import *
         # [[1, 3, 4, 2]],
         # [[3.5, 1, 0.2, 0.1]],
 
-        # [
-        #     [4, 1, 0.3, 0.2],
-        #     [0.2, 0.3, 1, 4],
-        # ],
+        [
+            [4, 1, 0.3, 0.2],
+            [0.2, 0.3, 1, 4],
+        ],
 
         # [
         #     [3, 1, 1, 1],
@@ -64,11 +64,11 @@ from src.utils.debug import *
         #     [0.1, 0.1, 10],
         # ],
 
-        [
-            [4, 0, 0],
-            [0, 4, 0],
-            [0, 0, 4],
-        ],
+        # [
+        #     [4, 0, 0],
+        #     [0, 4, 0],
+        #     [0, 0, 4],
+        # ],
 
         # [
         #     [10, 0.1, 0.1, 0.1],
@@ -118,4 +118,15 @@ def test_SearchStorageWithReplicasAndTwoXORs(demand_vector_list: list[list[float
 
     # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
     node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+    log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
+
+
+def test_SearchStorageWithReplicasAndMDS(demand_vector_list: list[list[float]]):
+    storage_searcher = storage_searcher_module.SearchStorageWithReplicasAndMDS(
+        demand_vector_list=demand_vector_list,
+        num_independent_mds_objs=1,
+    )
+
+    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
