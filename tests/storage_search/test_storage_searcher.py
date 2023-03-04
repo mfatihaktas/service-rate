@@ -127,6 +127,16 @@ def test_SearchStorageWithReplicasAndMDS(demand_vector_list: list[list[float]]):
         num_independent_mds_objs=1,
     )
 
-    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
-    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+    log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
+
+
+def test_SearchStorageWithReplicasAndXORs(demand_vector_list: list[list[float]]):
+    storage_searcher = storage_searcher_module.SearchStorageWithReplicasAndXORs(
+        demand_vector_list=demand_vector_list,
+    )
+
+    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)

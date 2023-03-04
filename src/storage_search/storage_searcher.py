@@ -148,17 +148,18 @@ class StorageSearcher:
 
                 node_id_to_objs_list.pop()
 
-            # distance_and_obj_list.sort(key=lambda distance_and_obj: (distance_and_obj[0], len(distance_and_obj[1])))
-            def compare(distance_and_obj_1, distance_and_obj_2):
-                distance_1, obj_1 = distance_and_obj_1
-                distance_2, obj_2 = distance_and_obj_2
+            distance_and_obj_list.sort(key=lambda distance_and_obj: (distance_and_obj[0], len(distance_and_obj[1])))
+            # def compare(distance_and_obj_1, distance_and_obj_2):
+            #     distance_1, obj_1 = distance_and_obj_1
+            #     distance_2, obj_2 = distance_and_obj_2
 
-                if abs(distance_1 - distance_2) < 0.0001:
-                    return len(obj_1) - len(obj_2)
-                else:
-                    return distance_1 - distance_2
+            #     if abs(distance_1 - distance_2) < 0.0001:
+            #         return len(obj_1) - len(obj_2)
+            #     else:
+            #         return distance_1 - distance_2
 
-            distance_and_obj_list = sorted(distance_and_obj_list, key=functools.cmp_to_key(compare))
+            # distance_and_obj_list = sorted(distance_and_obj_list, key=functools.cmp_to_key(compare))
+
             obj_to_add = distance_and_obj_list[0][1]
             node_id_to_objs_list.append([copy.copy(obj_to_add)])
             log(DEBUG, "Decision",
@@ -192,6 +193,31 @@ class SearchStorageWithReplicasAndTwoXORs(StorageSearcher):
                     ]
                 )
             )
+
+        return obj_to_add_list
+
+
+class SearchStorageWithReplicasAndXORs(StorageSearcher):
+    def __init__(self, demand_vector_list: list[list[float]]):
+        super().__init__(demand_vector_list=demand_vector_list)
+
+    def get_obj_to_add_list(self) -> list[storage_scheme_module.Obj]:
+        obj_to_add_list = [
+            storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}")
+            for obj_id in range(self.k)
+        ]
+
+        obj_id_list = list(range(self.k))
+        for xor_size in range(2, self.k + 1):
+            for obj_id_tuple in itertools.combinations(obj_id_list, r=xor_size):
+                obj_to_add_list.append(
+                    storage_scheme_module.CodedObj(
+                        coeff_obj_list=[
+                            (1, storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}"))
+                            for obj_id in obj_id_tuple
+                        ]
+                    )
+                )
 
         return obj_to_add_list
 
