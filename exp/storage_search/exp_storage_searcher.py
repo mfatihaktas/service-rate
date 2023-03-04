@@ -1,3 +1,4 @@
+from src.model import storage_optimizer as storage_optimizer_module
 from src.storage_search import storage_searcher as storage_searcher_module
 
 from src.utils.debug import *
@@ -51,9 +52,9 @@ def exp_SearchStorageWithReplicasAndTwoXORs():
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
 
 
-def exp_SearchStorageWithReplicasAndTwoXORs_forTrapezoidalCapRegion():
+def exp_SearchStorageWithReplicasAndTwoXORs_forTwoObjectsAndTrapezoidalCapRegion():
     demand_vector_lists = []
-    for high_demand in range(3, 8):
+    for high_demand in range(3, 5):
         for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
             demand_vector_lists.append(
                 [
@@ -63,16 +64,40 @@ def exp_SearchStorageWithReplicasAndTwoXORs_forTrapezoidalCapRegion():
             )
 
     for i, demand_vector_list in enumerate(demand_vector_lists):
+        # Get `node_id_to_objs_list_via_search`
         storage_searcher = storage_searcher_module.SearchStorageWithReplicasAndTwoXORs(
             demand_vector_list=demand_vector_list
         )
 
-        # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
-        node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
-        log(DEBUG, f"> i= {i}",
+        # node_id_to_objs_list_via_search = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+        node_id_to_objs_list_via_search = storage_searcher.get_node_id_to_objs_list()
+
+        # Get `node_id_to_objs_list_via_model`
+        alpha, beta, gamma = storage_optimizer_module.get_alpha_beta_gamma_for_trapezoidal_cap_region(
             demand_vector_list=demand_vector_list,
-            node_id_to_objs_list=node_id_to_objs_list,
         )
+
+        storage_optimizer = storage_optimizer_module.StorageOptimizer_wReplicasAndXORs_forTwoObjectsAndTrapezoidalCapRegion(
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+        )
+
+        node_id_to_objs_list_via_model = storage_optimizer.get_node_id_to_objs_list()
+
+        log(INFO, f"> i= {i}",
+            demand_vector_list=demand_vector_list,
+            alpha=alpha,
+            beta=beta,
+            gamma=gamma,
+            node_id_to_objs_list_via_search=node_id_to_objs_list_via_search,
+            node_id_to_objs_list_via_model=node_id_to_objs_list_via_model,
+        )
+        if len(node_id_to_objs_list_via_search) != len(node_id_to_objs_list_via_model):
+            log(WARNING, "Searcher and model gave different number of nodes",
+                len_node_id_to_objs_list_via_search=len(node_id_to_objs_list_via_search),
+                len_node_id_to_objs_list_via_model=len(node_id_to_objs_list_via_model),
+            )
 
     log(DEBUG, "Done")
 
@@ -92,5 +117,5 @@ def exp_SearchStorageWithReplicasAndMDS():
 
 if __name__ == "__main__":
     # exp_SearchStorageWithReplicasAndTwoXORs()
-    exp_SearchStorageWithReplicasAndTwoXORs_forTrapezoidalCapRegion()
+    exp_SearchStorageWithReplicasAndTwoXORs_forTwoObjectsAndTrapezoidalCapRegion()
     # exp_SearchStorageWithReplicasAndMDS()
