@@ -43,6 +43,9 @@ class PlainObj(Obj):
     def __hash__(self):
         return hash(self.id_str)
 
+    def __len__(self):
+        return 1
+
     # def __repr__(self):
     #     return (
     #         "PlainObj( \n" f"\t id_str= {self.id_str} \n" f"\t id_= {self.id_} \n" ")"
@@ -69,6 +72,9 @@ class CodedObj(Obj):
     def __hash__(self):
         id_tuple = (obj.id_str for _, obj in self.coeff_obj_list)
         return hash(id_tuple)
+
+    def __len__(self):
+        return len(self._coeff_obj_list)
 
     # def __repr__(self):
     #     s = "CodedObj( \n"

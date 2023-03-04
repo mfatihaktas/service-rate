@@ -9,11 +9,31 @@ def get_demand_vector_list() -> list[list[float]]:
     #     [0.2, 0.3, 1, 4],
     # ]
 
+    # demand_vector_list = [
+    #     [3, 1, 1, 1],
+    #     [1, 3, 1, 1],
+    #     [1, 1, 3, 1],
+    #     [1, 1, 1, 3],
+    # ]
+
+    # demand_vector_list = [
+    #     [10, 0.1, 0.1],
+    #     [0.1, 0.1, 2],
+    #     [0.1, 20, 0.1],
+    # ]
+
+    # demand_vector_list = [
+    #     [4, 0, 0],
+    #     [0, 4, 0],
+    #     [0, 0, 4],
+    # ]
+
     demand_vector_list = [
-        [3, 1, 1, 1],
-        [1, 3, 1, 1],
-        [1, 1, 3, 1],
-        [1, 1, 1, 3],
+        [3, 0.1, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 0.1, 3],
+        [0.1, 0.1, 3, 0.1, 0.1],
+        [0.1, 3, 0.1, 0.1, 0.1],
+        [0.1, 0.1, 0.1, 10, 0.1],
     ]
 
     return demand_vector_list
@@ -26,8 +46,8 @@ def exp_SearchStorageWithReplicasAndTwoXORs():
         demand_vector_list=demand_vector_list
     )
 
-    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
-    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+    # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+    node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
 
 

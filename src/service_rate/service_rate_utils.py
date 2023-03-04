@@ -332,6 +332,7 @@ def solve_prob(
     try:
         prob.solve()
     except cvxpy.SolverError:
+        # prob.solve(solver="ECOS")
         prob.solve(solver="SCS")
 
     # log(DEBUG, f"prob.status= {prob.status}")
