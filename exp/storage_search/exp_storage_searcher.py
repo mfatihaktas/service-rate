@@ -51,6 +51,32 @@ def exp_SearchStorageWithReplicasAndTwoXORs():
     log(DEBUG, "Done", node_id_to_objs_list=node_id_to_objs_list)
 
 
+def exp_SearchStorageWithReplicasAndTwoXORs_forTrapezoidalCapRegion():
+    demand_vector_lists = []
+    for high_demand in range(3, 8):
+        for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
+            demand_vector_lists.append(
+                [
+                    [low_demand, high_demand],
+                    [high_demand, low_demand],
+                ]
+            )
+
+    for i, demand_vector_list in enumerate(demand_vector_lists):
+        storage_searcher = storage_searcher_module.SearchStorageWithReplicasAndTwoXORs(
+            demand_vector_list=demand_vector_list
+        )
+
+        # node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list_w_brute_force()
+        node_id_to_objs_list = storage_searcher.get_node_id_to_objs_list()
+        log(DEBUG, f"> i= {i}",
+            demand_vector_list=demand_vector_list,
+            node_id_to_objs_list=node_id_to_objs_list,
+        )
+
+    log(DEBUG, "Done")
+
+
 def exp_SearchStorageWithReplicasAndMDS():
     demand_vector_list = get_demand_vector_list()
 
@@ -66,4 +92,5 @@ def exp_SearchStorageWithReplicasAndMDS():
 
 if __name__ == "__main__":
     # exp_SearchStorageWithReplicasAndTwoXORs()
-    exp_SearchStorageWithReplicasAndMDS()
+    exp_SearchStorageWithReplicasAndTwoXORs_forTrapezoidalCapRegion()
+    # exp_SearchStorageWithReplicasAndMDS()

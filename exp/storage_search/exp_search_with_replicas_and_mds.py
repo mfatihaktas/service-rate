@@ -57,7 +57,6 @@ def plot_num_nodes_vs_num_independent_mds_objs(
 
 if __name__ == "__main__":
     demand_vector_lists = []
-
     for high_demand in range(3, 8):
         for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
             demand_vector_lists.append(
