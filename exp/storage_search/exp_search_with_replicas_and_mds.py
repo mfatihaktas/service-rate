@@ -65,7 +65,7 @@ if __name__ == "__main__":
     #                 [low_demand, high_demand],
     #             ]
     #         )
-    for high_demand in range(2, 20):
+    for high_demand in range(2, 14):
         demand_vector_lists.append(
             [
                 [high_demand, 0],
