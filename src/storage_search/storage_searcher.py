@@ -49,6 +49,8 @@ class StorageSearcher:
             in_cap_region_, min_distance_ = service_rate_inspector.get_in_cap_region_and_min_distance_to_boundary_w_cvxpy(
                 obj_demand_list=demand_vector,
             )
+            if in_cap_region_:
+                min_distance_ = 0
 
             # log(DEBUG, "",
             #     node_id_to_objs_list=node_id_to_objs_list,
