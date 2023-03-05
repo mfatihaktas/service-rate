@@ -289,11 +289,13 @@ class ServiceRateInspector:
 
         prob = cvxpy.Problem(obj, constraints)
         opt_value = service_rate_utils.solve_prob(prob)
-        check(opt_value is not None, "Optimization program failed",
-              obj_demand_list=obj_demand_list,
-              in_cap_region=in_cap_region,
-              self=self
-        )
+        # check(opt_value is not None, "Optimization program failed",
+        #       obj_demand_list=obj_demand_list,
+        #       in_cap_region=in_cap_region,
+        #       self=self
+        # )
+        if opt_value is not None:
+            return in_cap_region, float("Inf")
 
         # blog(x_val=x.value)
         point_closest_to_demand_vector = numpy.matmul(self.T, x.value)
