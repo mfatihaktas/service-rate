@@ -6,6 +6,7 @@ from src.utils.plot import *
 
 def plot_num_nodes_vs_num_independent_mds_objs(
     demand_vector_lists: list[list[list[float]]],
+    file_suffix: str,
 ):
     log(DEBUG, "Started", demand_vector_lists=demand_vector_lists)
 
@@ -49,13 +50,13 @@ def plot_num_nodes_vs_num_independent_mds_objs(
     for plot_index in range(num_plots):
         plot_(plot_index=plot_index)
 
-    plot.savefig("plots/plot_num_nodes_vs_num_independent_mds_objs.png", bbox_inches="tight")
+    plot.savefig(f"plots/plot_num_nodes_vs_num_independent_mds_objs_{file_suffix}.png", bbox_inches="tight")
     plot.gcf().clear()
 
     log(DEBUG, "Done")
 
 
-if __name__ == "__main__":
+def manage_plot_num_nodes_vs_num_independent_mds_objs_for_k_2():
     demand_vector_lists = []
     # for high_demand in range(3, 8):
     #     for low_demand in [0, high_demand // 2, high_demand * 3 // 4]:
@@ -75,4 +76,27 @@ if __name__ == "__main__":
 
     plot_num_nodes_vs_num_independent_mds_objs(
         demand_vector_lists=demand_vector_lists,
+        file_suffix="k_2",
     )
+
+
+def manage_plot_num_nodes_vs_num_independent_mds_objs_for_k_3():
+    demand_vector_lists = []
+    for high_demand in range(2, 14):
+        demand_vector_lists.append(
+            [
+                [high_demand, 0, 0],
+                [0, high_demand, 0],
+                [0, 0, high_demand],
+            ]
+        )
+
+    plot_num_nodes_vs_num_independent_mds_objs(
+        demand_vector_lists=demand_vector_lists,
+        file_suffix="k_3",
+    )
+
+
+if __name__ == "__main__":
+    # manage_plot_num_nodes_vs_num_independent_mds_objs_for_k_2()
+    manage_plot_num_nodes_vs_num_independent_mds_objs_for_k_3()
