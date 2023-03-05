@@ -3,6 +3,7 @@ import collections
 import copy
 import functools
 import itertools
+import numpy
 
 from typing import Tuple
 
@@ -18,6 +19,14 @@ from src.utils.misc import *
 class StorageSearcher:
     def __init__(self, demand_vector_list: list[list[float]]):
         self.demand_vector_list = demand_vector_list
+
+        # Add `average_demand_vector`
+        average_demand_vector = sum(
+            numpy.array(demand_vector)
+            for demand_vector in demand_vector_list
+        ) / len(demand_vector_list)
+        # log(DEBUG, "", average_demand_vector=average_demand_vector)
+        self.demand_vector_list.append(average_demand_vector.tolist())
 
         self.k = len(self.demand_vector_list[0])
 
