@@ -376,6 +376,45 @@ class RandomExpanderDesign(ReplicaDesign):
 
 
 @dataclasses.dataclass
+class RandomExpanderDesign_wClusters(ReplicaDesign):
+    num_clusters: int
+
+    def __post_init__(self):
+        self.obj_id_to_node_id_set_map = {}
+
+        num_objs_per_cluster = self.k // self.num_clusters
+        cluster_size = self.n // self.num_clusters
+        for cluster_index in range(self.num_clusters):
+            node_id_list = list(
+                range(
+                    cluster_index * cluster_size,
+                    min(self.n, (cluster_index + 1) * cluster_size)
+                )
+            )
+
+            for obj_id in range(
+                cluster_index * num_objs_per_cluster,
+                min(self.k, (cluster_index + 1) * num_objs_per_cluster)
+            ):
+                self.obj_id_to_node_id_set_map[obj_id] = set(random.sample(node_id_list, self.d))
+
+        log(DEBUG, "Constructed", obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map)
+
+    def __repr__(self):
+        return (
+            "RandomExpanderDesign_wClusters( \n"
+            f"\t k= {self.k} \n"
+            f"\t n= {self.n} \n"
+            f"\t d= {self.d} \n"
+            ")"
+        )
+
+    def repr_for_plot(self):
+        # return f"RandomExpanderDesign_wClusters(k= {self.k}, n= {self.n}, d= {self.d})"
+        return r"$\textrm{RandomExpanderDesign_wClusters}$"
+
+
+@dataclasses.dataclass
 class TwoXORDesign(StorageDesign):
     d: int
 

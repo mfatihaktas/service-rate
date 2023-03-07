@@ -52,6 +52,23 @@ def test_CyclicDesign(
     )
 
 
+def test_RandomExpanderDesign_wClusters(
+    k_n_d: Tuple[int, int, int],
+    use_cvxpy: bool,
+):
+    k, n, d = k_n_d
+
+    num_clusters = 2
+    random_expander_design_w_clusters = design.RandomExpanderDesign_wClusters(
+        k=k, n=n, d=d, use_cvxpy=use_cvxpy, num_clusters=num_clusters
+    )
+
+    log(INFO, "",
+        random_expander_design_w_clusters=random_expander_design_w_clusters,
+        obj_id_to_node_id_set_map=random_expander_design_w_clusters.obj_id_to_node_id_set_map,
+    )
+
+
 def test_TwoXORDesign():
     # k, n = 7, 7
     # k = 106
