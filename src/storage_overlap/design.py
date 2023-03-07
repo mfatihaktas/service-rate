@@ -280,7 +280,7 @@ class CyclicDesign(ReplicaDesign):
 
 
 @dataclasses.dataclass
-class RandomDesign(ReplicaDesign):
+class RandomBlockDesign(ReplicaDesign):
     def __post_init__(self):
         self.obj_id_to_node_id_set_map = collections.defaultdict(set)
 
@@ -338,7 +338,7 @@ class RandomDesign(ReplicaDesign):
 
     def __repr__(self):
         return (
-            "RandomDesign( \n"
+            "RandomBlockDesign( \n"
             f"\t k= {self.k} \n"
             f"\t n= {self.n} \n"
             f"\t d= {self.d} \n"
@@ -346,8 +346,8 @@ class RandomDesign(ReplicaDesign):
         )
 
     def repr_for_plot(self):
-        # return f"RandomDesign(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{Random}$"
+        # return f"RandomBlockDesign(k= {self.k}, n= {self.n}, d= {self.d})"
+        return r"$\textrm{RandomBlockDesign}$"
 
 
 @dataclasses.dataclass
@@ -411,7 +411,7 @@ class RandomExpanderDesign_wClusters(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"RandomExpanderDesign_wClusters(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{RandomExpanderDesign_wClusters}$"
+        return r"$\textrm{RandomExpanderDesign_wClusters}, N_{c}= $" + fr"{self.num_clusters}"
 
 
 @dataclasses.dataclass

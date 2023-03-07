@@ -100,7 +100,7 @@ def test_get_node_overlap_size_to_counter_map(
         node_overlap_size_to_counter_map=cyclic_design.get_node_overlap_size_to_counter_map()
     )
 
-    random_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    random_design = design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     log(INFO, "random_design: ",
         random_design=random_design,
         node_overlap_size_to_counter_map=random_design.get_node_overlap_size_to_counter_map()
@@ -145,7 +145,7 @@ def test_is_demand_vector_covered(use_cvxpy: bool):
 
     # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
-    replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    replica_design = design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     check_is_demand_vector_covered_equality(replica_design=replica_design)
 
 
@@ -195,7 +195,7 @@ def test_combination_size_to_is_demand_covered_map(use_cvxpy: bool):
 
     # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
-    # replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    # replica_design = design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     check_combination_size_to_is_demand_covered_map(replica_design=replica_design)
 
 
@@ -207,7 +207,7 @@ def test_get_num_objs_to_span_size_map(use_cvxpy: bool):
 
     # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
-    replica_design = design.RandomDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
+    replica_design = design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
 
     num_popular_obj = 5
     num_obj_to_span_size_map = replica_design.get_num_obj_to_span_size_map(num_popular_obj=num_popular_obj)
