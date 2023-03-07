@@ -37,9 +37,18 @@ def get_node_id_to_objs_list_for_a_b_mds(
         ]
     )
 
-    for i in range(num_mds):
+    for _ in range(num_mds):
         obj = copy.copy(next(obj_cycle))
         node_id_to_objs_list.append([obj])
+
+    # # Unbalanced MDS nodes
+    # obj = copy.copy(next(obj_cycle))
+    # for _ in range(num_mds // 2):
+    #     node_id_to_objs_list.append([obj])
+
+    # for _ in range(num_mds // 2):
+    #     obj = copy.copy(next(obj_cycle))
+    #     node_id_to_objs_list.append([obj])
 
     return node_id_to_objs_list
 
@@ -62,7 +71,6 @@ def plot_capacity_region_for_a_b_mds_w_field_size(
     #         conf = Conf(num_a=num_a, num_b=num_b, num_mds=num_mds)
     #         conf_list.append(conf)
     for num_sys in range(2, num_nodes, 2):
-    # for num_sys in range(2, 6, 2):
         num_mds = num_nodes - num_sys
         conf = Conf(num_a=num_sys // 2, num_b=num_sys // 2, num_mds=num_mds)
         conf_list.append(conf)
