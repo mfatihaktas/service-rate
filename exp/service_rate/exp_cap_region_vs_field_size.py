@@ -50,7 +50,7 @@ def get_node_id_to_objs_list_for_sys_and_mds(
     return node_id_to_objs_list
 
 
-def plot_capacity_region_for_a_b_mds_w_field_size(
+def plot_capacity_region_for_sys_and_mds_w_field_size(
     k: int,
     num_nodes: int,
 ):
@@ -147,4 +147,4 @@ def test_service_rate_inspector():
 
 if __name__ == "__main__":
     # test_service_rate_inspector()
-    plot_capacity_region_for_a_b_mds_w_field_size(k=3, num_nodes=20)
+    plot_capacity_region_for_sys_and_mds_w_field_size(k=3, num_nodes=20)
