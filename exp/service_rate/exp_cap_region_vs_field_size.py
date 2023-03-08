@@ -8,29 +8,35 @@ from src.service_rate import (
 )
 
 from src.utils.debug import *
+from src.utils.misc import *
 from src.utils.plot import *
 
 
-def get_node_id_to_objs_list_for_a_b_mds(
-    num_a: int,
-    num_b: int,
+def get_node_id_to_objs_list_for_sys_and_mds(
+    k: int,
+    num_sys: int,
     num_mds: int,
     field_size: int,
 ) -> list[list[storage_scheme_module.Obj]]:
     node_id_to_objs_list = []
 
-    for _ in range(num_a):
-        node_id_to_objs_list.append([storage_scheme_module.PlainObj(id_str="a")])
+    sys_obj_cycle = itertools.cycle(
+        [
+            storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}")
+            for obj_id in range(k)
+        ]
+    )
 
-    for _ in range(num_b):
-        node_id_to_objs_list.append([storage_scheme_module.PlainObj(id_str="b")])
+    for _ in range(num_sys):
+        obj = copy.copy(next(sys_obj_cycle))
+        node_id_to_objs_list.append([obj])
 
-    obj_cycle = itertools.cycle(
+    mds_obj_cycle = itertools.cycle(
         [
             storage_scheme_module.CodedObj(
                 coeff_obj_list=[
-                    (1, storage_scheme_module.PlainObj(id_str="a")),
-                    (i + 1, storage_scheme_module.PlainObj(id_str="b")),
+                    ((obj_id + 1)**i, storage_scheme_module.PlainObj(id_str=f"{get_char(obj_id)}"))
+                    for obj_id in range(k)
                 ]
             )
             for i in range(field_size)
@@ -38,45 +44,31 @@ def get_node_id_to_objs_list_for_a_b_mds(
     )
 
     for _ in range(num_mds):
-        obj = copy.copy(next(obj_cycle))
+        obj = copy.copy(next(mds_obj_cycle))
         node_id_to_objs_list.append([obj])
-
-    # # Unbalanced MDS nodes
-    # obj = copy.copy(next(obj_cycle))
-    # for _ in range(num_mds // 2):
-    #     node_id_to_objs_list.append([obj])
-
-    # for _ in range(num_mds // 2):
-    #     obj = copy.copy(next(obj_cycle))
-    #     node_id_to_objs_list.append([obj])
 
     return node_id_to_objs_list
 
 
 def plot_capacity_region_for_a_b_mds_w_field_size(
+    k: int,
     num_nodes: int,
 ):
-    log(DEBUG, "Started", num_nodes=num_nodes)
+    log(DEBUG, "Started", k=k, num_nodes=num_nodes)
 
     @dataclasses.dataclass
     class Conf:
-        num_a: int
-        num_b: int
+        num_sys: int
         num_mds: int
 
     conf_list = []
-    # for num_a in range(1, num_nodes - 1):
-    #     for num_b in range(1, num_nodes - num_a):
-    #         num_mds = num_nodes - num_a - num_b
-    #         conf = Conf(num_a=num_a, num_b=num_b, num_mds=num_mds)
-    #         conf_list.append(conf)
-    for num_sys in range(2, num_nodes, 2):
+    for num_sys in range(k, num_nodes, k):
         num_mds = num_nodes - num_sys
-        conf = Conf(num_a=num_sys // 2, num_b=num_sys // 2, num_mds=num_mds)
+        conf = Conf(num_sys=num_sys, num_mds=num_mds)
         conf_list.append(conf)
     log(DEBUG, "", conf_list=conf_list)
 
-    field_size_list = [2, 3]
+    field_size_list = list(range(1, k + 2))
 
     num_rows = len(field_size_list)
     num_columns = len(conf_list)
@@ -88,9 +80,9 @@ def plot_capacity_region_for_a_b_mds_w_field_size(
         log(DEBUG, "Started", plot_index=plot_index, conf=conf)
 
         for row_index, field_size in enumerate(field_size_list):
-            node_id_to_objs_list = get_node_id_to_objs_list_for_a_b_mds(
-                num_a=conf.num_a,
-                num_b=conf.num_b,
+            node_id_to_objs_list = get_node_id_to_objs_list_for_sys_and_mds(
+                k=k,
+                num_sys=conf.num_sys,
                 num_mds=conf.num_mds,
                 field_size=field_size,
             )
@@ -118,8 +110,7 @@ def plot_capacity_region_for_a_b_mds_w_field_size(
             plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
 
             title = (
-                fr"$n_a= {conf.num_a}$, "
-                fr"$n_b= {conf.num_b}$, "
+                r"$n_{sys}= $" + fr"${conf.num_sys}$, "
                 r"$n_{mds}= $" + fr"${conf.num_mds}$, "
                 # r"$n_{\textrm{mds}}= $" + fr"${conf.num_mds}$, "
                 fr"$q= {field_size}$"
@@ -135,7 +126,7 @@ def plot_capacity_region_for_a_b_mds_w_field_size(
 
 
 def test_service_rate_inspector():
-    node_id_to_objs_list = get_node_id_to_objs_list_for_a_b_mds(
+    node_id_to_objs_list = get_node_id_to_objs_list_for_sys_and_mds(
         num_a=1,
         num_b=1,
         num_mds=4,
@@ -156,4 +147,4 @@ def test_service_rate_inspector():
 
 if __name__ == "__main__":
     # test_service_rate_inspector()
-    plot_capacity_region_for_a_b_mds_w_field_size(num_nodes=20)
+    plot_capacity_region_for_a_b_mds_w_field_size(k=2, num_nodes=20)
