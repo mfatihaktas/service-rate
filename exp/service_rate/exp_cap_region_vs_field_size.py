@@ -95,7 +95,7 @@ def plot_capacity_region_for_a_b_mds_w_field_size(
                 C=1,
                 G=storage_scheme.obj_encoding_matrix,
                 obj_id_to_node_id_map=storage_scheme.obj_id_to_node_id_map,
-                max_repair_set_size=2,
+                max_repair_set_size=k,
             )
 
             ax = ax_matrix[row_index][plot_index]
