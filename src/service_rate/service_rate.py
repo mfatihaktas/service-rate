@@ -195,15 +195,16 @@ class ServiceRateInspector:
 
         # check(self.k == 2, "Only defined for k= 2")
 
-        obj_id_to_max_demand_plust_epsilon_map = {
+        obj_id_to_max_demand_plus_epsilon_map = {
             obj_id: 1.1 * self.find_max_demand_for_obj(obj_id=obj_id)
             for obj_id in range(self.k)
         }
+        log(DEBUG, "", obj_id_to_max_demand_plus_epsilon_map=obj_id_to_max_demand_plus_epsilon_map)
 
         def find_vertex(obj_id: int, obj_demand: float) -> numpy.array:
             obj_demand_vector = numpy.zeros(shape=(self.k, 1))
-            for i in range(self.k):
-                obj_demand_vector[i, 0] = obj_id_to_max_demand_plust_epsilon_map[i]
+            for i in obj_id_list:
+                obj_demand_vector[i, 0] = obj_id_to_max_demand_plus_epsilon_map[i]
             obj_demand_vector[obj_id, 0] = obj_demand
             log(DEBUG, f"> obj_id= {obj_id}, obj_demand= {obj_demand}", obj_demand_vector=obj_demand_vector)
 
@@ -222,10 +223,13 @@ class ServiceRateInspector:
 
         vertex_list = []
         for obj_id in obj_id_list:
-            max_demand = obj_id_to_max_demand_plust_epsilon_map[obj_id]
+            max_demand = obj_id_to_max_demand_plus_epsilon_map[obj_id]
             for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_on_each_axis_to_query_boundary, endpoint=True):
                 vertex = find_vertex(obj_id=obj_id, obj_demand=obj_demand)
-                vertex_list.append(numpy.concatenate(vertex).ravel().tolist())
+                vertex = numpy.concatenate(vertex).ravel().tolist()
+                vertex = [vertex[i] for i in obj_id_list]
+                log(DEBUG, f"> obj_demand= {obj_demand}", vertex=vertex)
+                vertex_list.append(vertex)
 
         # log(DEBUG, "Done", vertex_list=vertex_list)
         return sorted(vertex_list)

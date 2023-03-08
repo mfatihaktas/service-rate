@@ -147,4 +147,4 @@ def test_service_rate_inspector():
 
 if __name__ == "__main__":
     # test_service_rate_inspector()
-    plot_capacity_region_for_a_b_mds_w_field_size(k=2, num_nodes=20)
+    plot_capacity_region_for_a_b_mds_w_field_size(k=3, num_nodes=20)

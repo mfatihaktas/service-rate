@@ -44,6 +44,7 @@ minversion = "6.1"
 addopts = "--capture=no"
 log_cli = true
 log_cli_level = "DEBUG"
+# log_cli_level = "INFO"
 
 ## Note (mehmet@overjet.ai): This will allow pytest to print out all the
 ## logging output to cli.

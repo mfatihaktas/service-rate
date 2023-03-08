@@ -7,7 +7,8 @@ if [ $1 = "s" ]; then
   # ${PYTEST} tests/test_service_rate_inspector.py -k "test_is_in_cap_region"
   # ${PYTEST} tests/test_service_rate_inspector.py -k "test_plot_cap_2d"
   # ${PYTEST} tests/test_service_rate_inspector.py -k "test_min_max_functions"
-   tests/test_service_rate_inspector.py -k "test_w_frac_of_demand_vectors_in_cap_region"
+
+  ${PYTEST} "tests/service_rate/test_plot_capacity_region.py::test_plot_cost_capacity_region_2d_alternative"
 
 elif [ $1 = "x" ]; then
   ${PYTEST} tests/test_service_rate_inspector_on_redundancy_w_two_xors.py
