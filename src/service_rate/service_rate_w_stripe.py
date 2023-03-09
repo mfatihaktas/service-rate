@@ -22,13 +22,13 @@ class ServiceRateInspectorForStorageWithStripeAndParity:
         self.obj_id_to_node_id_set_map = obj_id_to_node_id_set_map
         self.C = C
 
+        self.obj_id_to_repair_node_id_sets_map = self.get_obj_id_to_repair_node_id_sets_map()
+
         self.obj_id_to_num_repair_sets_map = {
-            obj_id: len(node_id_set)
-            for obj_id, node_id_set in obj_id_to_node_id_set_map.items()
+            obj_id: len(repair_node_id_sets)
+            for obj_id, repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.items()
         }
         self.l = sum(self.obj_id_to_num_repair_sets_map.values())
-
-        self.obj_id_to_repair_node_id_sets_map = self.get_obj_id_to_repair_node_id_sets_map()
 
         self.T = self.get_T()
         self.M = self.get_M()
