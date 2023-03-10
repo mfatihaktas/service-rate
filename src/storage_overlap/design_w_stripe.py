@@ -65,6 +65,7 @@ class DesignWithStripe(design.ReplicaDesign):
 @dataclasses.dataclass(repr=False)
 class ClusteringDesignWithStripe(DesignWithStripe):
     def __post_init__(self):
+        check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
         check(self.d >= self.s, "`d` must be greater than `s`", d=self.d, s=self.s)
 
         self.obj_id_to_node_id_set_map = {

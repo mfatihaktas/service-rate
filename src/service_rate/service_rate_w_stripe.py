@@ -33,6 +33,14 @@ class ServiceRateInspectorForStorageWithStripeAndParity:
         self.T = self.get_T()
         self.M = self.get_M()
 
+        log(DEBUG, "",
+            obj_id_to_repair_node_id_sets_map=self.obj_id_to_repair_node_id_sets_map,
+            obj_id_to_num_repair_sets_map=self.obj_id_to_num_repair_sets_map,
+            l=self.l,
+            T=self.T,
+            M=self.M,
+        )
+
     def get_obj_id_to_repair_node_id_sets_map(self) -> dict[int, list[set[int]]]:
         return {
             obj_id: [
