@@ -233,6 +233,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
         design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
+        design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=3, use_cvxpy=use_cvxpy),
+        design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=4, use_cvxpy=use_cvxpy),
         # design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design.RandomExpanderDesign_wClusters(k=k, n=n, d=d, num_clusters=2, use_cvxpy=use_cvxpy),
         # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
