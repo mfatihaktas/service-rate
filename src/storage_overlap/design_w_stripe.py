@@ -14,7 +14,7 @@ class DesignWithStripe(design.ReplicaDesign):
     s: int
 
     def __post_init__(self):
-        check(self.d >= self.s, "`d` must be greater than `s`", d=self.d, s=self.s)
+        # check(self.d >= self.s, "`d` must be greater than `s`", d=self.d, s=self.s)
 
         log(WARNING, "", use_cvxpy=self.use_cvxpy)
         self.service_rate_inspector = self.get_service_rate_inspector()
