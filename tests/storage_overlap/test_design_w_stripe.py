@@ -53,8 +53,8 @@ def test_RandomBlockDesignWithStripe(
     k_n_d: Tuple[int, int, int],
 ):
     k, n, d = k_n_d
-    s = 2
-    random_block_design = design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=(s * d), s=s, use_cvxpy=False)
+    s = d
+    random_block_design = design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=False)
 
     log(INFO, "",
         random_block_design=random_block_design,
