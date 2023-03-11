@@ -68,7 +68,7 @@ class ServiceRateInspectorForStorageWithStripeAndParity:
         for repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.values():
             for repair_node_id_set in repair_node_id_sets:
                 for node_id in repair_node_id_set:
-                    M[node_id, repair_set_index] = 1
+                    M[node_id, repair_set_index] = 1 / self.s
 
                 repair_set_index += 1
 
