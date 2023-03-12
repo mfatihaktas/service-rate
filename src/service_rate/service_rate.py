@@ -12,7 +12,99 @@ from src.utils.debug import *
 from src.utils.plot import *
 
 
-class ServiceRateInspector:
+class ServiceRateInspectorBase:
+    def __init__(
+        self,
+        k: int,
+        n: int,
+        m: int,
+        C: int = 1,
+    ):
+        # Number of original objects
+        self.k = k
+        # Number of object copies stored
+        self.n = n
+        # Number of nodes
+        self.m = m
+        # Capacity of each node
+        self.C = C
+
+    def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
+        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
+
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        # obj = cvxpy.Maximize(numpy.ones((1, self.l))*x)
+        obj = cvxpy.Maximize(0)
+        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
+
+        prob = cvxpy.Problem(obj, constraints)
+        opt_value = service_rate_utils.solve_prob(prob)
+
+        return opt_value is not None
+
+    def find_max_demand_for_obj(self, obj_id: int) -> float:
+        x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+        log(DEBUG, f"T[{obj_id}]= {self.T[obj_id]}")
+        obj = cvxpy.Maximize(self.T[obj_id] @ x)
+        constraints = [self.M @ x <= self.C, x >= 0]
+
+        prob = cvxpy.Problem(obj, constraints)
+        opt_value = service_rate_utils.solve_prob(prob)
+
+        return opt_value
+
+    def find_vertices_on_cap_region_boundary(
+        self,
+        obj_id_list: list[int],
+        num_points_on_each_axis_to_query_boundary: int = 5,
+    ) -> list[numpy.array]:
+        # log(DEBUG, "Started", obj_id_list=obj_id_list, num_points_on_each_axis_to_query_boundary=num_points_on_each_axis_to_query_boundary)
+
+        # check(self.k == 2, "Only defined for k= 2")
+
+        obj_id_to_max_demand_plus_epsilon_map = {
+            obj_id: 1.1 * self.find_max_demand_for_obj(obj_id=obj_id)
+            for obj_id in range(self.k)
+        }
+        log(DEBUG, "", obj_id_to_max_demand_plus_epsilon_map=obj_id_to_max_demand_plus_epsilon_map)
+
+        def find_vertex(obj_id: int, obj_demand: float) -> numpy.array:
+            obj_demand_vector = numpy.zeros(shape=(self.k, 1))
+            for i in obj_id_list:
+                obj_demand_vector[i, 0] = obj_id_to_max_demand_plus_epsilon_map[i]
+            obj_demand_vector[obj_id, 0] = obj_demand
+            log(DEBUG, f"> obj_id= {obj_id}, obj_demand= {obj_demand}", obj_demand_vector=obj_demand_vector)
+
+            x = cvxpy.Variable(shape=(self.l, 1), name="x")
+
+            obj = cvxpy.Minimize(cvxpy.norm(self.T @ x - obj_demand_vector))
+            constraints = [self.M @ x <= self.C, x >= 0]
+
+            prob = cvxpy.Problem(obj, constraints)
+            opt_value = service_rate_utils.solve_prob(prob)
+            check(opt_value is not None, "Optimization problem could not be solved!",
+                  obj_id=obj_id, obj_demand=obj_demand
+            )
+
+            return numpy.matmul(self.T, x.value)
+
+        vertex_list = []
+        for obj_id in obj_id_list:
+            max_demand = obj_id_to_max_demand_plus_epsilon_map[obj_id]
+            for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_on_each_axis_to_query_boundary, endpoint=True):
+                vertex = find_vertex(obj_id=obj_id, obj_demand=obj_demand)
+                vertex = numpy.concatenate(vertex).ravel().tolist()
+                vertex = [vertex[i] for i in obj_id_list]
+                log(DEBUG, f"> obj_demand= {obj_demand}", vertex=vertex)
+                vertex_list.append(vertex)
+
+        # log(DEBUG, "Done", vertex_list=vertex_list)
+        return sorted(vertex_list)
+
+
+class ServiceRateInspector(ServiceRateInspectorBase):
     """Defines a storage system that distributes n objects across m
     nodes. Input arguments and class variables are described in the README.
     """
@@ -27,10 +119,6 @@ class ServiceRateInspector:
         max_repair_set_size: int = None,
         compute_halfspace_intersections: bool = False,
     ):
-        # Number of buckets
-        self.m = m
-        # Capacity of each node
-        self.C = C
         # Object composition matrix
         self.G = G
         # Map from object id's to node id's
@@ -40,9 +128,7 @@ class ServiceRateInspector:
         numpy.set_printoptions(threshold=sys.maxsize)
 
         # log(DEBUG, f"G= \n{self.G}")
-
-        self.k = G.shape[0]
-        self.n = G.shape[1]
+        super().__init__(k=G.shape[0], n=G.shape[1], m=m, C=C)
 
         # Note: Repair sets are given in terms of obj ids,
         # in the sense of columns of G or keys of obj_id_to_node_id_map
@@ -159,80 +245,6 @@ class ServiceRateInspector:
         log(DEBUG, "scipy.spatial.ConvexHull is done.")
 
         return hull, boundary_points_in_rows
-
-    def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
-        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
-
-        x = cvxpy.Variable(shape=(self.l, 1), name="x")
-
-        # obj = cvxpy.Maximize(numpy.ones((1, self.l))*x)
-        obj = cvxpy.Maximize(0)
-        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
-
-        prob = cvxpy.Problem(obj, constraints)
-        opt_value = service_rate_utils.solve_prob(prob)
-
-        return opt_value is not None
-
-    def find_max_demand_for_obj(self, obj_id: int) -> float:
-        x = cvxpy.Variable(shape=(self.l, 1), name="x")
-
-        log(DEBUG, f"T[{obj_id}]= {self.T[obj_id]}")
-        obj = cvxpy.Maximize(self.T[obj_id] @ x)
-        constraints = [self.M @ x <= self.C, x >= 0]
-
-        prob = cvxpy.Problem(obj, constraints)
-        opt_value = service_rate_utils.solve_prob(prob)
-
-        return opt_value
-
-    def find_vertices_on_cap_region_boundary(
-        self,
-        obj_id_list: list[int],
-        num_points_on_each_axis_to_query_boundary: int = 5,
-    ) -> list[numpy.array]:
-        # log(DEBUG, "Started", obj_id_list=obj_id_list, num_points_on_each_axis_to_query_boundary=num_points_on_each_axis_to_query_boundary)
-
-        # check(self.k == 2, "Only defined for k= 2")
-
-        obj_id_to_max_demand_plus_epsilon_map = {
-            obj_id: 1.1 * self.find_max_demand_for_obj(obj_id=obj_id)
-            for obj_id in range(self.k)
-        }
-        log(DEBUG, "", obj_id_to_max_demand_plus_epsilon_map=obj_id_to_max_demand_plus_epsilon_map)
-
-        def find_vertex(obj_id: int, obj_demand: float) -> numpy.array:
-            obj_demand_vector = numpy.zeros(shape=(self.k, 1))
-            for i in obj_id_list:
-                obj_demand_vector[i, 0] = obj_id_to_max_demand_plus_epsilon_map[i]
-            obj_demand_vector[obj_id, 0] = obj_demand
-            log(DEBUG, f"> obj_id= {obj_id}, obj_demand= {obj_demand}", obj_demand_vector=obj_demand_vector)
-
-            x = cvxpy.Variable(shape=(self.l, 1), name="x")
-
-            obj = cvxpy.Minimize(cvxpy.norm(self.T @ x - obj_demand_vector))
-            constraints = [self.M @ x <= self.C, x >= 0]
-
-            prob = cvxpy.Problem(obj, constraints)
-            opt_value = service_rate_utils.solve_prob(prob)
-            check(opt_value is not None, "Optimization problem could not be solved!",
-                  obj_id=obj_id, obj_demand=obj_demand
-            )
-
-            return numpy.matmul(self.T, x.value)
-
-        vertex_list = []
-        for obj_id in obj_id_list:
-            max_demand = obj_id_to_max_demand_plus_epsilon_map[obj_id]
-            for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_on_each_axis_to_query_boundary, endpoint=True):
-                vertex = find_vertex(obj_id=obj_id, obj_demand=obj_demand)
-                vertex = numpy.concatenate(vertex).ravel().tolist()
-                vertex = [vertex[i] for i in obj_id_list]
-                log(DEBUG, f"> obj_demand= {obj_demand}", vertex=vertex)
-                vertex_list.append(vertex)
-
-        # log(DEBUG, "Done", vertex_list=vertex_list)
-        return sorted(vertex_list)
 
     def min_cost(self, obj_demand_list: list[float]):
         # log(DEBUG, "Started;", obj_demand_list=obj_demand_list)

@@ -110,7 +110,7 @@ def plot_capacity_region_2d(
 
 
 def plot_capacity_region_2d_alternative(
-    service_rate_inspector: service_rate.ServiceRateInspector,
+    service_rate_inspector: service_rate.ServiceRateInspectorBase,
     obj_id_list: list[int],
     file_name_suffix: str = None,
 ):
@@ -138,7 +138,7 @@ def plot_capacity_region_2d_alternative(
     title = (
         fr"$k= {service_rate_inspector.k}$, $m= {service_rate_inspector.m}$, $C= {service_rate_inspector.C}$"
         # + "Volume= {0:.2f} \n".format(hull.volume)
-        + "\n" + service_rate_inspector.to_sysrepr()
+        # + "\n" + service_rate_inspector.to_sysrepr()
     )
     plot.title(title, fontsize=fontsize)  # , y=1.05
     plot.gcf().set_size_inches(5, 5)

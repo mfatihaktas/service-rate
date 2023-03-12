@@ -1,26 +1,23 @@
-import cvxpy
+import itertools
 import numpy
 
-from src.service_rate import service_rate_utils
+from src.service_rate import service_rate
 
 from src.utils.debug import *
-from src.utils.plot import *
 
 
-class ServiceRateInspectorForStorageWithStripeAndParity:
+class ServiceRateInspectorForStorageWithStripeAndParity(service_rate.ServiceRateInspectorBase):
     def __init__(
         self,
         k: int,
-        n: int,
+        m: int,
         s: int,
         obj_id_to_node_id_set_map: dict[int, set[int]],
         C: int = 1,
     ):
-        self.k = k
-        self.n = n
+        super().__init__(k=k, n=None, m=m, C=C)
         self.s = s
         self.obj_id_to_node_id_set_map = obj_id_to_node_id_set_map
-        self.C = C
 
         self.obj_id_to_repair_node_id_sets_map = self.get_obj_id_to_repair_node_id_sets_map()
 
@@ -62,7 +59,7 @@ class ServiceRateInspectorForStorageWithStripeAndParity:
         return T
 
     def get_M(self) -> numpy.array:
-        M = numpy.zeros((self.n, self.l))
+        M = numpy.zeros((self.m, self.l))
 
         repair_set_index = 0
         for repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.values():
@@ -73,17 +70,3 @@ class ServiceRateInspectorForStorageWithStripeAndParity:
                 repair_set_index += 1
 
         return M
-
-    def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
-        demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
-
-        x = cvxpy.Variable(shape=(self.l, 1), name="x")
-
-        # obj = cvxpy.Maximize(numpy.ones((1, self.l))*x)
-        obj = cvxpy.Maximize(0)
-        constraints = [self.M @ x <= self.C, x >= 0, self.T @ x == demand_vector]
-
-        prob = cvxpy.Problem(obj, constraints)
-        opt_value = service_rate_utils.solve_prob(prob)
-
-        return opt_value is not None
