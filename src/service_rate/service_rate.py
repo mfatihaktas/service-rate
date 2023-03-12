@@ -90,7 +90,7 @@ class ServiceRateInspectorBase:
 
             return numpy.matmul(self.T, x.value)
 
-        vertex_list = []
+        vertex_list = [[0] * len(obj_id_list)]
         for obj_id in obj_id_list:
             max_demand = obj_id_to_max_demand_plus_epsilon_map[obj_id]
             for obj_demand in numpy.linspace(start=0, stop=max_demand, num=num_points_on_each_axis_to_query_boundary, endpoint=True):

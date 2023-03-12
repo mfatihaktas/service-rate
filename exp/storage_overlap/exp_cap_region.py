@@ -33,18 +33,18 @@ def plot_capacity_region_w_varying_overlap_size():
     @dataclasses.dataclass
     class Conf:
         d: int
-        overlap_size: int
+        s: int
 
     conf_list = []
     for d in range(2, 6):
-        for overlap_size in range(1, d + 1):
-            conf = Conf(d=d, overlap_size=overlap_size)
+        for s in range(1, d + 1):
+            conf = Conf(d=d, s=s)
             conf_list.append(conf)
     log(DEBUG, "", conf_list=conf_list)
 
-    s_list = [1, 2, 3, 4, 5]
+    overlap_size_list = [1, 2, 3, 4, 5]
 
-    num_rows = len(s_list)
+    num_rows = len(overlap_size_list)
     num_columns = len(conf_list)
     fig_size = (num_columns * 5, num_rows * 5)
     fig, ax_list = plot.subplots(num_rows, num_columns, figsize=fig_size)
@@ -53,19 +53,19 @@ def plot_capacity_region_w_varying_overlap_size():
         conf = conf_list[column_index]
         log(DEBUG, "Started", column_index=column_index, conf=conf)
 
-        for row_index, s in enumerate(s_list):
-            if s > conf.d:
+        for row_index, overlap_size in enumerate(overlap_size_list):
+            if overlap_size > conf.d:
                 continue
 
             service_rate_inspector = get_service_rate_inspector(
                 d=conf.d,
-                s=s,
-                overlap_size=conf.overlap_size,
+                s=conf.s,
+                overlap_size=overlap_size,
             )
 
             ax = ax_list[row_index][column_index]
             plot.sca(ax)
-            plot_capacity_region.plot_capacity_region_2d_alternative(
+            plot_capacity_region.plot_capacity_region_2d_alternative_w_hull(
                 service_rate_inspector=service_rate_inspector,
                 obj_id_list=[0, 1],
             )
@@ -76,8 +76,8 @@ def plot_capacity_region_w_varying_overlap_size():
 
             title = (
                 fr"$d= {conf.d}$, "
-                fr"$s= {s}$, "
-                r"$n_{overlap}=$" + fr" ${conf.overlap_size}$"
+                fr"$s= {conf.s}$, "
+                r"$n_{overlap}=$" + fr" ${overlap_size}$"
             )
             plot.title(title, fontsize=fontsize)
 

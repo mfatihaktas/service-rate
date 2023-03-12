@@ -147,6 +147,51 @@ def plot_capacity_region_2d_alternative(
     # log(INFO, "Done")
 
 
+def plot_capacity_region_2d_alternative_w_hull(
+    service_rate_inspector: service_rate.ServiceRateInspectorBase,
+    obj_id_list: list[int],
+    file_name_suffix: str = None,
+):
+    boundary_point_list = service_rate_inspector.find_vertices_on_cap_region_boundary(
+        obj_id_list=obj_id_list,
+        num_points_on_each_axis_to_query_boundary=5,
+    )
+    log(DEBUG, "", boundary_point_list=boundary_point_list)
+
+    boundary_points_in_rows = numpy.array(
+        boundary_point_list
+    ).reshape((len(boundary_point_list), len(obj_id_list)))
+
+    log(DEBUG, "Calling scipy.spatial.ConvexHull", boundary_points_in_rows_shape=boundary_points_in_rows.shape)
+    hull = scipy.spatial.ConvexHull(boundary_points_in_rows)
+
+    plot.fill(
+        boundary_points_in_rows[hull.vertices, 0], boundary_points_in_rows[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
+    )
+
+    if file_name_suffix is None:
+        return
+
+    fontsize = 14
+    plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
+    # plot.xlim(xmin=0)
+    plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
+    # plot.ylim(ymin=0)
+
+    # title = (
+    #     r"$k= {}$, $m= {}$, $C= {}$, ".format(
+    #         service_rate_inspector.k, service_rate_inspector.m, service_rate_inspector.C
+    #     )
+    #     + "Volume= {0:.2f} \n".format(hull.volume)
+    #     + service_rate_inspector.to_sysrepr()
+    # )
+    # plot.title(title, fontsize=fontsize, y=1.05)
+    plot.gcf().set_size_inches(4, 3)
+    plot.savefig(f"plots/plot_capacity_region_{file_name_suffix}.png", bbox_inches="tight")
+    plot.gcf().clear()
+    log(INFO, "Done")
+
+
 def plot_capacity_region_2d_when_k_g_2(
     service_rate_inspector: service_rate.ServiceRateInspector,
     file_name_suffix: str,

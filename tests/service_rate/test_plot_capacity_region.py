@@ -74,10 +74,11 @@ def test_plot_cost_capacity_region_2d(storage_name_and_service_rate_inspector):
 def test_plot_cost_capacity_region_2d_alternative(storage_name_and_service_rate_inspector):
     storage_name, service_rate_inspector = storage_name_and_service_rate_inspector
 
-    plot_capacity_region.plot_capacity_region_2d_alternative(
+    # plot_capacity_region.plot_capacity_region_2d_alternative(
+    plot_capacity_region.plot_capacity_region_2d_alternative_w_hull(
         service_rate_inspector=service_rate_inspector,
-        # obj_id_list=[0, 1],
-        obj_id_list=[1, 2],
+        obj_id_list=[0, 1],
+        # obj_id_list=[1, 2],
         file_name_suffix=storage_name,
     )
 
