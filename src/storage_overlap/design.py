@@ -114,20 +114,7 @@ class ReplicaDesign(StorageDesign):
             # log(DEBUG, "", load_across_nodes=load_across_nodes)
             return self.service_rate_inspector.is_in_cap_region(demand_vector)
 
-        nonneg_demand_index_list = []
-        for i, d in enumerate(demand_vector):
-            if d > 0:
-                nonneg_demand_index_list.append(i)
-
-        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
-            if self.is_demand_vector_covered_for_given_combination_size(
-                demand_vector=demand_vector,
-                combination_size=combination_size,
-                nonneg_demand_index_list=nonneg_demand_index_list,
-            ) is False:
-                return False
-
-        return True
+        return self.is_demand_vector_covered_w_service_choice_union(demand_vector=demand_vector)
 
     def is_demand_vector_covered_w_service_choice_union(
         self,
