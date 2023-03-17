@@ -21,8 +21,6 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
-    # nonlocal COMBINATION_SIZE_TO_COLOR_MAP
-
     log(INFO, "Started",
         storage_design=storage_design,
         demand_for_popular=demand_for_popular,
@@ -94,7 +92,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
 ):
     k = 120
     n = k
-    use_cvxpy = True
+    use_cvxpy = False
 
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.15, 0.2, 0.25]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]

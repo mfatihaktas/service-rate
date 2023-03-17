@@ -10,6 +10,7 @@ from typing import Generator
 
 from src.service_rate import (
     service_rate,
+    service_rate_w_replica,
     storage_scheme as storage_scheme_module,
 )
 from src.utils import storage_object
@@ -78,7 +79,7 @@ class ReplicaDesign(StorageDesign):
         if self.use_cvxpy:
             self.service_rate_inspector = self.get_service_rate_inspector()
 
-    def get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
+    def _get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
         node_id_to_objs_list = [[] for _ in range(self.n)]
         for obj_id, node_id_set in self.obj_id_to_node_id_set_map.items():
             for node_id in node_id_set:
@@ -98,12 +99,19 @@ class ReplicaDesign(StorageDesign):
             max_repair_set_size=1,
         )
 
+    def get_service_rate_inspector(self) -> service_rate_w_replica.ServiceRateInspectorForStorageWithReplicas:
+        return service_rate_w_replica.ServiceRateInspectorForStorageWithReplicas(
+            obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
+        )
+
     def is_demand_vector_covered(
         self,
         demand_vector: list[float],
     ) -> bool:
         if self.use_cvxpy:
             # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
+            # load_across_nodes = self.service_rate_inspector.load_across_nodes(demand_vector)
+            # log(DEBUG, "", load_across_nodes=load_across_nodes)
             return self.service_rate_inspector.is_in_cap_region(demand_vector)
 
         nonneg_demand_index_list = []
@@ -117,6 +125,30 @@ class ReplicaDesign(StorageDesign):
                 combination_size=combination_size,
                 nonneg_demand_index_list=nonneg_demand_index_list,
             ) is False:
+                return False
+
+        return True
+
+    def is_demand_vector_covered_w_service_choice_union(
+        self,
+        demand_vector: list[float],
+    ) -> bool:
+        nonneg_demand_index_list = []
+        for i, d in enumerate(demand_vector):
+            if d > 0:
+                nonneg_demand_index_list.append(i)
+
+        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
+            if self.is_demand_vector_covered_for_given_combination_size(
+                demand_vector=demand_vector,
+                combination_size=combination_size,
+                nonneg_demand_index_list=nonneg_demand_index_list,
+            ) is False:
+                # log(WARNING, "Not covered",
+                #     demand_vector=demand_vector,
+                #     combination_size=combination_size,
+                #     nonneg_demand_index_list=nonneg_demand_index_list,
+                # )
                 return False
 
         return True
@@ -143,6 +175,12 @@ class ReplicaDesign(StorageDesign):
                 cum_demand += demand_vector[i]
 
             if len(node_id_set) < math.ceil(cum_demand):
+                log(WARNING, "Not covered",
+                    demand_vector=demand_vector,
+                    cum_demand=cum_demand,
+                    index_combination=index_combination,
+                    node_id_set=node_id_set,
+                )
                 return False
 
         return True
@@ -181,6 +219,12 @@ class ReplicaDesign(StorageDesign):
                 cum_demand += demand_vector[i]
 
                 if len(node_id_set) < math.ceil(cum_demand):
+                    log(WARNING, "Not covered",
+                        node_id_set=node_id_set,
+                        cum_demand=cum_demand,
+                        demand_vector=demand_vector,
+                        nonneg_demand_index_list_=nonneg_demand_index_list_,
+                    )
                     return False
 
         # log(DEBUG, "Done")
@@ -335,6 +379,8 @@ class RandomBlockDesign(ReplicaDesign):
 
             self.obj_id_to_node_id_set_map[obj_id].add(node_id)
             node_id_to_obj_id_set_map[node_id].add(obj_id)
+
+        super().__post_init__()
 
     def __repr__(self):
         return (

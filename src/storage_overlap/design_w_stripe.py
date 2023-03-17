@@ -55,10 +55,8 @@ class DesignWithStripe(design.ReplicaDesign):
         # )
 
         return service_rate_w_stripe.ServiceRateInspectorForStorageWithStripeAndParity(
-            k=self.k,
-            n=self.n,
-            s=self.s,
             obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
+            s=self.s,
         )
 
     def is_demand_vector_covered(

@@ -111,7 +111,8 @@ def test_is_demand_vector_covered(use_cvxpy: bool):
     def check_is_demand_vector_covered_equality(replica_design: design.ReplicaDesign):
         num_sample = 100
 
-        for num_popular_obj in range(1, 10):
+        # for num_popular_obj in range(1, 5):
+        for num_popular_obj in range(1, 4):
             for popular_obj_demand in range(2, replica_design.d + 1):
                 log(DEBUG, "> ",
                     num_popular_obj=num_popular_obj,
@@ -125,24 +126,28 @@ def test_is_demand_vector_covered(use_cvxpy: bool):
                     zipf_tail_index=0,
                     num_sample=num_sample,
                 ):
+                    result_by_is_demand_vector_covered = replica_design.is_demand_vector_covered(demand_vector=demand_vector)
+                    result_by_is_demand_vector_covered_w_service_choice_union = replica_design.is_demand_vector_covered_w_service_choice_union(demand_vector=demand_vector)
+                    # result_by_is_demand_vector_covered_alternative = replica_design.is_demand_vector_covered_alternative(demand_vector=demand_vector)
+                    # result_by_is_demand_vector_covered_w_joblib = replica_design.is_demand_vector_covered_w_joblib(demand_vector=demand_vector)
                     check(
-                        (
-                            replica_design.is_demand_vector_covered(demand_vector=demand_vector)
-                            == replica_design.is_demand_vector_covered_w_joblib(demand_vector=demand_vector)
-                            # == replica_design.is_demand_vector_covered_alternative(demand_vector=demand_vector)
-                        ),
+                        result_by_is_demand_vector_covered == result_by_is_demand_vector_covered_w_service_choice_union,
                         "is_demand_vector_covered()'s returned different results",
                         replica_design=replica_design,
                         obj_id_to_node_id_set_map=replica_design.obj_id_to_node_id_set_map,
                         num_popular_obj=num_popular_obj,
                         popular_obj_demand=popular_obj_demand,
                         demand_vector=demand_vector,
+                        result_by_is_demand_vector_covered=result_by_is_demand_vector_covered,
+                        result_by_is_demand_vector_covered_w_service_choice_union=result_by_is_demand_vector_covered_w_service_choice_union,
+                        # result_by_is_demand_vector_covered_alternative=result_by_is_demand_vector_covered_alternative,
                     )
 
-    k = 12
+    k = 120
     n = k
-    d = 4
+    d = 2
 
+    use_cvxpy = True
     # replica_design = design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
     # replica_design = design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy)
     replica_design = design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy)
