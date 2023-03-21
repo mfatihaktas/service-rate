@@ -1,5 +1,6 @@
 *
 !.gitignore
+!model/
 !service_rate/
 !sim/
 !storage_opt/
