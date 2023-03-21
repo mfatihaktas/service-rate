@@ -7,9 +7,10 @@ if [ $1 = "i" ]; then
   # srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=16000 --time=3:00:00 --export=ALL --pty bash -i
 
 elif [ $1 = "j" ]; then
+  FILE="model/exp_random_design"
   # FILE="service_rate/exp_plot_capacity_region"
   # FILE="sim/exp_mm1_stability"
-  FILE="storage_overlap/exp_design"
+  # FILE="storage_overlap/exp_design"
   # FILE="storage_overlap/exp_random_design"
   # FILE="storage_search/exp_search_with_replicas_and_mds"
   # FILE="storage_opt/exp_single_obj_per_node"
@@ -20,7 +21,7 @@ elif [ $1 = "j" ]; then
 #SBATCH --job-name=${FILE}
 #SBATCH --nodes=${NTASKS}            # Number of nodes you require
 #SBATCH --ntasks=${NTASKS}           # Total # of tasks across all nodes
-#SBATCH --cpus-per-task=4            # Cores per task (>1 if multithread tasks)
+#SBATCH --cpus-per-task=8            # Cores per task (>1 if multithread tasks)
 #SBATCH --mem=8000                   # Real memory (RAM) required (MB)
 #SBATCH --time=12:00:00              # Total run time limit (HH:MM:SS)
 #SBATCH --export=ALL                 # Export your current env to the job env
