@@ -11,12 +11,11 @@ from src.utils.debug import *
 from src.utils.plot import *
 
 
-def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_for_storage_design(
+def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     storage_design: design.StorageDesign,
     storage_design_model: storage_overlap_model.StorageDesignModel,
     demand_for_popular: int,
     num_popular_obj_list: list[int],
-    combination_size: int,
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
@@ -25,7 +24,6 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         storage_design_model=storage_design_model,
         demand_for_popular=demand_for_popular,
         num_popular_obj_list=num_popular_obj_list,
-        combination_size=combination_size,
         num_sample=num_sample,
         num_sim_run=num_sim_run,
     )
@@ -33,6 +31,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     E_frac_of_demand_vectors_covered_list = []
     std_frac_of_demand_vectors_covered_list = []
 
+    frac_of_demand_vectors_covered_w_given_combination_size_list = []
     frac_of_demand_vectors_covered_upper_bound_list = []
     frac_of_demand_vectors_covered_lower_bound_list = []
 
@@ -53,7 +52,6 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
                 zipf_tail_index=0,
                 num_sample=num_sample,
                 num_sim_run=num_sim_run,
-                combination_size_for_is_demand_vector_covered=combination_size,
             )
         E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
         std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
@@ -71,14 +69,15 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         num_popular_obj_list=num_popular_obj_list,
         E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
         std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+        frac_of_demand_vectors_covered_w_given_combination_size_list=frac_of_demand_vectors_covered_w_given_combination_size_list,
         frac_of_demand_vectors_covered_lower_bound_list=frac_of_demand_vectors_covered_lower_bound_list,
         frac_of_demand_vectors_covered_upper_bound_list=frac_of_demand_vectors_covered_upper_bound_list,
     )
 
     color = next(dark_color_cycle)
-    plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, C={combination_size}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{storage_design.repr_for_plot()}, C={combination_size}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{storage_design.repr_for_plot()}, C={combination_size}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -96,7 +95,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     log(INFO, "Done")
 
 
-def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs(
+def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     d: int,
     demand_for_popular: int,
     num_sample: int = 300,
@@ -125,23 +124,19 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
             storage_overlap_model.RandomExpanderDesignModel(k=k, n=n, d=d)
         ),
     ]:
-        # for combination_size in range(2, d + 1):
-        # for combination_size in list(range(2, d + 1)) + [None]:
-        for combination_size in [None]:
-            plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_for_storage_design(
-                storage_design=storage_design,
-                storage_design_model=storage_design_model,
-                demand_for_popular=demand_for_popular,
-                num_popular_obj_list=num_popular_obj_list,
-                combination_size=combination_size,
-                num_sample=num_sample,
-                num_sim_run=num_sim_run,
-            )
+        plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
+            storage_design=storage_design,
+            storage_design_model=storage_design_model,
+            demand_for_popular=demand_for_popular,
+            num_popular_obj_list=num_popular_obj_list,
+            num_sample=num_sample,
+            num_sim_run=num_sim_run,
+        )
 
     # Save the plot
     plot.gcf().set_size_inches(8, 6)
     file_name = (
-        "plots/plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs"
+        "plots/plot_frac_demand_vectors_covered_vs_num_popular_objs"
         + f"_k_{k}"
         + f"_d_{d}"
         + f"_lambda_{demand_for_popular}"
@@ -153,12 +148,12 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     log(INFO, "Done")
 
 
-def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs():
+def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
     log(INFO, "Started")
 
     def plot_(d: int):
         for demand_for_popular in range(1, d + 1):
-            plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs(
+            plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
                 num_sample=300,
@@ -175,22 +170,22 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
     log(INFO, "Done")
 
 
-def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_w_joblib():
+def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
     log(INFO, "Started")
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
-        joblib.delayed(plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs)(
+        joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
             num_sample=300,
             # num_sample=1000,
             num_sim_run=3,
         )
-        # for d in range(2, 3)
+        for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(4, 5)
         # for d in range(2, 5)
-        for d in range(2, 7)
+        # for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
 
@@ -198,5 +193,5 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
 
 
 if __name__ == "__main__":
-    # manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs()
-    manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_w_joblib()
+    # manage_plot_frac_demand_vectors_covered_vs_num_popular_objs()
+    manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib()

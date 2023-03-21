@@ -19,6 +19,14 @@ class StorageDesignModel:
     d: int
 
     @abc.abstractmethod
+    def prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+        self,
+        m: int,
+        lambda_: float,
+    ):
+        pass
+
+    @abc.abstractmethod
     def prob_serving_upper_bound(self, m: int, lambda_: int):
         pass
 
@@ -42,6 +50,19 @@ class RandomExpanderDesignModel(StorageDesignModel):
                 n=self.n, m=m, d=self.d, c=num_idle_nodes
             )
             for num_idle_nodes in range(max_num_idle_nodes + 1)
+        )
+
+    def prob_serving_w_combination_size(
+        self,
+        m: int,
+        lambda_: float,
+        combination_size: int,
+    ) -> float:
+        """DISCLAIMER: This function does not make sense!
+        """
+        self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+            m=combination_size,
+            lambda_=lambda_,
         )
 
     def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
