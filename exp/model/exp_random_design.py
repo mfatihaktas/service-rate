@@ -40,7 +40,6 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         log(INFO, f"> num_popular_obj= {num_popular_obj}")
 
         if (
-            True or
             len(E_frac_of_demand_vectors_covered_list) > 0
             and E_frac_of_demand_vectors_covered_list[-1] <= 0.01
         ):
@@ -103,13 +102,14 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
-    k = 120
+    k = 30  # 120
     n = k
     use_cvxpy = False
 
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.15, 0.2, 0.25]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
-    num_popular_obj_list = [2, 5, 10, 20]
+    # num_popular_obj_list = [2, 5, 10]
+    num_popular_obj_list = list(range(1, 10))
     # num_popular_obj_list = [2, 5]
 
     log(INFO, "Started",
@@ -125,7 +125,9 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
             storage_overlap_model.RandomExpanderDesignModel(k=k, n=n, d=d)
         ),
     ]:
-        for combination_size in range(2, d + 1):
+        # for combination_size in range(2, d + 1):
+        # for combination_size in list(range(2, d + 1)) + [None]:
+        for combination_size in [None]:
             plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs_for_storage_design(
                 storage_design=storage_design,
                 storage_design_model=storage_design_model,
@@ -180,15 +182,15 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
         joblib.delayed(plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            # num_sample=300,
-            num_sample=1000,
+            num_sample=300,
+            # num_sample=1000,
             num_sim_run=3,
         )
         # for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(4, 5)
-        for d in range(3, 5)
-        # for d in range(2, 7)
+        # for d in range(2, 5)
+        for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
     )
 

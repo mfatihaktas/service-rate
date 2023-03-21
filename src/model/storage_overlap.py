@@ -34,9 +34,14 @@ class RandomExpanderDesignModel(StorageDesignModel):
         m: int,
         lambda_: float,
     ) -> float:
-        service_choice_union_size = math.ceil(m * lambda_)
-        return allocation_w_complexes.prob_num_cells_w_zero_particles_eq_c(
-            n=self.n, m=m, d=self.d, c=service_choice_union_size
+        min_service_choice_union_size = math.ceil(m * lambda_)
+        max_num_idle_nodes = self.n - min_service_choice_union_size
+
+        return sum(
+            allocation_w_complexes.prob_num_cells_w_zero_particles_eq_c(
+                n=self.n, m=m, d=self.d, c=num_idle_nodes
+            )
+            for num_idle_nodes in range(max_num_idle_nodes + 1)
         )
 
     def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:

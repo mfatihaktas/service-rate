@@ -38,7 +38,8 @@ minversion = "6.1"
 
 ## Print only stdout.
 addopts = "-rP -p no:logging"
-log_cli_level = "DEBUG"
+# log_cli_level = "DEBUG"
+log_cli_level = "INFO"
 
 ## Print only logs.
 # addopts = "--capture=no"
