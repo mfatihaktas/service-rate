@@ -31,7 +31,6 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     E_frac_of_demand_vectors_covered_list = []
     std_frac_of_demand_vectors_covered_list = []
 
-    frac_of_demand_vectors_covered_w_given_combination_size_list = []
     frac_of_demand_vectors_covered_upper_bound_list = []
     frac_of_demand_vectors_covered_lower_bound_list = []
 
@@ -69,15 +68,14 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
         num_popular_obj_list=num_popular_obj_list,
         E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
         std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
-        frac_of_demand_vectors_covered_w_given_combination_size_list=frac_of_demand_vectors_covered_w_given_combination_size_list,
         frac_of_demand_vectors_covered_lower_bound_list=frac_of_demand_vectors_covered_lower_bound_list,
         frac_of_demand_vectors_covered_upper_bound_list=frac_of_demand_vectors_covered_upper_bound_list,
     )
 
     color = next(dark_color_cycle)
-    plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -181,12 +179,14 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             # num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(2, 3)
+        for d in range(1, 2)
+        # for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(4, 5)
         # for d in range(2, 5)
         # for d in range(2, 7)
-        for demand_for_popular in range(2, d + 1)
+        # for demand_for_popular in range(2, d + 1)
+        for demand_for_popular in range(1, d + 1)
     )
 
     log(INFO, "Done")

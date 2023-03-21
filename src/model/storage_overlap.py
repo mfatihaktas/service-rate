@@ -52,19 +52,6 @@ class RandomExpanderDesignModel(StorageDesignModel):
             for num_idle_nodes in range(max_num_idle_nodes + 1)
         )
 
-    def prob_serving_w_combination_size(
-        self,
-        m: int,
-        lambda_: float,
-        combination_size: int,
-    ) -> float:
-        """DISCLAIMER: This function does not make sense!
-        """
-        self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
-            m=combination_size,
-            lambda_=lambda_,
-        )
-
     def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
         return min(
             self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
