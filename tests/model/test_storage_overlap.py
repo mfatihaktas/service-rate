@@ -14,10 +14,10 @@ from src.utils.plot import *
         # (10, 2),
         # (10, 3),
         # (20, 3),
-        (20, 4),
+        # (20, 4),
         # (30, 4),
         # (40, 4),
-        # (40, 3),
+        (40, 3),
         # (40, 4),
     ],
 )
@@ -68,7 +68,7 @@ def test_RandomExpanderDesignModel(k_d: Tuple[int, int]):
     # Save the plot
     plot.gcf().set_size_inches(8, 6)
     file_name = (
-        f"plots/plot_model"
+        "plots/plot_model"
         + f"_k_{k}"
         + f"_d_{d}"
         + f"_lambda_{lambda_}"
