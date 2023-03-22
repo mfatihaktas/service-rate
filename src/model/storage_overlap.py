@@ -19,7 +19,7 @@ class StorageDesignModel:
     d: int
 
     @abc.abstractmethod
-    def prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+    def prob_span_is_larger_than_m_times_lambda(
         self,
         m: int,
         lambda_: float,
@@ -37,27 +37,23 @@ class StorageDesignModel:
 
 @dataclasses.dataclass
 class RandomExpanderDesignModel(StorageDesignModel):
-    def prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+    def prob_span_is_larger_than_m_times_lambda(
         self,
         m: int,
         lambda_: float,
     ) -> float:
-        min_service_choice_union_size = math.ceil(m * lambda_)
-        max_num_idle_nodes = self.n - min_service_choice_union_size
+        min_span = math.ceil(m * lambda_)
 
         return sum(
-            # allocation_w_complexes_model.prob_num_empty_cells_eq_c(
-            #     n=self.n, m=m, d=self.d, c=num_idle_nodes
-            # )
-            allocation_w_complexes_model.prob_num_empty_cells_eq_c_w_mpmath(
-                n=self.n, m=m, d=self.d, c=num_idle_nodes
+            allocation_w_complexes_model.prob_num_nonempty_cells_eq_c(
+                n=self.n, m=m, d=self.d, c=span
             )
-            for num_idle_nodes in range(max_num_idle_nodes + 1)
+            for span in range(min_span, n + 1)
         )
 
     def prob_serving(self, m: int, lambda_: int) -> float:
         return min(
-            self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+            self.prob_span_is_larger_than_m_times_lambda(
                 m=m_,
                 lambda_=lambda_,
             )
@@ -66,7 +62,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
 
     def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
         return min(
-            self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+            self.prob_span_is_larger_than_m_times_lambda(
                 m=m_,
                 lambda_=lambda_,
             )
@@ -76,7 +72,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
     def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
         return math.prod(
             [
-                self.prob_union_of_m_service_choices_is_larger_than_m_times_lambda(
+                self.prob_span_is_larger_than_m_times_lambda(
                     m=m_,
                     lambda_=lambda_,
                 )

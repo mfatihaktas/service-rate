@@ -160,3 +160,8 @@ def prob_num_empty_cells_eq_c_w_mpmath_deprecated(n: int, m: int, d: int, c: int
         s += term
 
     return s
+
+
+def prob_num_nonempty_cells_eq_c(n: int, m: int, d: int, c: int) -> float:
+    num_empty_cells = n - c
+    return prob_num_empty_cells_eq_c_w_mpmath(n=n, m=m, d=d, c=num_empty_cells)
