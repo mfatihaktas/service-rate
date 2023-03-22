@@ -102,12 +102,13 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     k = 120
     # k = 30
     n = k
-    use_cvxpy = False
+    use_cvxpy = True
 
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.15, 0.2, 0.25]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
     # num_popular_obj_list = [2, 5, 10]
-    num_popular_obj_list = list(range(1, 10))
+    # num_popular_obj_list = list(range(1, 10))
+    num_popular_obj_list = list(range(1, 10)) + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
     # num_popular_obj_list = [2, 5]
 
     log(INFO, "Started",
@@ -139,6 +140,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         + f"_k_{k}"
         + f"_d_{d}"
         + f"_lambda_{demand_for_popular}"
+        + f"_cvxpy_{use_cvxpy}"
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
