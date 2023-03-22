@@ -394,6 +394,8 @@ class RandomExpanderDesign(ReplicaDesign):
 
         log(DEBUG, "Constructed", obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map)
 
+        super().__post_init__()
+
     def __repr__(self):
         return (
             "RandomExpanderDesign( \n"
