@@ -99,7 +99,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     num_sample: int = 300,
     num_sim_run: int = 3,
 ):
-    k = 30  # 120
+    k = 120
+    # k = 30
     n = k
     use_cvxpy = False
 
@@ -179,12 +180,12 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             # num_sample=1000,
             num_sim_run=3,
         )
-        for d in range(1, 2)
+        # for d in range(1, 2)
         # for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(4, 5)
         # for d in range(2, 5)
-        # for d in range(2, 7)
+        for d in range(2, 7)
         # for demand_for_popular in range(2, d + 1)
         for demand_for_popular in range(1, d + 1)
     )

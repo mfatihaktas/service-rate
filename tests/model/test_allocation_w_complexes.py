@@ -20,7 +20,11 @@ from src.utils.debug import *
         # (60, 12, 5),
         # (70, 12, 5),
         # (80, 12, 5),
-        (100, 5, 4),
+        # (100, 5, 4),
+        # (100, 10, 5),
+        # (120, 5, 4),
+        # (120, 10, 5),
+        (120, 20, 5),
     ],
 )
 def n_m_d(request) -> Tuple[int, int, int]:
@@ -36,6 +40,7 @@ def test_prob_num_empty_cells_eq_c(
     for c in range(n):
         # prob_num_empty_cells_eq_c = allocation_w_complexes.prob_num_empty_cells_eq_c(n=n, m=m, d=d, c=c)
         prob_num_empty_cells_eq_c = allocation_w_complexes.prob_num_empty_cells_eq_c_w_mpmath(n=n, m=m, d=d, c=c)
+        # prob_num_empty_cells_eq_c = allocation_w_complexes.prob_num_empty_cells_eq_c_w_mpmath_2(n=n, m=m, d=d, c=c)
         log(INFO, "",
             prob_num_empty_cells_eq_c=prob_num_empty_cells_eq_c,
             n=n, m=m, d=d, c=c,
