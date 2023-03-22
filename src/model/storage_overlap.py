@@ -7,7 +7,7 @@ import abc
 import dataclasses
 import math
 
-from src.model import allocation_w_complexes
+from src.allocation_w_complexes import model as allocation_w_complexes_model
 
 from src.utils.debug import *
 
@@ -46,10 +46,10 @@ class RandomExpanderDesignModel(StorageDesignModel):
         max_num_idle_nodes = self.n - min_service_choice_union_size
 
         return sum(
-            # allocation_w_complexes.prob_num_empty_cells_eq_c(
+            # allocation_w_complexes_model.prob_num_empty_cells_eq_c(
             #     n=self.n, m=m, d=self.d, c=num_idle_nodes
             # )
-            allocation_w_complexes.prob_num_empty_cells_eq_c_w_mpmath(
+            allocation_w_complexes_model.prob_num_empty_cells_eq_c_w_mpmath(
                 n=self.n, m=m, d=self.d, c=num_idle_nodes
             )
             for num_idle_nodes in range(max_num_idle_nodes + 1)
