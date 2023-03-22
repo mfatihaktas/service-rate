@@ -1,16 +1,3 @@
-"""Let there be `n` (N) cells into which `m` (n') complexes of particles are thrown
-independently of each other, `d` (m) particles in each complex. Thus, `t = m * d`
-(n = n' * m) is the total number of particles thrown into the cells.
-
-
-Parameters inside `()` refer to the notation used in [1].
-
-Refs:
-[1] Kolchin, Valentin Fedorovich, Boris A. Sevast'janov, and Vladimir P. Christ'Yakov.
-Random allocations. Vh Winston, 1978.
-"""
-
-import math
 import scipy
 
 from mpmath import mp
@@ -117,59 +104,6 @@ def prob_num_empty_cells_eq_c_w_mpmath(n: int, m: int, d: int, c: int) -> float:
     ratio = n_minus_c_choose_d / n_choose_d
     coeff = n_choose_c * mp.power(ratio, m)
     prob_c_0 = prob_num_empty_cells_eq_c_w_mpmath(n=n - c, m=m, d=d, c=0)
-    log(DEBUG, "", coeff=coeff, prob_c_0=prob_c_0)
+    # log(WARNING, "", coeff=coeff, prob_c_0=prob_c_0)
 
     return coeff * prob_c_0
-
-
-def prob_num_empty_cells_eq_c_w_mpmath_2(n: int, m: int, d: int, c: int) -> float:
-    """Denoted as `Pr{mu_0'(n, N) = c}` in [1]."""
-    # log(DEBUG, "Started", n=n, m=m, d=d, c=c)
-
-    num_nonempty_cells = n - c
-    if not (d <= num_nonempty_cells <= m * d):
-        return 0
-
-    if n <= d:
-        if c == 0:
-            return 1
-        else:
-            return 0
-
-    n_ = mp.mpf(f"{n}")
-    m_ = mp.mpf(f"{m}")
-    d_ = mp.mpf(f"{d}")
-    c_ = mp.mpf(f"{c}")
-
-    n_minus_c_choose_d_over_n_choose_d = math.prod(
-        [
-            (n_ - d_ - i) / (n_ - i)
-            for i in range(c)
-        ]
-    )
-
-    n_choose_c = mp.binomial(n_, c_)
-
-    s = 0
-    for l in range(n + 1):
-        n_choose_l = mp.binomial(n_, l)
-        n_minus_l_choose_d_over_n_choose_d = math.prod(
-            [
-                (n_ - d_ - i) / (n_ - i)
-                for i in range(l)
-            ]
-        )
-
-        term = (
-            mp.power(mp.mpf("-1"), l)
-            * n_choose_c
-            * n_choose_l
-            * mp.power(
-                n_minus_l_choose_d_over_n_choose_d * n_minus_c_choose_d_over_n_choose_d,
-                m_
-            )
-        )
-        # log(WARNING, "", term=term)
-        s += term
-
-    return s
