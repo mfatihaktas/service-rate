@@ -2,7 +2,7 @@ import pytest
 
 from typing import Tuple
 
-from src.random_allocations import model, sim
+from src.allocation_w_complexes import model, sim
 
 from src.utils.debug import *
 
@@ -10,8 +10,9 @@ from src.utils.debug import *
 @pytest.fixture(
     scope="session",
     params=[
-        (40, 10, 3),
-        (100, 10, 3),
+        # (40, 10, 3),
+        # (100, 10, 3),
+        (100, 20, 5),
     ],
 )
 def n_m_d(request) -> Tuple[int, int, int]:
