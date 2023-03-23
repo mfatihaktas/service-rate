@@ -85,6 +85,10 @@ class RandomExpanderDesignModel(StorageDesignModel):
         #     n=self.n, m=m, d=self.d, e=1
         # )
 
-        return allocation_w_complexes_model.prob_expand_span_by_at_least_e_with_each_complex(
-            n=self.n, m=m, d=self.d, e=lambda_ - 1
+        # return allocation_w_complexes_model.prob_expand_span_by_at_least_e_with_each_complex(
+        #     n=self.n, m=m, d=self.d, e=lambda_ - 1
+        # )
+
+        return allocation_w_complexes_model.prob_expand_span_as_necessary_faster(
+            n=self.n, m=m, d=self.d, lambda_=lambda_
         )

@@ -90,3 +90,24 @@ def test_prob_num_nonempty_cells_geq(n_m_d: Tuple[int, int, int]):
     log(INFO, "Done",
         cum_diff_between_model_and_sim=cum_diff_between_model_and_sim,
     )
+
+
+def test_prob_expand_span_as_necessary():
+    n, d = 100, 5
+    lambda_ = d - 1
+
+    log(DEBUG, "Started", n=n, d=d, lambda_=lambda_)
+
+    for m in range(2, 20):
+        prob_expand_span_as_necessary = model.prob_expand_span_as_necessary(n=n, m=m, d=d, lambda_=lambda_)
+        prob_expand_span_as_necessary_faster = model.prob_expand_span_as_necessary_faster(n=n, m=m, d=d, lambda_=lambda_)
+
+        # prob_expand_span_as_necessary_alternative = model.prob_expand_span_as_necessary_alternative(n=n, m=m, d=d, lambda_=lambda_)
+
+        log(INFO, f"> m= {m}",
+            prob_expand_span_as_necessary=prob_expand_span_as_necessary,
+            prob_expand_span_as_necessary_faster=prob_expand_span_as_necessary_faster,
+            # prob_expand_span_as_necessary_alternative=prob_expand_span_as_necessary_alternative,
+        )
+
+    log(DEBUG, "Done", n=n, d=d)

@@ -193,6 +193,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         # for d in [4]
         # for demand_for_popular in [3]
         # for demand_for_popular in [4]
+        # for d in [6]
+        # for demand_for_popular in [5]
     )
 
     log(INFO, "Done")

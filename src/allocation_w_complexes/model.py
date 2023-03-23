@@ -1,3 +1,4 @@
+import functools
 import math
 import scipy
 
@@ -232,3 +233,67 @@ def prob_expand_span_by_at_least_e_with_each_complex(n: int, m: int, d: int, e: 
     helper(cur_span=d)
 
     return prob
+
+
+def prob_expand_span_as_necessary(n: int, m: int, d: int, lambda_: int) -> float:
+    prob = 0
+    step_prob_list = []
+
+    def helper(cur_span: int):
+        nonlocal prob
+        # log(WARNING, "Started", cur_span=cur_span)
+
+        if cur_span >= n:
+            return
+
+        elif len(step_prob_list) == m - 1:
+            prob += math.prod(step_prob_list)
+            return
+
+        m_ = len(step_prob_list)
+        min_e = max((m_ + 1) * lambda_ - cur_span, 0)
+        for e_ in range(min_e, d + 1):
+            step_prob = mp.binomial(n - cur_span, e_) * mp.binomial(cur_span, d - e_) / mp.binomial(n, d)
+            step_prob_list.append(step_prob)
+
+            helper(cur_span=cur_span + e_)
+
+            step_prob_list.pop()
+
+    helper(cur_span=d)
+
+    return prob
+
+
+def prob_expand_span_as_necessary_faster(n: int, m: int, d: int, lambda_: int) -> float:
+    @functools.cache
+    def helper(cur_span: int, cur_m: int):
+        # log(WARNING, "Started", cur_span=cur_span)
+
+        if cur_m == m:
+            return 1
+        elif cur_span > n:
+            return 0
+
+        prob = 0
+        min_e = max((cur_m + 1) * lambda_ - cur_span, 0)
+        for e_ in range(min_e, d + 1):
+            step_prob = mp.binomial(n - cur_span, e_) * mp.binomial(cur_span, d - e_) / mp.binomial(n, d)
+            prob_ = helper(cur_span=(cur_span + e_), cur_m=(cur_m + 1))
+
+            prob += step_prob * prob_
+
+        return prob
+
+    return helper(cur_span=d, cur_m=1)
+
+
+def prob_expand_span_as_necessary_alternative(n: int, m: int, d: int, lambda_: int) -> float:
+    return math.prod(
+        [
+            prob_num_nonempty_cells_geq_c(
+                n=n, m=m_, d=d, c=(m_ * lambda_)
+            )
+            for m_ in range(1, m + 1)
+        ]
+    )
