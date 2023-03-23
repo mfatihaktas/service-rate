@@ -98,7 +98,7 @@ def sim_frac_of_demand_vectors_covered(
             zipf_tail_index=zipf_tail_index,
             num_sample=num_sample,
         ):
-            storage_design.reset()
+            # storage_design.reset()
 
             if combination_size_for_is_demand_vector_covered is not None:
                 if storage_design.is_demand_vector_covered_for_given_combination_size(

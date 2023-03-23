@@ -254,7 +254,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
     plot.title(
         fr"$d= {d}$, "
-        r"$D_{\textrm{pop}}= $" + fr"${demand_for_popular}$, "
+        fr"$\lambda= {demand_for_popular}$"
         r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
