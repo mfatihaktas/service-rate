@@ -1,3 +1,4 @@
+import math
 import scipy
 
 from mpmath import mp
@@ -172,3 +173,62 @@ def prob_num_nonempty_cells_geq_c(n: int, m: int, d: int, c: int) -> float:
         prob_num_nonempty_cells_eq_c(n=n, m=m, d=d, c=c_)
         for c_ in range(c, n + 1)
     )
+
+
+def prob_expand_span_by_e_with_each_complex(n: int, m: int, d: int, e: int) -> float:
+    if e > d:
+        log(WARNING, "Expansion at each step can NOT be greater than complex size", d=d, e=e)
+        return 0
+    elif d + (m - 1) * e > n:
+        log(WARNING, "Cannot expand beyond the available nodes", d=d, e=e)
+        return 0
+
+    # n_ = mp.mpf(f"{n}")
+    # d_ = mp.mpf(f"{d}")
+    # e_ = mp.mpf(f"{e}")
+
+    span = d
+    prob = 1
+    for step in range(m - 1):
+        prob_ = mp.binomial(n - span, e) * mp.binomial(span, d - e) / mp.binomial(n, d)
+        log(WARNING, f"> step= {step}", prob_=prob_)
+        prob *= prob_
+
+        span += e
+
+    return prob
+
+
+def prob_expand_span_by_at_least_e_with_each_complex(n: int, m: int, d: int, e: int) -> float:
+    if e > d:
+        log(WARNING, "Expansion at each step can NOT be greater than complex size", d=d, e=e)
+        return 0
+    elif d + (m - 1) * e > n:
+        log(WARNING, "Cannot expand beyond the available nodes", d=d, e=e)
+        return 0
+
+    prob = 0
+    step_prob_list = []
+
+    def helper(cur_span: int):
+        nonlocal prob
+        # log(WARNING, "Started", cur_span=cur_span)
+
+        if cur_span >= n:
+            return
+
+        elif len(step_prob_list) == m - 1:
+            prob += math.prod(step_prob_list)
+            return
+
+        for e_ in range(e, d + 1):
+            step_prob = mp.binomial(n - cur_span, e_) * mp.binomial(cur_span, d - e_) / mp.binomial(n, d)
+            step_prob_list.append(step_prob)
+
+            helper(cur_span=cur_span + e_)
+
+            step_prob_list.pop()
+
+    helper(cur_span=d)
+
+    return prob

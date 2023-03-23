@@ -65,7 +65,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
             for m_ in range(1, m + 1)
         )
 
-    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
+    def wrong_prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
         return math.prod(
             [
                 self.prob_span_is_larger_than_m_times_lambda(
@@ -74,4 +74,17 @@ class RandomExpanderDesignModel(StorageDesignModel):
                 )
                 for m_ in range(1, m + 1)
             ]
+        )
+
+    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
+        # return allocation_w_complexes_model.prob_expand_span_by_e_with_each_complex(
+        #     n=self.n, m=m, d=self.d, e=lambda_
+        # )
+
+        # return allocation_w_complexes_model.prob_expand_span_by_e_with_each_complex(
+        #     n=self.n, m=m, d=self.d, e=1
+        # )
+
+        return allocation_w_complexes_model.prob_expand_span_by_at_least_e_with_each_complex(
+            n=self.n, m=m, d=self.d, e=lambda_
         )

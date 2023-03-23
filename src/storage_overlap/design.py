@@ -162,12 +162,12 @@ class ReplicaDesign(StorageDesign):
                 cum_demand += demand_vector[i]
 
             if len(node_id_set) < math.ceil(cum_demand):
-                log(WARNING, "Not covered",
-                    demand_vector=demand_vector,
-                    cum_demand=cum_demand,
-                    index_combination=index_combination,
-                    node_id_set=node_id_set,
-                )
+                # log(WARNING, "Not covered",
+                #     demand_vector=demand_vector,
+                #     cum_demand=cum_demand,
+                #     index_combination=index_combination,
+                #     node_id_set=node_id_set,
+                # )
                 return False
 
         return True
@@ -206,12 +206,12 @@ class ReplicaDesign(StorageDesign):
                 cum_demand += demand_vector[i]
 
                 if len(node_id_set) < math.ceil(cum_demand):
-                    log(WARNING, "Not covered",
-                        node_id_set=node_id_set,
-                        cum_demand=cum_demand,
-                        demand_vector=demand_vector,
-                        nonneg_demand_index_list_=nonneg_demand_index_list_,
-                    )
+                    # log(WARNING, "Not covered",
+                    #     node_id_set=node_id_set,
+                    #     cum_demand=cum_demand,
+                    #     demand_vector=demand_vector,
+                    #     nonneg_demand_index_list_=nonneg_demand_index_list_,
+                    # )
                     return False
 
         # log(DEBUG, "Done")
