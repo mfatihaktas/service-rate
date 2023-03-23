@@ -107,8 +107,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.15, 0.2, 0.25]]
     # num_popular_obj_list = [2, 5, 10] + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
     # num_popular_obj_list = [2, 5, 10]
-    # num_popular_obj_list = list(range(1, 10))
-    num_popular_obj_list = list(range(1, 20))
+    num_popular_obj_list = list(range(1, 10))
+    # num_popular_obj_list = list(range(1, 20))
     # num_popular_obj_list = list(range(1, 10)) + [int(k * frac) for frac in [0.1, 0.6, 0.8]]
     # num_popular_obj_list = [2, 5]
 
@@ -188,10 +188,10 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         # for d in range(2, 3)
         # for d in range(3, 4)
         # for d in range(2, 5)
-        # for d in range(2, 7)
-        # for demand_for_popular in range(1, d + 1)
-        for d in [4]
-        for demand_for_popular in [3]
+        for d in range(2, 7)
+        for demand_for_popular in range(1, d + 1)
+        # for d in [4]
+        # for demand_for_popular in [3]
         # for demand_for_popular in [4]
     )
 
