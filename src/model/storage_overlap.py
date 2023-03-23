@@ -43,12 +43,8 @@ class RandomExpanderDesignModel(StorageDesignModel):
         lambda_: float,
     ) -> float:
         min_span = math.ceil(m * lambda_)
-
-        return sum(
-            allocation_w_complexes_model.prob_num_nonempty_cells_eq_c(
-                n=self.n, m=m, d=self.d, c=span
-            )
-            for span in range(min_span, n + 1)
+        return allocation_w_complexes_model.prob_num_nonempty_cells_geq_c(
+            n=self.n, m=m, d=self.d, c=min_span
         )
 
     def prob_serving(self, m: int, lambda_: int) -> float:

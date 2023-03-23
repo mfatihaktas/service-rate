@@ -1,13 +1,70 @@
 import collections
 import functools
 import numpy
+import random
 
 from typing import Tuple
 
+from src.allocation_w_complexes import sim as allocation_w_complexes_sim
 from src.model import demand
 from src.storage_overlap import design
 
 from src.utils.debug import *
+
+
+def sim_object_span(
+    storage_design: design.StorageDesign,
+    m: int,
+) -> float:
+    # node_id_list = list(range(storage_design.n))
+    # obj_id_to_node_id_set_map = {
+    #     obj_id: set(random.sample(node_id_list, storage_design.d))
+    #     for obj_id in range(storage_design.k)
+    # }
+
+    node_id_set = set()
+    obj_id_list = random.sample(list(range(storage_design.k)), m)
+    for obj_id in obj_id_list:
+        node_id_set_ = storage_design.obj_id_to_node_id_set_map[obj_id]
+
+        # node_id_set_ = obj_id_to_node_id_set_map[obj_id]
+        # log(DEBUG, "", obj_id=obj_id, node_id_set_=node_id_set_)
+
+        # node_id_set_ = random.sample(list(range(storage_design.n)), storage_design.d)
+        for node_id in node_id_set_:
+            node_id_set.add(node_id)
+
+    return len(node_id_set)
+
+
+def sim_object_span_to_prob_map(
+    storage_design: design.StorageDesign,
+    m: int,
+    num_sample: int,
+) -> dict[int, float]:
+    log(DEBUG, "Started",
+        storage_design=storage_design,
+        m=m,
+        num_sample=num_sample,
+    )
+
+    object_span_to_counter_map = collections.defaultdict(int)
+    for _ in range(num_sample):
+        storage_design.reset()
+        object_span = sim_object_span(storage_design=storage_design, m=m)
+        object_span_to_counter_map[object_span] += 1
+
+    object_span_to_prob_map = {
+        object_span: counter / num_sample
+        for object_span, counter in object_span_to_counter_map.items()
+    }
+    log(DEBUG, "Done",
+        storage_design=storage_design,
+        m=m,
+        object_span_to_prob_map=object_span_to_prob_map,
+    )
+
+    return object_span_to_prob_map
 
 
 def sim_frac_of_demand_vectors_covered(

@@ -405,6 +405,15 @@ class RandomExpanderDesign(ReplicaDesign):
             ")"
         )
 
+    def reset(self):
+        node_id_list = list(range(self.n))
+        self.obj_id_to_node_id_set_map = {
+            obj_id: set(random.sample(node_id_list, self.d))
+            for obj_id in range(self.k)
+        }
+
+        # log(DEBUG, "Reset `obj_id_to_node_id_set_map`")
+
     def repr_for_plot(self):
         # return f"RandomExpanderDesign(k= {self.k}, n= {self.n}, d= {self.d})"
         return r"$\textrm{RandomExpanderDesign}$"
