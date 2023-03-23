@@ -92,12 +92,14 @@ def sim_frac_of_demand_vectors_covered(
 
         num_covered = 0
         for demand_vector in demand.sample_demand_vectors_w_zipf_law(
-                num_obj=storage_design.k,
-                num_popular_obj=num_popular_obj,
-                cum_demand=cum_demand,
-                zipf_tail_index=zipf_tail_index,
-                num_sample=num_sample,
+            num_obj=storage_design.k,
+            num_popular_obj=num_popular_obj,
+            cum_demand=cum_demand,
+            zipf_tail_index=zipf_tail_index,
+            num_sample=num_sample,
         ):
+            storage_design.reset()
+
             if combination_size_for_is_demand_vector_covered is not None:
                 if storage_design.is_demand_vector_covered_for_given_combination_size(
                         demand_vector=demand_vector,
