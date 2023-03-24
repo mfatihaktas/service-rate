@@ -226,21 +226,23 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     n = k
     use_cvxpy = False
     replica_design_list = [
-        design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        design_w_stripe.ClusteringDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
+        # design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        # design_w_stripe.ClusteringDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
-        design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        # design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        # design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design.RandomExpanderDesign_wClusters(k=k, n=n, d=d, num_clusters=2, use_cvxpy=use_cvxpy),
         # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
     ]
 
-    for s in [2, 3, 4]:
+    # for s in [2, 3, 4]:
+    for s in [2]:
         if s <= d:
             replica_design_list.append(
-                design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=use_cvxpy),
+                # design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True),
+                design_w_stripe.RandomExpanderDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True)
             )
 
     for replica_design in replica_design_list:
@@ -254,7 +256,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
     plot.title(
         fr"$d= {d}$, "
-        fr"$\lambda= {demand_for_popular}$"
+        fr"$\lambda= {demand_for_popular}$, "
         r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -282,7 +284,7 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
             plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=1000,
+                num_sample=300,
                 num_sim_run=3,
             )
 

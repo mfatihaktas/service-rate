@@ -198,3 +198,31 @@ class RandomBlockDesignWithStripe(DesignWithStripe):
     def repr_for_plot(self):
         # return f"RandomBlockDesignWithStripe(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.s})"
         return r"$\textrm{RandomBlockDesignWithStripe}$, " + fr"$s={self.s}$"
+
+
+@dataclasses.dataclass
+class RandomExpanderDesignWithStripe(DesignWithStripe):
+    def __post_init__(self):
+        node_id_list = list(range(self.n))
+        self.obj_id_to_node_id_set_map = {
+            obj_id: set(random.sample(node_id_list, self.d))
+            for obj_id in range(self.k)
+        }
+
+        log(DEBUG, "Constructed", obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map)
+
+        super().__post_init__()
+
+    def __repr__(self):
+        return (
+            "RandomExpanderDesignWithStripe( \n"
+            f"\t k= {self.k} \n"
+            f"\t n= {self.n} \n"
+            f"\t d= {self.d} \n"
+            f"\t s= {self.s} \n"
+            ")"
+        )
+
+    def repr_for_plot(self):
+        # return f"RandomExpanderDesignWithStripe(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.s})"
+        return r"$\textrm{RandomExpanderDesignWithStripe}$"

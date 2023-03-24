@@ -540,7 +540,7 @@ class ServiceRateInspectorForStorageWithReplicasOrStripes(ServiceRateInspectorBa
             for node_id_set in obj_id_to_node_id_set_map.values()
             for node_id in node_id_set
         )
-        m = len(node_id_set)
+        m = max(node_id_set) + 1
 
         super().__init__(k=k, n=None, m=m, C=C)
         self.obj_id_to_node_id_set_map = obj_id_to_node_id_set_map
