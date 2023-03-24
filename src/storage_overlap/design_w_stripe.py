@@ -225,4 +225,4 @@ class RandomExpanderDesignWithStripe(DesignWithStripe):
 
     def repr_for_plot(self):
         # return f"RandomExpanderDesignWithStripe(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.s})"
-        return r"$\textrm{RandomExpanderDesignWithStripe}$"
+        return r"$\textrm{RandomExpanderDesignWithStripe}$, " + fr"$s={self.s}$"

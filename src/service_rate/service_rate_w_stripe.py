@@ -31,10 +31,11 @@ class ServiceRateInspectorForStorageWithStripeAndParity(service_rate.ServiceRate
         M = numpy.zeros((self.m, self.l))
 
         repair_set_index = 0
-        for repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.values():
+        # for repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.values():
+        for obj_id, repair_node_id_sets in self.obj_id_to_repair_node_id_sets_map.items():
             for repair_node_id_set in repair_node_id_sets:
                 for node_id in repair_node_id_set:
-                    log(WARNING, "", node_id=node_id, repair_set_index=repair_set_index)
+                    # log(WARNING, "", node_id=node_id, repair_set_index=repair_set_index)
                     M[node_id, repair_set_index] = 1 / self.s
 
                 repair_set_index += 1

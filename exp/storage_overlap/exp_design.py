@@ -222,7 +222,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
     # k = 45
     # k = 111
-    k = 120
+    # k = 120
+    k = 10
     n = k
     use_cvxpy = False
     replica_design_list = [
@@ -238,7 +239,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     ]
 
     # for s in [2, 3, 4]:
-    for s in [2]:
+    for s in [2, 3]:
         if s <= d:
             replica_design_list.append(
                 # design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True),
@@ -308,11 +309,10 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
             # num_sample=1000,
             num_sim_run=3,
         )
-        # for d in range(2, 3)
-        # for d in range(3, 4)
-        # for d in range(4, 5)
         for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
+        # for d in [4]
+        # for demand_for_popular in [d - 1]
     )
 
     log(INFO, "Done")

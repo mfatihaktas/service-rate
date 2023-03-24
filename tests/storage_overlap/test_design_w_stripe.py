@@ -10,7 +10,7 @@ from src.utils.debug import *
 @pytest.fixture(
     scope="session",
     params=[
-        (4, 6, 3),
+        (6, 6, 3),
         # (4, 4, 2),
         # (12, 12, 3),
     ],
@@ -62,3 +62,19 @@ def test_RandomBlockDesignWithStripe(
     )
 
     assert random_block_design.is_demand_vector_covered(demand_vector=[d] + (k - 1) * [0])
+
+
+def test_RandomExpanderDesignWithStripe(
+    k_n_d: Tuple[int, int, int],
+):
+    k, n, d = k_n_d
+    s = 2
+    random_block_design = design_w_stripe.RandomExpanderDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=False)
+
+    log(INFO, "",
+        random_block_design=random_block_design,
+        obj_id_to_node_id_set_map=random_block_design.obj_id_to_node_id_set_map,
+    )
+
+    # assert random_block_design.is_demand_vector_covered(demand_vector=[d] + (k - 1) * [0])
+    assert random_block_design.is_demand_vector_covered(demand_vector=[d - 1] + (k - 1) * [0])
