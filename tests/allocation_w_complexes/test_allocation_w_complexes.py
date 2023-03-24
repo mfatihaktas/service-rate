@@ -113,13 +113,36 @@ def test_prob_expand_span_as_necessary():
     log(DEBUG, "Done", n=n, d=d)
 
 
-def test_prob_span_of_all_t_tuples_geq_u():
-    n, m, d = 10, 4, 2
-    t, u = 2, 3
+@pytest.fixture(
+    scope="session",
+    params=[
+        # (10, 4, 2, 2, 3),
+        # (10, 4, 3, 2, 5),
+        # (30, 10, 3, 2, 5),
+        # (30, 10, 3, 2, 4),
+        # (100, 20, 5, 2, 8),
+        # (100, 20, 5, 2, 9),
+        # (100, 20, 5, 2, 10),
+        (100, 30, 3, 2, 5),
+        # (100, 20, 4, 3, 8),
+    ],
+)
+def n_m_d_t_u(request) -> Tuple[int, int, int, int, int]:
+    return request.param
+
+
+def test_prob_span_of_all_t_tuples_geq_u(n_m_d_t_u: Tuple[int, int, int, int, int]):
+    n, m, d, t, u = n_m_d_t_u
     num_samples = 10**4
 
-    prob_span_of_all_t_tuples_geq_u = allocation_w_complexes_sim.sim_prob_span_of_all_t_tuples_geq_u(
+    prob_span_of_all_t_tuples_geq_u = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u(
+        n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
+    )
+    prob_span_of_all_t_tuples_geq_u_alternative = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u_alternative(
         n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
     )
 
-    log(INFO, "", prob_span_of_all_t_tuples_geq_u=prob_span_of_all_t_tuples_geq_u)
+    log(INFO, "",
+        prob_span_of_all_t_tuples_geq_u=prob_span_of_all_t_tuples_geq_u,
+        prob_span_of_all_t_tuples_geq_u_alternative=prob_span_of_all_t_tuples_geq_u_alternative,
+    )
