@@ -28,14 +28,14 @@ def n_m_d(request) -> Tuple[int, int, int]:
 
 def test_prob_num_nonempty_cells_eq(n_m_d: Tuple[int, int, int]):
     n, m, d = n_m_d
-    num_sample = 10**4
+    num_samples = 10**4
 
     log(DEBUG, "Started", n=n, m=m, d=d)
 
-    num_nonempty_cells_to_prob_map = allocation_w_complexes_sim.sim_num_nonempty_cells_to_prob_map(n=n, m=m, d=d, num_sample=num_sample)
+    num_nonempty_cells_to_prob_map = allocation_w_complexes_sim.sim_num_nonempty_cells_to_prob_map(n=n, m=m, d=d, num_samples=num_samples)
 
     storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=False)
-    object_span_to_prob_map = storage_overlap_sim.sim_object_span_to_prob_map(storage_design=storage_design, m=m, num_sample=num_sample)
+    object_span_to_prob_map = storage_overlap_sim.sim_object_span_to_prob_map(storage_design=storage_design, m=m, num_samples=num_samples)
 
     cum_prob_model = 0
     cum_diff_between_model_and_sim = 0
@@ -71,7 +71,7 @@ def test_prob_num_nonempty_cells_geq(n_m_d: Tuple[int, int, int]):
 
     log(DEBUG, "Started", n=n, m=m, d=d)
 
-    num_nonempty_cells_to_tail_prob_map = allocation_w_complexes_sim.sim_num_nonempty_cells_to_tail_prob_map(n=n, m=m, d=d, num_sample=10**5)
+    num_nonempty_cells_to_tail_prob_map = allocation_w_complexes_sim.sim_num_nonempty_cells_to_tail_prob_map(n=n, m=m, d=d, num_samples=10**5)
 
     cum_diff_between_model_and_sim = 0
     for num_nonempty_cells in range(d, m * d):
@@ -111,3 +111,15 @@ def test_prob_expand_span_as_necessary():
         )
 
     log(DEBUG, "Done", n=n, d=d)
+
+
+def test_prob_span_of_all_t_tuples_geq_u():
+    n, m, d = 10, 4, 2
+    t, u = 2, 3
+    num_samples = 10**4
+
+    prob_span_of_all_t_tuples_geq_u = allocation_w_complexes_sim.sim_prob_span_of_all_t_tuples_geq_u(
+        n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
+    )
+
+    log(INFO, "", prob_span_of_all_t_tuples_geq_u=prob_span_of_all_t_tuples_geq_u)

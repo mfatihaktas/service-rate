@@ -9,6 +9,6 @@ def test_gen_demand_vector_w_zipf_law():
         num_popular_obj=2,
         cum_demand=2,
         zipf_tail_index=0,
-        num_sample=5,
+        num_samples=5,
     ):
         log(DEBUG, "", demand_vector=demand_vector)

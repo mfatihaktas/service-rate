@@ -40,22 +40,22 @@ def sim_object_span(
 def sim_object_span_to_prob_map(
     storage_design: design.StorageDesign,
     m: int,
-    num_sample: int,
+    num_samples: int,
 ) -> dict[int, float]:
     log(DEBUG, "Started",
         storage_design=storage_design,
         m=m,
-        num_sample=num_sample,
+        num_samples=num_samples,
     )
 
     object_span_to_counter_map = collections.defaultdict(int)
-    for _ in range(num_sample):
+    for _ in range(num_samples):
         storage_design.reset()
         object_span = sim_object_span(storage_design=storage_design, m=m)
         object_span_to_counter_map[object_span] += 1
 
     object_span_to_prob_map = {
-        object_span: counter / num_sample
+        object_span: counter / num_samples
         for object_span, counter in object_span_to_counter_map.items()
     }
     log(DEBUG, "Done",
@@ -72,7 +72,7 @@ def sim_frac_of_demand_vectors_covered(
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
-    num_sample: int,
+    num_samples: int,
     num_sim_run: int = 1,
     combination_size_for_is_demand_vector_covered: int = None,
 ) -> list[float]:
@@ -80,7 +80,7 @@ def sim_frac_of_demand_vectors_covered(
         num_popular_obj=num_popular_obj,
         cum_demand=cum_demand,
         zipf_tail_index=zipf_tail_index,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
         combination_size_for_is_demand_vector_covered=combination_size_for_is_demand_vector_covered,
     )
@@ -96,7 +96,7 @@ def sim_frac_of_demand_vectors_covered(
             num_popular_obj=num_popular_obj,
             cum_demand=cum_demand,
             zipf_tail_index=zipf_tail_index,
-            num_sample=num_sample,
+            num_samples=num_samples,
         ):
             # storage_design.reset()
 
@@ -110,7 +110,7 @@ def sim_frac_of_demand_vectors_covered(
             elif storage_design.is_demand_vector_covered(demand_vector=demand_vector):
                 num_covered += 1
 
-        frac_of_demand_vectors_covered = num_covered / num_sample
+        frac_of_demand_vectors_covered = num_covered / num_samples
         frac_of_demand_vectors_covered_list.append(frac_of_demand_vectors_covered)
 
     log(DEBUG, "Done")
@@ -122,14 +122,14 @@ def sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
-    num_sample: int,
+    num_samples: int,
     num_sim_run: int = 1,
 ) -> Tuple[float, float]:
     log(DEBUG, "Started",
         num_popular_obj=num_popular_obj,
         cum_demand=cum_demand,
         zipf_tail_index=zipf_tail_index,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -143,7 +143,7 @@ def sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
                 num_popular_obj=num_popular_obj,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
-                num_sample=num_sample,
+                num_samples=num_samples,
         ):
             for combination_size in range(1, num_popular_obj + 1):
                 if storage_design.is_demand_vector_covered_for_given_combination_size(
@@ -153,7 +153,7 @@ def sim_frac_of_demand_vectors_covered_lower_and_upper_bound(
                     combination_size_to_num_covered_map[combination_size] += 1
 
         for combination_size, num_covered in combination_size_to_num_covered_map.items():
-            frac_of_demand_vectors_covered = num_covered / num_sample
+            frac_of_demand_vectors_covered = num_covered / num_samples
             combination_size_to_frac_demand_vectors_covered_list_map[combination_size].append(frac_of_demand_vectors_covered)
 
     log(DEBUG, "Done",

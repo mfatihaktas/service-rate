@@ -19,7 +19,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
     # zipf_tail_index_list = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3]
     zipf_tail_index_list = numpy.linspace(start=0, stop=4, num=20, endpoint=True)
 
-    num_sample = 200
+    num_samples = 200
     num_sim_run = 3
 
     log(INFO, "Started",
@@ -27,7 +27,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
         cum_demand=cum_demand,
         d=d,
         zipf_tail_index_list=zipf_tail_index_list,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -65,7 +65,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
                 num_popular_obj=num_popular_obj,
                 cum_demand=cum_demand,
                 zipf_tail_index=zipf_tail_index,
-                num_sample=num_sample,
+                num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
 
@@ -105,7 +105,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
     plot.title(
         f"$D= {cum_demand}$"
         + r", $N_{\textrm{pop}}= $" + fr"${num_popular_obj}$"
-        + r", $N_{\textrm{sample}}= $" + fr"${num_sample}$"
+        + r", $N_{\textrm{sample}}= $" + fr"${num_samples}$"
         + r", $N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
@@ -128,7 +128,7 @@ def plot_frac_demand_vectors_covered_vs_tail_index():
 def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     d: int,
     demand_for_popular: int,
-    num_sample: int = 300,
+    num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     num_popular_obj_list = list(range(1, 10))
@@ -137,7 +137,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         d=d,
         num_popular_obj_list=num_popular_obj_list,
         demand_for_popular=demand_for_popular,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -161,7 +161,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 num_popular_obj=num_popular_obj,
                 cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
-                num_sample=num_sample,
+                num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
             E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
@@ -172,7 +172,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             #     num_popular_obj=num_popular_obj,
             #     cum_demand=demand_for_popular * num_popular_obj,
             #     zipf_tail_index=0,
-            #     num_sample=num_sample,
+            #     num_samples=num_samples,
             #     num_sim_run=num_sim_run,
             # )
             # frac_of_demand_vectors_covered_lower_bound_list.append(frac_of_demand_vectors_covered_lower_bound)
@@ -183,7 +183,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             #     num_popular_obj=num_popular_obj,
             #     cum_demand=demand_for_popular * num_popular_obj,
             #     zipf_tail_index=0,
-            #     num_sample=num_sample,
+            #     num_samples=num_samples,
             #     num_sim_run=num_sim_run,
             #     combination_size_for_is_demand_vector_covered=2,
             # )
@@ -195,7 +195,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             #     num_popular_obj=num_popular_obj,
             #     cum_demand=demand_for_popular * num_popular_obj,
             #     zipf_tail_index=0,
-            #     num_sample=num_sample,
+            #     num_samples=num_samples,
             #     num_sim_run=num_sim_run,
             #     combination_size_for_is_demand_vector_covered=3,
             # )
@@ -258,7 +258,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     plot.title(
         fr"$d= {d}$, "
         fr"$\lambda= {demand_for_popular}$, "
-        r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
+        r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
@@ -285,7 +285,7 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
             plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=300,
+                num_samples=300,
                 num_sim_run=3,
             )
 
@@ -305,8 +305,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            num_sample=300,
-            # num_sample=1000,
+            num_samples=300,
+            # num_samples=1000,
             num_sim_run=3,
         )
         for d in range(2, 7)

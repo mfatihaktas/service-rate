@@ -16,7 +16,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     storage_design_model: storage_overlap_model.StorageDesignModel,
     demand_for_popular: int,
     num_popular_obj_list: list[int],
-    num_sample: int = 300,
+    num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     log(INFO, "Started",
@@ -24,7 +24,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
         storage_design_model=storage_design_model,
         demand_for_popular=demand_for_popular,
         num_popular_obj_list=num_popular_obj_list,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -49,7 +49,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
                 num_popular_obj=num_popular_obj,
                 cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
-                num_sample=num_sample,
+                num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
         E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
@@ -86,7 +86,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     plot.title(
         fr"$d= {storage_design.d}$, "
         r"$\lambda= $" + fr"${demand_for_popular}$, "
-        r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
+        r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
@@ -96,7 +96,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
 def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     d: int,
     demand_for_popular: int,
-    num_sample: int = 300,
+    num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     k = 120
@@ -115,7 +115,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     log(INFO, "Started",
         num_popular_obj_list=num_popular_obj_list,
         demand_for_popular=demand_for_popular,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -130,14 +130,14 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             storage_design_model=storage_design_model,
             demand_for_popular=demand_for_popular,
             num_popular_obj_list=num_popular_obj_list,
-            num_sample=num_sample,
+            num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
 
     # Save the plot
     plot.gcf().set_size_inches(8, 6)
     file_name = (
-        "plots/plot_frac_demand_vectors_covered_vs_num_popular_objs"
+        "plots/exp_random_design_plot_frac_demand_vectors_covered_vs_num_popular_objs"
         + f"_k_{k}"
         + f"_d_{d}"
         + f"_lambda_{demand_for_popular}"
@@ -158,8 +158,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs():
             plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=300,
-                # num_sample=1000,
+                num_samples=300,
+                # num_samples=1000,
                 num_sim_run=3,
             )
 
@@ -179,9 +179,9 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            num_sample=300,
+            num_samples=300,
             num_sim_run=3,
-            # num_sample=5000,
+            # num_samples=5000,
             # num_sim_run=5,
         )
         # for d in range(1, 2)

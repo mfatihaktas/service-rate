@@ -1,4 +1,5 @@
 import collections
+import itertools
 import random
 
 from src.utils.debug import *
@@ -20,14 +21,14 @@ def sim_mean_num_nonempty_cells_list(
     n: int,
     m: int,
     d: int,
-    num_sample: int,
+    num_samples: int,
     num_sim_run: int = 1,
 ) -> list[float]:
     log(DEBUG, "Started",
         n=n,
         m=m,
         d=d,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -36,7 +37,7 @@ def sim_mean_num_nonempty_cells_list(
         mean_num_nonempty_cells = numpy.mean(
             [
                 sim_num_nonempty_cells(n=n, m=m, d=d)
-                for _ in range(num_sample)
+                for _ in range(num_samples)
             ]
         )
 
@@ -49,22 +50,22 @@ def sim_num_nonempty_cells_to_prob_map(
     n: int,
     m: int,
     d: int,
-    num_sample: int,
+    num_samples: int,
 ) -> dict[int, float]:
     log(DEBUG, "Started",
         n=n,
         m=m,
         d=d,
-        num_sample=num_sample,
+        num_samples=num_samples,
     )
 
     num_nonempty_cells_to_counter_map = collections.defaultdict(int)
-    for _ in range(num_sample):
+    for _ in range(num_samples):
         num_nonempty_cells = sim_num_nonempty_cells(n=n, m=m, d=d)
         num_nonempty_cells_to_counter_map[num_nonempty_cells] += 1
 
     num_nonempty_cells_to_prob_map = {
-        num_nonempty_cells: counter / num_sample
+        num_nonempty_cells: counter / num_samples
         for num_nonempty_cells, counter in num_nonempty_cells_to_counter_map.items()
     }
     log(DEBUG, "Done", n=n, m=m, d=d, num_nonempty_cells_to_prob_map=num_nonempty_cells_to_prob_map)
@@ -76,23 +77,23 @@ def sim_num_nonempty_cells_to_tail_prob_map(
     n: int,
     m: int,
     d: int,
-    num_sample: int,
+    num_samples: int,
 ) -> dict[int, float]:
     log(DEBUG, "Started",
         n=n,
         m=m,
         d=d,
-        num_sample=num_sample,
+        num_samples=num_samples,
     )
 
     num_nonempty_cells_to_counter_map = collections.defaultdict(int)
-    for _ in range(num_sample):
+    for _ in range(num_samples):
         num_nonempty_cells = sim_num_nonempty_cells(n=n, m=m, d=d)
         num_nonempty_cells_to_counter_map[num_nonempty_cells] += 1
 
     num_nonempty_cells_to_tail_prob_map = {
         num_nonempty_cells: sum(
-            counter / num_sample
+            counter / num_samples
             for num_nonempty_cells_, counter in num_nonempty_cells_to_counter_map.items()
             if num_nonempty_cells_ >= num_nonempty_cells
         )
@@ -102,3 +103,56 @@ def sim_num_nonempty_cells_to_tail_prob_map(
     log(DEBUG, "Done", n=n, m=m, d=d, num_nonempty_cells_to_tail_prob_map=num_nonempty_cells_to_tail_prob_map)
 
     return num_nonempty_cells_to_tail_prob_map
+
+
+def sim_if_span_of_all_t_tuples_geq_u(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+) -> bool:
+    cell_id_list = list(range(n))
+
+    complex_list = []
+    for _ in range(m):
+        complex_ = set(random.sample(cell_id_list, d))
+
+        for complex_combination in itertools.combinations(complex_list, r=(t - 1)):
+            union = set.union(*[*complex_combination, complex_])
+            if len(union) < u:
+                return False
+
+        complex_list.append(complex_)
+
+    return True
+
+
+def sim_prob_span_of_all_t_tuples_geq_u(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+    num_samples: int,
+) -> float:
+    log(DEBUG, "Started",
+        n=n,
+        m=m,
+        d=d,
+        t=t,
+        u=u,
+        num_samples=num_samples,
+    )
+
+    prop = (
+        sum(
+            sim_if_span_of_all_t_tuples_geq_u(n=n, m=m, d=d, t=t, u=u)
+            for _ in range(num_samples)
+        )
+        / num_samples
+    )
+
+    log(DEBUG, "Done", n=n, m=m, d=d, t=t, u=u, prop=prop)
+
+    return prop

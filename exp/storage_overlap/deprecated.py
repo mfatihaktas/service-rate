@@ -3,14 +3,14 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_and_demand_for_popular(
     num_popular_obj_list = list(range(1, 10))
     demand_for_popular_list = list(range(1, d + 1))
 
-    num_sample = 300
+    num_samples = 300
     num_sim_run = 3
 
     log(INFO, "Started",
         d=d,
         num_popular_obj_list=num_popular_obj_list,
         demand_for_popular_list=demand_for_popular_list,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -29,7 +29,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_and_demand_for_popular(
                     num_popular_obj=num_popular_obj,
                     cum_demand=demand_for_popular * num_popular_obj,
                     zipf_tail_index=0,
-                    num_sample=num_sample,
+                    num_samples=num_samples,
                     num_sim_run=num_sim_run,
                 )
 
@@ -77,7 +77,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_and_demand_for_popular(
         fr"$k= {k}$, "
         fr"$n= {n}$, "
         fr"$d= {d}$, "
-        r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
+        r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 

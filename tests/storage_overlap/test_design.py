@@ -109,7 +109,7 @@ def test_get_node_overlap_size_to_counter_map(
 
 def test_is_demand_vector_covered(use_cvxpy: bool):
     def check_is_demand_vector_covered_equality(replica_design: design.ReplicaDesign):
-        num_sample = 100
+        num_samples = 100
 
         # for num_popular_obj in range(1, 5):
         for num_popular_obj in range(1, 4):
@@ -124,7 +124,7 @@ def test_is_demand_vector_covered(use_cvxpy: bool):
                     num_popular_obj=num_popular_obj,
                     cum_demand=num_popular_obj * popular_obj_demand,
                     zipf_tail_index=0,
-                    num_sample=num_sample,
+                    num_samples=num_samples,
                 ):
                     result_by_is_demand_vector_covered = replica_design.is_demand_vector_covered(demand_vector=demand_vector)
                     result_by_is_demand_vector_covered_w_service_choice_union = replica_design.is_demand_vector_covered_w_service_choice_union(demand_vector=demand_vector)
@@ -156,7 +156,7 @@ def test_is_demand_vector_covered(use_cvxpy: bool):
 
 def test_combination_size_to_is_demand_covered_map(use_cvxpy: bool):
     def check_combination_size_to_is_demand_covered_map(replica_design: design.ReplicaDesign):
-        num_sample = 1000
+        num_samples = 1000
 
         for popular_obj_demand in range(2, replica_design.d + 1):
             combination_size_and_is_demand_covered_tuple_to_counter_map = collections.defaultdict(int)
@@ -172,7 +172,7 @@ def test_combination_size_to_is_demand_covered_map(use_cvxpy: bool):
                     num_popular_obj=num_popular_obj,
                     cum_demand=num_popular_obj * popular_obj_demand,
                     zipf_tail_index=0,
-                    num_sample=num_sample,
+                    num_samples=num_samples,
                 ):
                     combination_size_and_is_demand_covered_tuple = tuple(
                         [

@@ -18,7 +18,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     demand_for_popular: int,
     num_popular_obj_list: list[int],
     combination_size: int,
-    num_sample: int = 300,
+    num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     log(INFO, "Started",
@@ -26,7 +26,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
         demand_for_popular=demand_for_popular,
         num_popular_obj_list=num_popular_obj_list,
         combination_size=combination_size,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -51,7 +51,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
                 num_popular_obj=num_popular_obj,
                 cum_demand=demand_for_popular * num_popular_obj,
                 zipf_tail_index=0,
-                num_sample=num_sample,
+                num_samples=num_samples,
                 num_sim_run=num_sim_run,
                 combination_size_for_is_demand_vector_covered=combination_size,
             )
@@ -77,7 +77,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     plot.title(
         fr"$d= {storage_design.d}$, "
         r"$\lambda= $" + fr"${demand_for_popular}$, "
-        r"$N_{\textrm{sample}}= $" + fr"${num_sample}$, "
+        r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
@@ -87,7 +87,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
 def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs(
     d: int,
     demand_for_popular: int,
-    num_sample: int = 300,
+    num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     k = 120
@@ -102,7 +102,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
     log(INFO, "Started",
         num_popular_obj_list=num_popular_obj_list,
         demand_for_popular=demand_for_popular,
-        num_sample=num_sample,
+        num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
 
@@ -119,7 +119,7 @@ def plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_o
                 demand_for_popular=demand_for_popular,
                 num_popular_obj_list=num_popular_obj_list,
                 combination_size=combination_size,
-                num_sample=num_sample,
+                num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
 
@@ -146,8 +146,8 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
             plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs(
                 d=d,
                 demand_for_popular=demand_for_popular,
-                num_sample=300,
-                # num_sample=1000,
+                num_samples=300,
+                # num_samples=1000,
                 num_sim_run=3,
             )
 
@@ -167,8 +167,8 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
         joblib.delayed(plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            # num_sample=300,
-            num_sample=1000,
+            # num_samples=300,
+            num_samples=1000,
             num_sim_run=3,
         )
         # for d in range(2, 3)

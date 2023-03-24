@@ -107,7 +107,7 @@ def sample_demand_vectors_w_zipf_law(
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
-    num_sample: int,
+    num_samples: int,
 ) -> list[float]:
     ordered_demand_vector = get_ordered_demand_vector(
         num_popular_obj=num_popular_obj,
@@ -121,7 +121,7 @@ def sample_demand_vectors_w_zipf_law(
     #     zipf_tail_index=zipf_tail_index,
     # )
 
-    for sample_id in range(num_sample):
+    for sample_id in range(num_samples):
         # log(DEBUG, f"> sample_id= {sample_id}")
 
         demand_vector = num_obj * [0]
