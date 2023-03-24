@@ -297,3 +297,55 @@ def prob_expand_span_as_necessary_alternative(n: int, m: int, d: int, lambda_: i
             for m_ in range(1, m + 1)
         ]
     )
+
+
+def prob_span_of_every_t_complexes_geq_u_upper_bound(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+) -> float:
+    return prob_span_of_every_t_complexes_geq_u_alternative(
+        n=n, m=m, d=d, t=t, u=u, for_upper_bound=True
+    )
+
+
+def prob_span_of_every_t_complexes_geq_u_lower_bound(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+) -> float:
+    return prob_span_of_every_t_complexes_geq_u_alternative(
+        n=n, m=m, d=d, t=t, u=u, for_upper_bound=False
+    )
+
+
+def prob_span_of_every_t_complexes_geq_u_alternative(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+    for_upper_bound: bool = True,
+) -> float:
+    prob = 1
+
+    for m_ in range(1, m):
+        prob_ = math.prod(
+            [
+                prob_num_nonempty_cells_geq_c(n=n, m=t, d=d, c=u)
+                for _ in range(
+                    m_
+                    if for_upper_bound
+                    else
+                    int(mp.binomial(m_, t - 1))
+                )
+            ]
+        )
+
+        prob *= prob_
+
+    return prob

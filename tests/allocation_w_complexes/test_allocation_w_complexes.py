@@ -123,8 +123,18 @@ def test_prob_expand_span_as_necessary():
         # (100, 20, 5, 2, 8),
         # (100, 20, 5, 2, 9),
         # (100, 20, 5, 2, 10),
-        (100, 30, 3, 2, 5),
+        # (100, 30, 3, 2, 5),
         # (100, 20, 4, 3, 8),
+        # (100, 25, 6, 4, 10),
+        # (100, 15, 5, 3, 12),  # Diff
+        # (100, 10, 5, 2, 7),
+        # (100, 15, 5, 4, 15),  # Diff
+        # (100, 15, 4, 3, 10),  # Diff
+        # (100, 10, 4, 3, 9),
+        (150, 15, 4, 3, 10),  # Diff
+        # (150, 15, 4, 2, 7),
+        # (150, 20, 7, 5, 25),
+        # (150, 20, 7, 2, 12),
     ],
 )
 def n_m_d_t_u(request) -> Tuple[int, int, int, int, int]:
@@ -135,14 +145,19 @@ def test_prob_span_of_all_t_tuples_geq_u(n_m_d_t_u: Tuple[int, int, int, int, in
     n, m, d, t, u = n_m_d_t_u
     num_samples = 10**4
 
-    prob_span_of_all_t_tuples_geq_u = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u(
+    sim_prob_span_of_all_t_tuples_geq_u = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u(
         n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
     )
-    prob_span_of_all_t_tuples_geq_u_alternative = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u_alternative(
-        n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
+    # sim_prob_span_of_all_t_tuples_geq_u_alternative = allocation_w_complexes_sim.sim_prob_span_of_every_t_complexes_geq_u_alternative(
+    #     n=n, m=m, d=d, t=t, u=u, num_samples=num_samples
+    # )
+
+    prob_span_of_all_t_tuples_geq_u_alternative = model.prob_span_of_every_t_complexes_geq_u_alternative(
+        n=n, m=m, d=d, t=t, u=u
     )
 
     log(INFO, "",
-        prob_span_of_all_t_tuples_geq_u=prob_span_of_all_t_tuples_geq_u,
+        sim_prob_span_of_all_t_tuples_geq_u=sim_prob_span_of_all_t_tuples_geq_u,
+        # sim_prob_span_of_all_t_tuples_geq_u_alternative=sim_prob_span_of_all_t_tuples_geq_u_alternative,
         prob_span_of_all_t_tuples_geq_u_alternative=prob_span_of_all_t_tuples_geq_u_alternative,
     )

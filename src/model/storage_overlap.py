@@ -56,11 +56,19 @@ class RandomExpanderDesignModel(StorageDesignModel):
             for m_ in range(1, m + 1)
         )
 
-    def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
+    def _prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
         return min(
             self.prob_span_is_larger_than_m_times_lambda(
                 m=m_,
                 lambda_=lambda_,
+            )
+            for m_ in range(1, m + 1)
+        )
+
+    def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
+        return min(
+            allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_upper_bound(
+                n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
             )
             for m_ in range(1, m + 1)
         )
@@ -76,7 +84,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
             ]
         )
 
-    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
+    def _prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
         # return allocation_w_complexes_model.prob_expand_span_by_e_with_each_complex(
         #     n=self.n, m=m, d=self.d, e=lambda_
         # )
@@ -91,4 +99,21 @@ class RandomExpanderDesignModel(StorageDesignModel):
 
         return allocation_w_complexes_model.prob_expand_span_as_necessary_faster(
             n=self.n, m=m, d=self.d, lambda_=lambda_
+        )
+
+    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
+        # return max(
+        #     allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_lower_bound(
+        #         n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
+        #     )
+        #     for m_ in range(1, m + 1)
+        # )
+
+        return math.prod(
+            [
+                allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_lower_bound(
+                    n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
+                )
+                for m_ in range(1, m + 1)
+            ]
         )
