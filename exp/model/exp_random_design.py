@@ -38,6 +38,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
         log(INFO, f"> num_popular_obj= {num_popular_obj}")
 
         if (
+            # True or
             len(E_frac_of_demand_vectors_covered_list) > 0
             and E_frac_of_demand_vectors_covered_list[-1] <= 0.01
         ):

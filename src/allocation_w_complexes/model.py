@@ -59,6 +59,7 @@ def prob_num_empty_cells_eq_c(n: int, m: int, d: int, c: int) -> float:
     return coeff * prob_num_empty_cells_eq_c(n=n - c, m=m, d=d, c=0)
 
 
+@functools.cache
 def prob_num_empty_cells_eq_c_w_mpmath(n: int, m: int, d: int, c: int) -> float:
     """Denoted as `Pr{mu_0'(n, N) = c}` in [1]."""
     # log(DEBUG, "Started", n=n, m=m, d=d, c=c)
@@ -164,11 +165,13 @@ def prob_num_empty_cells_eq_c_w_mpmath_deprecated(n: int, m: int, d: int, c: int
     return s
 
 
+@functools.cache
 def prob_num_nonempty_cells_eq_c(n: int, m: int, d: int, c: int) -> float:
     num_empty_cells = n - c
     return prob_num_empty_cells_eq_c_w_mpmath(n=n, m=m, d=d, c=num_empty_cells)
 
 
+@functools.cache
 def prob_num_nonempty_cells_geq_c(n: int, m: int, d: int, c: int) -> float:
     return sum(
         prob_num_nonempty_cells_eq_c(n=n, m=m, d=d, c=c_)
@@ -299,6 +302,7 @@ def prob_expand_span_as_necessary_alternative(n: int, m: int, d: int, lambda_: i
     )
 
 
+@functools.cache
 def prob_span_of_every_t_complexes_geq_u_upper_bound(
     n: int,
     m: int,
@@ -311,6 +315,7 @@ def prob_span_of_every_t_complexes_geq_u_upper_bound(
     )
 
 
+@functools.cache
 def prob_span_of_every_t_complexes_geq_u_lower_bound(
     n: int,
     m: int,
@@ -323,6 +328,7 @@ def prob_span_of_every_t_complexes_geq_u_lower_bound(
     )
 
 
+@functools.cache
 def prob_span_of_every_t_complexes_geq_u_alternative(
     n: int,
     m: int,
