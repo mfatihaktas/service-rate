@@ -180,7 +180,7 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         joblib.delayed(plot_frac_demand_vectors_covered_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            num_samples=300,
+            num_samples=1000,
             num_sim_run=3,
             # num_samples=5000,
             # num_sim_run=5,

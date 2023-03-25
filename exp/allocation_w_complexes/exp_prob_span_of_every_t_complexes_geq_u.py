@@ -113,10 +113,13 @@ def manage_plot_prob_span_of_complexes_geq_u_w_joblib():
             d=d,
             num_samples=10**4,
         )
-        # for n in [10]
-        for n in [100]
-        for m in [10, 20]
-        for d in range(2, 7)
+        for n in [40]
+        for m in [8]
+        for d in [4]
+
+        # for n in [100]
+        # for m in [10, 20]
+        # for d in range(2, 7)
     )
 
     log(INFO, "Done")

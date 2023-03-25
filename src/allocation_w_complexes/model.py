@@ -337,13 +337,15 @@ def prob_span_of_every_t_complexes_geq_u_alternative(
     u: int,
     for_upper_bound: bool = True,
 ) -> float:
+    """
     prob = 1
 
-    for m_ in range(1, m):
+    for m_ in range(t, m):
         prob_ = math.prod(
             [
                 prob_num_nonempty_cells_geq_c(n=n, m=t, d=d, c=u)
                 for _ in range(m_)
+
                 # for _ in range(int(mp.binomial(m_, t - 1)))
                 # for _ in range(
                 #     1  # m_
@@ -355,5 +357,13 @@ def prob_span_of_every_t_complexes_geq_u_alternative(
         )
 
         prob *= prob_
+    """
+
+    prob = math.prod(
+        [
+            prob_num_nonempty_cells_geq_c(n=n, m=t, d=d, c=u)
+            for _ in range(int(mp.binomial(m, t)))
+        ]
+    )
 
     return prob
