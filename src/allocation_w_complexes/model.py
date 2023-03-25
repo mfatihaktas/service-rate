@@ -343,12 +343,14 @@ def prob_span_of_every_t_complexes_geq_u_alternative(
         prob_ = math.prod(
             [
                 prob_num_nonempty_cells_geq_c(n=n, m=t, d=d, c=u)
-                for _ in range(
-                    m_
-                    if for_upper_bound
-                    else
-                    int(mp.binomial(m_, t - 1))
-                )
+                for _ in range(m_)
+                # for _ in range(int(mp.binomial(m_, t - 1)))
+                # for _ in range(
+                #     1  # m_
+                #     if for_upper_bound
+                #     else
+                #     1  # int(mp.binomial(m_, t - 1))
+                # )
             ]
         )
 

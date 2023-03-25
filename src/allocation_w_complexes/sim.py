@@ -106,7 +106,7 @@ def sim_num_nonempty_cells_to_tail_prob_map(
     return num_nonempty_cells_to_tail_prob_map
 
 
-def sim_if_span_of_every_t_complexes_geq_u(
+def _sim_if_span_of_every_t_complexes_geq_u(
     n: int,
     m: int,
     d: int,
@@ -127,6 +127,26 @@ def sim_if_span_of_every_t_complexes_geq_u(
                 return False
 
         complex_list.append(complex_)
+
+    return True
+
+
+def sim_if_span_of_every_t_complexes_geq_u(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+) -> bool:
+    cell_id_list = list(range(n))
+
+    complex_list = [set(random.sample(cell_id_list, d)) for _ in range(m)]
+    for complex_combination in itertools.combinations(complex_list, r=t):
+        union = set.union(*complex_combination)
+        # log(WARNING, "", union=union)
+
+        if len(union) < u:
+            return False
 
     return True
 

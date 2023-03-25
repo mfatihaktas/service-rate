@@ -7,7 +7,8 @@ if [ $1 = "i" ]; then
   # srun --partition=main --nodes=1 --ntasks=1 --cpus-per-task=20 --mem=16000 --time=3:00:00 --export=ALL --pty bash -i
 
 elif [ $1 = "j" ]; then
-  FILE="model/exp_random_design"
+  FILE="allocation_w_complexes/exp_prob_span_of_every_t_complexes_geq_u"
+  # FILE="model/exp_random_design"
   # FILE="service_rate/exp_plot_capacity_region"
   # FILE="sim/exp_mm1_stability"
   # FILE="storage_overlap/exp_design"
