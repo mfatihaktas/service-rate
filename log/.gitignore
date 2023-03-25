@@ -1,5 +1,6 @@
 *
 !.gitignore
+!allocation_w_complexes/
 !model/
 !service_rate/
 !sim/
