@@ -111,7 +111,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
 
         return math.prod(
             [
-                allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_lower_bound(
+                allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_alternative(
                     n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
                 )
                 for m_ in range(1, m + 1)

@@ -303,39 +303,12 @@ def prob_expand_span_as_necessary_alternative(n: int, m: int, d: int, lambda_: i
 
 
 @functools.cache
-def prob_span_of_every_t_complexes_geq_u_upper_bound(
-    n: int,
-    m: int,
-    d: int,
-    t: int,
-    u: int,
-) -> float:
-    return prob_span_of_every_t_complexes_geq_u_alternative(
-        n=n, m=m, d=d, t=t, u=u, for_upper_bound=True
-    )
-
-
-@functools.cache
-def prob_span_of_every_t_complexes_geq_u_lower_bound(
-    n: int,
-    m: int,
-    d: int,
-    t: int,
-    u: int,
-) -> float:
-    return prob_span_of_every_t_complexes_geq_u_alternative(
-        n=n, m=m, d=d, t=t, u=u, for_upper_bound=False
-    )
-
-
-@functools.cache
 def prob_span_of_every_t_complexes_geq_u_alternative(
     n: int,
     m: int,
     d: int,
     t: int,
     u: int,
-    for_upper_bound: bool = True,
 ) -> float:
     """
     prob = 1
