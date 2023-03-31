@@ -2,6 +2,7 @@
 !.gitignore
 !allocation_w_complexes/
 !model/
+!random_allocations/
 !service_rate/
 !sim/
 !storage_opt/
