@@ -1,8 +1,10 @@
 #!/bin/bash
 
-python exp/allocation_w_complexes/exp_prob_span_of_every_t_complexes_geq_u.py
+# python exp/allocation_w_complexes/exp_prob_span_of_every_t_complexes_geq_u.py
 
 # python exp/model/exp_random_design.py
+
+python exp/random_allocations/exp_prob_max_num_balls_leq_u.py
 
 # python exp/service_rate/exp_cap_region_vs_field_size.py
 # python exp/service_rate/exp_plot_capacity_region.py

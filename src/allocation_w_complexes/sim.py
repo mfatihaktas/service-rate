@@ -6,7 +6,7 @@ import random
 from src.utils.debug import *
 
 
-def sim_num_nonempty_cells(n: int, m: int, d: int) -> float:
+def sim_num_nonempty_cells(n: int, m: int, d: int) -> int:
     cell_id_list = list(range(n))
 
     cell_id_set = set()
