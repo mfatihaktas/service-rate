@@ -120,11 +120,11 @@ def plot_prob_max_num_balls_leq_u_alternative(
 
     color = next(dark_color_cycle)
     plot.plot(m_list, prob_w_b_2_list, label=r"$\mathcal{P}_{2m, \lambda/2}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(m_list, prob_w_b_2_square_list, label=r"$\mathcal{P}_{2m, \lambda/2}^{2}$", color=color, marker="", linestyle="-", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_2_square_list, label=r"$\left(\mathcal{P}_{2m, \lambda/2}\right)^{2}$", color=color, marker="", linestyle="-", lw=2, mew=3, ms=5)
 
     color = next(dark_color_cycle)
     plot.plot(m_list, prob_w_b_3_list, label=r"$\mathcal{P}_{3m, \lambda/3}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(m_list, prob_w_b_3_cube_list, label=r"$\mathcal{P}_{3m, \lambda/3}^{3}$", color=color, marker="", linestyle="--", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_3_cube_list, label=r"$\left(\mathcal{P}_{3m, \lambda/3}\right)^{3}$", color=color, marker="", linestyle="--", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -156,7 +156,8 @@ def plot_prob_max_num_balls_leq_u_alternative(
 def manage_plot_prob_max_num_balls_leq_u_alternative():
     log(INFO, "Started")
 
-    num_samples = 10**3
+    # num_samples = 10**2
+    num_samples = 10**5
     for n, lambda_ in [
         # (10, 0.3),
         (100, 0.3),
