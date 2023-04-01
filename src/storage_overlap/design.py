@@ -416,7 +416,7 @@ class RandomExpanderDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"RandomExpanderDesign(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{RandomExpanderDesign}$"
+        return r"$\textrm{RandomDesign}$"
 
 
 @dataclasses.dataclass
