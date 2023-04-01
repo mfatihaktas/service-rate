@@ -90,41 +90,41 @@ def plot_prob_max_num_balls_leq_u_alternative(
 
     m_list = list(range(2, n))
     prob_list = []
-    prob_upper_bound_w_b_2_list = []
-    prob_sqrt_upper_bound_w_b_2_list = []
-    prob_upper_bound_w_b_3_list = []
-    prob_cubed_upper_bound_w_b_3_list = []
+    prob_w_b_2_list = []
+    prob_w_b_2_square_list = []
+    prob_w_b_3_list = []
+    prob_w_b_3_cube_list = []
     for m in m_list:
         prob = sim.sim_prob_max_num_balls_leq_u(n=n, m=m, u=u, num_samples=num_samples)
         prob_list.append(prob)
 
-        prob_upper_bound_w_b_2 = sim.sim_prob_max_num_balls_leq_u(n=n, m=(2 * m), u=(2 * u), num_samples=num_samples)
-        prob_upper_bound_w_b_2_list.append(prob_upper_bound_w_b_2)
-        prob_sqrt_upper_bound_w_b_2 = math.pow(prob, 1 / 2)
-        prob_sqrt_upper_bound_w_b_2_list.append(prob_sqrt_upper_bound_w_b_2)
+        prob_w_b_2 = sim.sim_prob_max_num_balls_leq_u(n=n, m=(2 * m), u=(2 * u), num_samples=num_samples)
+        prob_w_b_2_list.append(prob_w_b_2)
+        prob_w_b_2_square = prob_w_b_2**2
+        prob_w_b_2_square_list.append(prob_w_b_2_square)
 
-        prob_upper_bound_w_b_3 = sim.sim_prob_max_num_balls_leq_u(n=n, m=(3 * m), u=(3 * u), num_samples=num_samples)
-        prob_upper_bound_w_b_3_list.append(prob_upper_bound_w_b_3)
-        prob_cubed_upper_bound_w_b_3 = math.pow(prob, 1 / 3)
-        prob_cubed_upper_bound_w_b_3_list.append(prob_cubed_upper_bound_w_b_3)
+        prob_w_b_3 = sim.sim_prob_max_num_balls_leq_u(n=n, m=(3 * m), u=(3 * u), num_samples=num_samples)
+        prob_w_b_3_list.append(prob_w_b_3)
+        prob_w_b_3_cube = prob_w_b_3**3
+        prob_w_b_3_cube_list.append(prob_w_b_3_cube)
 
         log(DEBUG, f"> m= {m}",
             prob=prob,
-            prob_upper_bound_w_b_2=prob_upper_bound_w_b_2,
-            prob_sqrt_upper_bound_w_b_2=prob_sqrt_upper_bound_w_b_2,
-            prob_upper_bound_w_b_3=prob_upper_bound_w_b_3,
-            prob_cubed_upper_bound_w_b_3=prob_cubed_upper_bound_w_b_3,
+            prob_w_b_2=prob_w_b_2,
+            # prob_w_b_2_square=prob_w_b_2_square,
+            prob_w_b_3=prob_w_b_3,
+            # prob_w_b_3_cube=prob_w_b_3_cube,
         )
 
     plot.plot(m_list, prob_list, label=r"$\mathcal{P}_{m, \lambda}$", color=next(dark_color_cycle), marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     color = next(dark_color_cycle)
-    plot.plot(m_list, prob_upper_bound_w_b_2_list, label=r"$\mathcal{P}_{2m, \lambda/2}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(m_list, prob_sqrt_upper_bound_w_b_2_list, label=r"$\mathcal{P}_{m, \lambda}^{1/2}$", color=color, marker=".", linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_2_list, label=r"$\mathcal{P}_{2m, \lambda/2}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_2_square_list, label=r"$\mathcal{P}_{2m, \lambda/2}^{2}$", color=color, marker="", linestyle="-", lw=2, mew=3, ms=5)
 
     color = next(dark_color_cycle)
-    plot.plot(m_list, prob_upper_bound_w_b_3_list, label=r"$\mathcal{P}_{3m, \lambda/3}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(m_list, prob_cubed_upper_bound_w_b_3_list, label=r"$\mathcal{P}_{m, \lambda}^{1/3}$", color=color, marker=".", linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_3_list, label=r"$\mathcal{P}_{3m, \lambda/3}$", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(m_list, prob_w_b_3_cube_list, label=r"$\mathcal{P}_{3m, \lambda/3}^{3}$", color=color, marker="", linestyle="--", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -136,7 +136,7 @@ def plot_prob_max_num_balls_leq_u_alternative(
     plot.title(
         fr"$n= {n}$, "
         fr"$\lambda= {lambda_}$, "
-        r"$N_{sim}= $" + fr"${num_samples}$"
+        r"$N_{sample}= $" + fr"${num_samples}$"
     )
 
     # Save the plot
@@ -159,8 +159,8 @@ def manage_plot_prob_max_num_balls_leq_u_alternative():
     num_samples = 10**3
     for n, lambda_ in [
         # (10, 0.3),
-        # (100, 0.3),
-        (1000, 0.3),
+        (100, 0.3),
+        # (1000, 0.3),
         # (100, 20, 6),
         # (40, 4, 4),
         # (100, 100),
