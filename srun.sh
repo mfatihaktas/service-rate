@@ -8,8 +8,8 @@ if [ $1 = "i" ]; then
 
 elif [ $1 = "j" ]; then
   # FILE="allocation_w_complexes/exp_prob_span_of_every_t_complexes_geq_u"
-  # FILE="model/exp_random_design"
-  FILE="random_allocations/exp_prob_max_num_balls_leq_u"
+  FILE="model/exp_random_design"
+  # FILE="random_allocations/exp_prob_max_num_balls_leq_u"
   # FILE="service_rate/exp_plot_capacity_region"
   # FILE="sim/exp_mm1_stability"
   # FILE="storage_overlap/exp_design"
