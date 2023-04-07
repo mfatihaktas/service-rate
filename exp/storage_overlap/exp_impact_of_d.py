@@ -40,7 +40,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
         # for m in range(1, k):
         # for m in range(1, k, 3):
-        for _m in numpy.linspace(1, k, num=8):
+        for _m in numpy.linspace(1, k, num=20):
             m = int(_m)
             log(INFO, f"> m= {m}")
 
