@@ -108,6 +108,8 @@ class ReplicaDesign(StorageDesign):
         self,
         demand_vector: list[float],
     ) -> bool:
+        # log(DEBUG, "Started", demand_vector=demand_vector)
+
         if self.use_cvxpy:
             # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
             # load_across_nodes = self.service_rate_inspector.load_across_nodes(demand_vector)
@@ -255,12 +257,14 @@ class ClusteringDesign(ReplicaDesign):
     def __post_init__(self):
         check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
 
-        self.obj_id_to_node_id_set_map = {
-            obj_id: set(
-                i % self.n for i in range(obj_id * self.d , obj_id * self.d + self.d)
+        self.obj_id_to_node_id_set_map = {}
+
+        for obj_id in range(self.k):
+            cluster_id = obj_id // self.d
+
+            self.obj_id_to_node_id_set_map[obj_id] = set(
+                range(cluster_id * self.d, (cluster_id + 1) * self.d)
             )
-            for obj_id in range(self.k)
-        }
 
         super().__post_init__()
 
