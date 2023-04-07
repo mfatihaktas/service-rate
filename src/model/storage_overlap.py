@@ -6,6 +6,7 @@
 import abc
 import dataclasses
 import math
+import scipy.stats
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
 
@@ -117,3 +118,15 @@ class RandomExpanderDesignModel(StorageDesignModel):
                 for m_ in range(1, m + 1)
             ]
         )
+
+
+@dataclasses.dataclass
+class ClusteringDesignModel(StorageDesignModel):
+    def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
+        num_bins = self.n / self.d
+        num_balls = m
+        max_num_balls = math.ceil(self.d / lambda_)
+
+        prob_single_node_is_stable = scipy.stats.binom.cdf(max_num_balls, num_balls, 1 / num_bins)
+
+        return prob_single_node_is_stable**num_bins
