@@ -169,14 +169,15 @@ def plot_capacity_region_2d_alternative_w_hull(
         boundary_points_in_rows[hull.vertices, 0], boundary_points_in_rows[hull.vertices, 1], c=NICE_BLUE, alpha=0.5
     )
 
+    plot.xlim(xmin=0)
+    plot.ylim(ymin=0)
+
     if file_name_suffix is None:
         return
 
     fontsize = 14
     plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
-    # plot.xlim(xmin=0)
     plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
-    # plot.ylim(ymin=0)
 
     # title = (
     #     r"$k= {}$, $m= {}$, $C= {}$, ".format(

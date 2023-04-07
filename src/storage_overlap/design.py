@@ -283,7 +283,7 @@ class CyclicDesign(ReplicaDesign):
     shift_size: int
 
     def __post_init__(self):
-        check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
+        # check(self.n % self.d == 0, f"d= {self.d} must divide n= {self.n}")
 
         self.obj_id_to_node_id_set_map = {
             obj_id: set(

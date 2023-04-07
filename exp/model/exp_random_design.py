@@ -32,8 +32,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     std_frac_of_demand_vectors_covered_list = []
 
     frac_of_demand_vectors_covered_upper_bound_list = []
-    frac_of_demand_vectors_covered_upper_bound_power_d_list = []
     frac_of_demand_vectors_covered_lower_bound_list = []
+    frac_of_demand_vectors_covered_lower_bound_power_d_list = []
 
     for num_popular_obj in num_popular_obj_list:
         log(INFO, f"> num_popular_obj= {num_popular_obj}")
@@ -59,13 +59,12 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
         E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
         std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-        frac_of_demand_vectors_covered_lower_bound_list.append(
-            storage_design_model.prob_serving_lower_bound(m=num_popular_obj, lambda_=demand_for_popular)
-        )
+        frac_of_demand_vectors_covered_lower_bound = storage_design_model.prob_serving_lower_bound(m=num_popular_obj, lambda_=demand_for_popular)
+        frac_of_demand_vectors_covered_lower_bound_list.append(frac_of_demand_vectors_covered_lower_bound)
+        frac_of_demand_vectors_covered_lower_bound_power_d_list.append(frac_of_demand_vectors_covered_lower_bound**(storage_design.d))
 
         frac_of_demand_vectors_covered_upper_bound = storage_design_model.prob_serving_upper_bound(m=num_popular_obj, lambda_=demand_for_popular)
         frac_of_demand_vectors_covered_upper_bound_list.append(frac_of_demand_vectors_covered_upper_bound)
-        frac_of_demand_vectors_covered_upper_bound_power_d_list.append(frac_of_demand_vectors_covered_upper_bound**(storage_design.d))
 
     log(INFO, "",
         storage_design=storage_design,
@@ -81,7 +80,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     # plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_power_d_list, label=f"{storage_design.repr_for_plot()}, UB**d", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_power_d_list, label=f"{storage_design.repr_for_plot()}, LB**d", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
@@ -196,7 +195,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         # for demand_for_popular in range(1, d + 1)
         # for d in [4]
         # for demand_for_popular in [3]
-        for d in [6]
+        for d in [4]
+        # for d in [6]
         for demand_for_popular in [3]
     )
 

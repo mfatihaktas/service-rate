@@ -223,13 +223,14 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     # k = 45
     # k = 111
     # k = 120
-    k = 10
+    k = 200
+    # k = 24
     n = k
     use_cvxpy = False
     replica_design_list = [
         # design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design_w_stripe.ClusteringDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
-        # design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+        design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
         # design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
@@ -239,12 +240,12 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     ]
 
     # for s in [2, 3, 4]:
-    for s in [2, 3]:
-        if s <= d:
-            replica_design_list.append(
-                # design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True),
-                design_w_stripe.RandomExpanderDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True)
-            )
+    # for s in [2, 3]:
+    #     if s <= d:
+    #         replica_design_list.append(
+    #             # design_w_stripe.RandomBlockDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True),
+    #             design_w_stripe.RandomExpanderDesignWithStripe(k=k, n=n, d=d, s=s, use_cvxpy=True)
+    #         )
 
     for replica_design in replica_design_list:
         plot_(replica_design=replica_design)
@@ -252,8 +253,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
     fontsize = 14
     plot.legend(fontsize=fontsize)
     # plot.yscale("log")
-    plot.ylabel("Fraction of demand vectors covered", fontsize=fontsize)
-    plot.xlabel("Number of popular objects", fontsize=fontsize)
+    plot.ylabel(r"$\mathcal{P}_{m, \lambda}$", fontsize=fontsize)
+    plot.xlabel(r"$m$", fontsize=fontsize)
 
     plot.title(
         fr"$d= {d}$, "

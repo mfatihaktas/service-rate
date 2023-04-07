@@ -18,8 +18,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 ):
     # k = 45
     # k = 111
-    # k = 120
-    k = 24
+    k = 120
+    # k = 24
     n = k
 
     log(INFO, "Started",
@@ -35,8 +35,11 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         m_list = []
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
+        frac_of_demand_vectors_covered_power_d_list = []
+        frac_of_demand_vectors_covered_power_d_d_list = []
 
-        for m in range(1, k):
+        # for m in range(1, k):
+        for m in range(1, k, 3):
             log(INFO, f"> m= {m}")
 
             m_list.append(m)
@@ -53,6 +56,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
+            frac_of_demand_vectors_covered_power_d_list.append(E_frac_of_demand_vectors_covered**d)
+            frac_of_demand_vectors_covered_power_d_d_list.append((E_frac_of_demand_vectors_covered**d)**d)
+
             if E_frac_of_demand_vectors_covered < 0.01:
                 break
 
@@ -64,11 +70,13 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
         color = next(dark_color_cycle)
         plot.errorbar(m_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(m_list, frac_of_demand_vectors_covered_power_d_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}, 'd", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(m_list, frac_of_demand_vectors_covered_power_d_d_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}, 'd'd", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     use_cvxpy = False
     replica_design_list = []
 
-    for d in range(2, d_max + 1):
+    for d in range(1, d_max + 1):
         replica_design_list_ = [
             design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
             # design_w_stripe.ClusteringDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
@@ -76,7 +84,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
             # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
             # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
             # design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            # design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
             # design.RandomExpanderDesign_wClusters(k=k, n=n, d=d, num_clusters=2, use_cvxpy=use_cvxpy),
             # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
         ]
