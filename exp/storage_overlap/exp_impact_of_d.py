@@ -39,7 +39,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         frac_of_demand_vectors_covered_power_d_d_list = []
 
         # for m in range(1, k):
-        for m in range(1, k, 3):
+        # for m in range(1, k, 3):
+        for _m in numpy.linspace(1, k, num=8):
+            m = int(_m)
             log(INFO, f"> m= {m}")
 
             m_list.append(m)
@@ -71,9 +73,9 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
         color = next(dark_color_cycle)
         plot.errorbar(m_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         plot.plot(m_list, frac_of_demand_vectors_covered_power_d_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}, 'd", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(m_list, frac_of_demand_vectors_covered_power_d_d_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}, 'd'd", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.plot(m_list, frac_of_demand_vectors_covered_power_d_d_list, label=f"{replica_design.repr_for_plot()}, d={replica_design.d}, 'd'd", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    use_cvxpy = False
+    use_cvxpy = True  # False
     replica_design_list = []
 
     for d in range(1, d_max + 1):
