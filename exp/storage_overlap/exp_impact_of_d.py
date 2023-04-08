@@ -19,8 +19,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 ):
     # k = 45
     # k = 111
-    k = 120
-    # k = 24
+    # k = 120
+    k = 24
     n = k
 
     log(INFO, "Started",
@@ -42,7 +42,8 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
         # for m in range(1, k):
         # for m in range(1, k, 3):
-        for _m in numpy.linspace(2, k, num=20):
+        # for _m in numpy.linspace(2, k, num=20):
+        for _m in numpy.linspace(2, k, num=8):
             m = int(_m)
             log(INFO, f"> m= {m}")
 

@@ -10,26 +10,26 @@ from src.utils.debug import *
 
 @functools.cache
 def get_demand_vectors(
-    num_obj: int,
+    num_objs: int,
     demand_ordered_for_most_popular_objs: Tuple[float],
 ) -> list[list[float]]:
     num_popular_obj = len(demand_ordered_for_most_popular_objs)
     base_demand_vector = (
         demand_ordered_for_most_popular_objs
-        + (num_obj - num_popular_obj) * (0,)
+        + (num_objs - num_popular_obj) * (0,)
     )
 
     return [list(p) for p in itertools.permutations(base_demand_vector)]
 
 
 def gen_demand_vectors(
-    num_obj: int,
+    num_objs: int,
     demand_ordered_for_most_popular_objs: Tuple[float],
 ) -> list[float]:
     num_popular_obj = len(demand_ordered_for_most_popular_objs)
     base_demand_vector = (
         demand_ordered_for_most_popular_objs
-        + (num_obj - num_popular_obj) * (0,)
+        + (num_objs - num_popular_obj) * (0,)
     )
 
     for p in itertools.permutations(base_demand_vector):
@@ -54,7 +54,7 @@ def get_ordered_demand_vector(
 
 @functools.cache
 def get_demand_vectors_w_zipf_law(
-    num_obj: int,
+    num_objs: int,
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
@@ -72,13 +72,13 @@ def get_demand_vectors_w_zipf_law(
     # )
 
     return get_demand_vectors(
-        num_obj=num_obj,
+        num_objs=num_objs,
         demand_ordered_for_most_popular_objs=ordered_demand_vector,
     )
 
 
 def gen_demand_vector_w_zipf_law(
-    num_obj: int,
+    num_objs: int,
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
@@ -96,14 +96,14 @@ def gen_demand_vector_w_zipf_law(
     # )
 
     for demand_vector in gen_demand_vectors(
-        num_obj=num_obj,
+        num_objs=num_objs,
         demand_ordered_for_most_popular_objs=ordered_demand_vector,
     ):
         yield demand_vector
 
 
 def sample_demand_vectors_w_zipf_law(
-    num_obj: int,
+    num_objs: int,
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
@@ -124,9 +124,34 @@ def sample_demand_vectors_w_zipf_law(
     for sample_id in range(num_samples):
         # log(DEBUG, f"> sample_id= {sample_id}")
 
-        demand_vector = num_obj * [0]
-        index_list = random.sample(list(range(num_obj)), num_popular_obj)
+        demand_vector = num_objs * [0]
+        index_list = random.sample(list(range(num_objs)), num_popular_obj)
         for i, index in enumerate(index_list):
             demand_vector[index] = ordered_demand_vector[i]
+
+        yield demand_vector
+
+
+def sample_demand_vectors_w_balls_into_bins(
+    num_objs: int,
+    cum_demand: float,
+    lambda_: float,
+    num_samples: int,
+) -> list[float]:
+    # log(DEBUG, "",
+    #     num_objs=num_objs,
+    #     lambda_=lambda_,
+    #     num_samples=num_samples,
+    # )
+
+    num_demand_chunks = int(cum_demand / lambda_)
+
+    for sample_id in range(num_samples):
+        # log(DEBUG, f"> sample_id= {sample_id}")
+
+        demand_vector = num_objs * [0]
+        for _ in range(num_demand_chunks):
+            obj_id = random.randint(0, num_objs - 1)
+            demand_vector[obj_id] += lambda_
 
         yield demand_vector

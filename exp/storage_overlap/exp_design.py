@@ -222,13 +222,13 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
 
     # k = 45
     # k = 111
-    # k = 120
-    k = 200
+    k = 120
+    # k = 200
     # k = 24
     n = k
     use_cvxpy = False
     replica_design_list = [
-        # design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design_w_stripe.ClusteringDesignWithStripe(k=k, n=n, d=d, s=2, use_cvxpy=use_cvxpy),
         design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
@@ -312,6 +312,8 @@ def manage_plot_frac_demand_vectors_covered_vs_num_popular_objs_w_joblib():
         )
         for d in range(2, 7)
         for demand_for_popular in range(2, d + 1)
+        # for d in range(2, 7)
+        # for demand_for_popular in range(2, d + 1)
         # for d in [4]
         # for demand_for_popular in [d - 1]
     )
