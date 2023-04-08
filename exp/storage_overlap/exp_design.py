@@ -32,7 +32,7 @@ def plot_frac_demand_vectors_covered_vs_prob_obj_is_active(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
 
-        for prob_obj_is_active in numpy.linspace(0.1, 0.9, 8):
+        for prob_obj_is_active in numpy.linspace(0.1, 0.7, 8):
             log(INFO, f"> prob_obj_is_active= {prob_obj_is_active}")
 
             prob_obj_is_active_list.append(prob_obj_is_active)
@@ -81,7 +81,7 @@ def plot_frac_demand_vectors_covered_vs_prob_obj_is_active(
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
         design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        # design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design.RandomExpanderDesign_wClusters(k=k, n=n, d=d, num_clusters=2, use_cvxpy=use_cvxpy),
         # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
     ]
@@ -137,7 +137,7 @@ def manage_plot_frac_demand_vectors_covered_vs_prob_obj_is_active_w_joblib():
             num_sim_run=3,
         )
         for d in range(2, 7)
-        for demand_for_active_obj in range(2, d + 1)
+        for demand_for_active_obj in numpy.linspace(1.5, d, 4)
         # for d in [3]
         # for demand_for_active_obj in [2]
         # for d in [3, 4]

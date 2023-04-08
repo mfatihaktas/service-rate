@@ -23,20 +23,13 @@ class StorageDesign:
     k: int
     n: int
 
-    @abc.abstractmethod
-    def is_demand_vector_covered(
-        self,
-        demand_vector: list[float],
-    ):
-        pass
+    use_cvxpy: bool
+    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
 
-    @abc.abstractmethod
-    def is_demand_vector_covered_for_given_combination_size(
-        self,
-        demand_vector: list[float],
-        combination_size: int,
-    ):
-        pass
+    def __post_init__(self):
+        log(WARNING, "", use_cvxpy=self.use_cvxpy)
+        if self.use_cvxpy:
+            self.service_rate_inspector = self.get_service_rate_inspector()
 
     def frac_of_demand_vectors_covered(
         self,
@@ -65,19 +58,6 @@ class StorageDesign:
             num_demand_vector += 1
 
         return num_demand_vector_covered / num_demand_vector
-
-
-@dataclasses.dataclass
-class ReplicaDesign(StorageDesign):
-    d: int
-    use_cvxpy: bool
-
-    obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
-
-    def __post_init__(self):
-        log(WARNING, "", use_cvxpy=self.use_cvxpy)
-        if self.use_cvxpy:
-            self.service_rate_inspector = self.get_service_rate_inspector()
 
     def _get_service_rate_inspector(self) -> service_rate.ServiceRateInspector:
         node_id_to_objs_list = [[] for _ in range(self.n)]
@@ -250,6 +230,34 @@ class ReplicaDesign(StorageDesign):
                 num_obj_to_span_size_to_count_map[num_obj][span_size] += 1
 
         return num_obj_to_span_size_to_count_map
+
+
+@dataclasses.dataclass(repr=False)
+class NoRedundancyDesign(StorageDesign):
+    def __post_init__(self):
+        self.obj_id_to_node_id_set_map = {
+            obj_id: {obj_id % self.n}
+            for obj_id in range(self.k)
+        }
+
+        super().__post_init__()
+
+    def __repr__(self):
+        return (
+            "NoRedundancyDesign( \n"
+            f"\t k= {self.k} \n"
+            f"\t n= {self.n} \n"
+            ")"
+        )
+
+    def repr_for_plot(self):
+        # return f"NoRedundancyDesign(k= {self.k}, n= {self.n})"
+        return r"$\textrm{NoRedundancy}$"
+
+
+@dataclasses.dataclass
+class ReplicaDesign(StorageDesign):
+    d: int
 
 
 @dataclasses.dataclass(repr=False)
