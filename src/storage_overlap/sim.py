@@ -3,9 +3,8 @@ import functools
 import numpy
 import random
 
-from typing import Tuple
+from typing import Callable, Tuple
 
-from src.allocation_w_complexes import sim as allocation_w_complexes_sim
 from src.model import demand
 from src.storage_overlap import design
 
@@ -68,18 +67,13 @@ def sim_object_span_to_prob_map(
 
 
 def sim_frac_of_demand_vectors_covered(
+    sample_demand_vector: Callable,
     storage_design: design.StorageDesign,
-    num_popular_obj: int,
-    cum_demand: float,
-    zipf_tail_index: float,
     num_samples: int,
     num_sim_run: int = 1,
     combination_size_for_is_demand_vector_covered: int = None,
 ) -> list[float]:
     log(DEBUG, "Started",
-        num_popular_obj=num_popular_obj,
-        cum_demand=cum_demand,
-        zipf_tail_index=zipf_tail_index,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
         combination_size_for_is_demand_vector_covered=combination_size_for_is_demand_vector_covered,
@@ -91,20 +85,13 @@ def sim_frac_of_demand_vectors_covered(
         log(DEBUG, f"> sim_id= {sim_id}")
 
         num_covered = 0
-        for demand_vector in demand.sample_demand_vectors_w_zipf_law(
-            num_objs=storage_design.k,
-            num_popular_obj=num_popular_obj,
-            cum_demand=cum_demand,
-            zipf_tail_index=zipf_tail_index,
-            num_samples=num_samples,
-        ):
-        # for demand_vector in demand.sample_demand_vectors_w_balls_into_bins(
-        #     num_objs=storage_design.k,
-        #     cum_demand=cum_demand,
-        #     lambda_=(cum_demand / num_popular_obj),
-        #     num_samples=num_samples,
-        # ):
+        for sample_id in range(num_samples):
             # storage_design.reset()
+
+            demand_vector = sample_demand_vector()
+            # log(DEBUG, f"> sample_id= {sample_id}",
+            #     demand_vector=demand_vector,
+            # )
 
             if combination_size_for_is_demand_vector_covered is not None:
                 if storage_design.is_demand_vector_covered_for_given_combination_size(

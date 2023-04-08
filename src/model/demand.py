@@ -1,6 +1,7 @@
 import functools
 import itertools
 import math
+import numpy
 import random
 
 from typing import Tuple
@@ -102,12 +103,11 @@ def gen_demand_vector_w_zipf_law(
         yield demand_vector
 
 
-def sample_demand_vectors_w_zipf_law(
+def sample_demand_vector_w_zipf_law(
     num_objs: int,
     num_popular_obj: int,
     cum_demand: float,
     zipf_tail_index: float,
-    num_samples: int,
 ) -> list[float]:
     ordered_demand_vector = get_ordered_demand_vector(
         num_popular_obj=num_popular_obj,
@@ -121,37 +121,36 @@ def sample_demand_vectors_w_zipf_law(
     #     zipf_tail_index=zipf_tail_index,
     # )
 
-    for sample_id in range(num_samples):
-        # log(DEBUG, f"> sample_id= {sample_id}")
+    demand_vector = num_objs * [0]
+    index_list = random.sample(list(range(num_objs)), num_popular_obj)
+    for i, index in enumerate(index_list):
+        demand_vector[index] = ordered_demand_vector[i]
 
-        demand_vector = num_objs * [0]
-        index_list = random.sample(list(range(num_objs)), num_popular_obj)
-        for i, index in enumerate(index_list):
-            demand_vector[index] = ordered_demand_vector[i]
-
-        yield demand_vector
+    return demand_vector
 
 
-def sample_demand_vectors_w_balls_into_bins(
+def sample_demand_vector_w_balls_into_bins(
     num_objs: int,
     cum_demand: float,
-    lambda_: float,
-    num_samples: int,
+    demand_for_active_obj: float,
 ) -> list[float]:
-    # log(DEBUG, "",
-    #     num_objs=num_objs,
-    #     lambda_=lambda_,
-    #     num_samples=num_samples,
-    # )
+    num_demand_chunks = int(cum_demand / demand_for_active_obj)
 
-    num_demand_chunks = int(cum_demand / lambda_)
+    demand_vector = num_objs * [0]
+    for _ in range(num_demand_chunks):
+        obj_id = random.randint(0, num_objs - 1)
+        demand_vector[obj_id] += demand_for_active_obj
 
-    for sample_id in range(num_samples):
-        # log(DEBUG, f"> sample_id= {sample_id}")
+    return demand_vector
 
-        demand_vector = num_objs * [0]
-        for _ in range(num_demand_chunks):
-            obj_id = random.randint(0, num_objs - 1)
-            demand_vector[obj_id] += lambda_
 
-        yield demand_vector
+def sample_demand_vector_w_p(
+    num_objs: int,
+    demand_for_active_obj: float,
+    prob_obj_is_active: float,
+) -> list[float]:
+    # uniform_samples = [random.uniform(0, 1) for _ in range(num_objs)]
+    # return [int(sample < prob_obj_is_active) for sample in uniform_samples]
+
+    uniform_sample_array = numpy.random.uniform(low=0.0, high=1.0, size=num_objs)
+    return list(map(lambda e: int(e < prob_obj_is_active), uniform_sample_array))
