@@ -90,7 +90,8 @@ def sim_frac_of_demand_vectors_covered(
 
             demand_vector = sample_demand_vector()
             # log(DEBUG, f"> sample_id= {sample_id}",
-            #     demand_vector=demand_vector,
+            #     num_nonzero_demands=sum(int(demand > 0) for demand in demand_vector),
+            #     # demand_vector=demand_vector,
             # )
 
             if combination_size_for_is_demand_vector_covered is not None:

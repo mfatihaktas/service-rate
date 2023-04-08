@@ -260,7 +260,7 @@ class ClusteringDesign(ReplicaDesign):
         self.obj_id_to_node_id_set_map = {}
 
         for obj_id in range(self.k):
-            cluster_id = obj_id // self.d
+            cluster_id = (obj_id // self.d) % self.n
 
             self.obj_id_to_node_id_set_map[obj_id] = set(
                 range(cluster_id * self.d, (cluster_id + 1) * self.d)

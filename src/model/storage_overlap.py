@@ -122,7 +122,7 @@ class RandomExpanderDesignModel(StorageDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModel(StorageDesignModel):
-    def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
+    def prob_serving_for_balls_into_bins_upper_bound(self, m: int, lambda_: int) -> float:
         num_bins = self.n / self.d
         num_balls = m
         max_num_balls = math.ceil(self.d / lambda_)

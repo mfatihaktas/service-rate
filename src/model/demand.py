@@ -153,4 +153,8 @@ def sample_demand_vector_w_p(
     # return [int(sample < prob_obj_is_active) for sample in uniform_samples]
 
     uniform_sample_array = numpy.random.uniform(low=0.0, high=1.0, size=num_objs)
-    return list(map(lambda e: int(e < prob_obj_is_active), uniform_sample_array))
+    return list(
+        map(lambda sample: demand_for_active_obj * int(sample < prob_obj_is_active),
+            uniform_sample_array
+        )
+    )
