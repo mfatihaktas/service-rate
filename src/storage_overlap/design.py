@@ -287,7 +287,7 @@ class ClusteringDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Clustering(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{Clustering}$"
+        return r"$\textrm{Clustering}$" + fr", $d= {self.d}$"
 
 
 @dataclasses.dataclass

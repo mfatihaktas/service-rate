@@ -42,8 +42,9 @@ class NoRedundancyDesignModel(StorageDesignModel):
 
         return prob_sys_can_serve
 
+
 @dataclasses.dataclass
-class ReplicaDesignModel:
+class ReplicaDesignModel(StorageDesignModel):
     d: int
 
     @abc.abstractmethod
@@ -149,11 +150,33 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModel(ReplicaDesignModel):
+    def prob_serving(self, p: int, lambda_: int) -> float:
+        # log(DEBUG, "Started", p=p, lambda_=lambda_)
+
+        num_clusters = self.n / self.d
+        num_active_objs_handled_by_cluster = math.floor(self.d / lambda_)
+
+        prob_single_cluster_is_stable = scipy.stats.binom.cdf(num_active_objs_handled_by_cluster, self.d, p)
+        # log(DEBUG, "",
+        #     d=self.d,
+        #     num_clusters=num_clusters,
+        #     num_active_objs_handled_by_cluster=num_active_objs_handled_by_cluster,
+        #     prob_single_cluster_is_stable=prob_single_cluster_is_stable
+        # )
+
+        return prob_single_cluster_is_stable**num_clusters
+
     def prob_serving_for_balls_into_bins_upper_bound(self, m: int, lambda_: int) -> float:
         num_bins = self.n / self.d
         num_balls = m
-        max_num_balls = math.ceil(self.d / lambda_)
+        max_num_balls = math.floor(self.d / lambda_)
 
         prob_single_node_is_stable = scipy.stats.binom.cdf(max_num_balls, num_balls, 1 / num_bins)
 
         return prob_single_node_is_stable**num_bins
+
+
+@dataclasses.dataclass
+class CyclicDesignModel(ReplicaDesignModel):
+    def prob_serving_lower_bound(self, p: int, lambda_: int) -> float:
+        num_nodes_needed_for_active_obj = math.ceil(lambda_)

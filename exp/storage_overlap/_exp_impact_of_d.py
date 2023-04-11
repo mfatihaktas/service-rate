@@ -58,6 +58,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs(
                 num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
+
             E_frac_of_demand_vectors_covered = numpy.mean(frac_of_demand_vectors_covered_list)
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
