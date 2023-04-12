@@ -34,7 +34,7 @@ def plot_frac_demand_vectors_covered_vs_d(
 
     def plot_(
         storage_design: design.ReplicaDesign,
-        storage_model: model.NoRedundancyDesignModel,
+        storage_model: model.ClusteringDesignModel,
     ):
         log(INFO, f">> storage_design= {storage_design}")
 
@@ -69,7 +69,8 @@ def plot_frac_demand_vectors_covered_vs_d(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            prob_serving_model = storage_model.prob_serving(p=prob_obj_is_active, lambda_=demand_for_active_obj)
+            # prob_serving_model = storage_model.prob_serving(p=prob_obj_is_active, lambda_=demand_for_active_obj)
+            prob_serving_model = storage_model.prob_serving_downscaling_p_per_obj(p=prob_obj_is_active, lambda_=demand_for_active_obj)
             prob_serving_model_list.append(prob_serving_model)
 
             if prob_serving_model < 0.01:
@@ -82,17 +83,18 @@ def plot_frac_demand_vectors_covered_vs_d(
         )
 
         color = next(dark_color_cycle)
-        # plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(prob_obj_is_active_list, prob_serving_model_list, label=f"{storage_design.repr_for_plot()}, model", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"d={storage_model.d}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(prob_obj_is_active_list, prob_serving_model_list, label=f"d={storage_model.d}, b={storage_model.b}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     use_cvxpy = True  # False
     storage_design_model_list = [
         (
             design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.ClusteringDesignModel(k=k, n=n, d=d)
+            model.ClusteringDesignModel(k=k, n=n, b=b, d=d)
         )
         # for d in [2]
         for d in range(2, d_max + 1)
+        for b in range(1, 4)
         if n % d == 0
     ]
 
@@ -114,10 +116,10 @@ def plot_frac_demand_vectors_covered_vs_d(
     # Save the plot
     plot.gcf().set_size_inches(8, 6)
     file_name = (
-        "plots/plot_frac_demand_vectors_covered_vs_d"
+        "plots/plot_frac_demand_vectors_covered_vs_d_for_clustering"
         + f"_k_{k}"
         + f"_d_max_{d_max}"
-        + f"_lambda_{demand_for_active_obj}"
+        + "_lambda_{}_".format(f"{demand_for_active_obj}".replace(".", "_"))
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")

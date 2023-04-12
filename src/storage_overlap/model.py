@@ -4,6 +4,7 @@ import math
 import scipy.stats
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
+from src.model import generalized_birthday_problem
 
 from src.utils.debug import *
 
@@ -18,29 +19,29 @@ class StorageDesignModel:
 class NoRedundancyDesignModel(StorageDesignModel):
     b: int
 
-    def prob_serving_downscaling_demand_per_obj(self, p: int, lambda_b_1: float) -> float:
-        lambda_ = lambda_b_1 / self.b
+    def prob_serving_helper(self, p: int, lambda_: float) -> float:
         num_active_objs_handled_by_node = math.floor(1 / lambda_)
 
         prob_sys_can_serve = 1
-
         for node_id in range(self.n):
             prob_node_can_serve = scipy.stats.binom.cdf(num_active_objs_handled_by_node, self.b, p)
             prob_sys_can_serve *= prob_node_can_serve
 
         return prob_sys_can_serve
 
+    def prob_serving_downscaling_demand_per_obj(self, p: int, lambda_b_1: float) -> float:
+        lambda_ = lambda_b_1 / self.b
+        return self.prob_serving_helper(p=p, lambda_=lambda_)
+
+    def prob_serving_downscaling_demand_per_obj_(self, p: int, lambda_b_1: float) -> float:
+        p_ = p / math.sqrt(self.b)
+        lambda_ = lambda_b_1 / math.sqrt(self.b)
+
+        return self.prob_serving_helper(p=p_, lambda_=lambda_)
+
     def prob_serving_downscaling_p_per_obj(self, p: int, lambda_b_1: float) -> float:
-        num_active_objs_handled_by_node = math.floor(1 / lambda_b_1)
         p_ = p / self.b
-
-        prob_sys_can_serve = 1
-
-        for node_id in range(self.n):
-            prob_node_can_serve = scipy.stats.binom.cdf(num_active_objs_handled_by_node, self.b, p_)
-            prob_sys_can_serve *= prob_node_can_serve
-
-        return prob_sys_can_serve
+        return self.prob_serving_helper(p=p_, lambda_=lambda_b_1)
 
 
 @dataclasses.dataclass
@@ -150,6 +151,8 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModel(ReplicaDesignModel):
+    b: int
+
     def prob_serving(self, p: int, lambda_: int) -> float:
         # log(DEBUG, "Started", p=p, lambda_=lambda_)
 
@@ -166,6 +169,16 @@ class ClusteringDesignModel(ReplicaDesignModel):
 
         return prob_single_cluster_is_stable**num_clusters
 
+    def prob_serving_downscaling_p_per_obj(self, p: int, lambda_: int) -> float:
+        p_ = p / self.b
+
+        num_clusters = self.n / self.d
+        num_active_objs_handled_by_cluster = math.floor(self.d / lambda_)
+
+        prob_single_cluster_is_stable = scipy.stats.binom.cdf(num_active_objs_handled_by_cluster, self.d * self.b, p_)
+
+        return prob_single_cluster_is_stable**num_clusters
+
     def prob_serving_for_balls_into_bins_upper_bound(self, m: int, lambda_: int) -> float:
         num_bins = self.n / self.d
         num_balls = m
@@ -178,5 +191,26 @@ class ClusteringDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class CyclicDesignModel(ReplicaDesignModel):
-    def prob_serving_lower_bound(self, p: int, lambda_: int) -> float:
+    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
+        """
+        m: Number of active objects.
+        """
+
         num_nodes_needed_for_active_obj = math.ceil(lambda_)
+        # log(DEBUG, "",
+        #     lambda_=lambda_,
+        #     num_nodes_needed_for_active_obj=num_nodes_needed_for_active_obj,
+        # )
+
+        # return generalized_birthday_problem.prob_kstar_leq_k(
+        #     k=1, n=self.k, m=num_nodes_needed_for_active_obj, a=m
+        # )
+        return generalized_birthday_problem.prob_kstar_leq_k(
+            k=m/2, n=self.k, m=num_nodes_needed_for_active_obj, a=m
+        )
+
+    # def prob_serving_lower_bound(self, p: int, lambda_: int) -> float:
+    #     num_nodes_needed_for_active_obj = math.ceil(lambda_)
+
+    #     prob_kstar_leq_k(k: int, n: int, m: int, a: int)
+    #     generalized_birthday_problem

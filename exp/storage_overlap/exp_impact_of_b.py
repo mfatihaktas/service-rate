@@ -69,8 +69,10 @@ def plot_frac_demand_vectors_covered_vs_b(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            prob_serving_model = storage_model.prob_serving_downscaling_demand_per_obj(p=prob_obj_is_active, lambda_b_1=demand_b_1)
-            # prob_serving_model = storage_model.prob_serving_downscaling_p_per_obj(p=prob_obj_is_active, lambda_b_1=demand_b_1)
+            # prob_serving_model = storage_model.prob_serving_downscaling_demand_per_obj(p=prob_obj_is_active, lambda_b_1=demand_b_1)
+            prob_serving_model = storage_model.prob_serving_downscaling_p_per_obj(p=prob_obj_is_active, lambda_b_1=demand_b_1)
+            # prob_serving_model = storage_model.prob_serving_downscaling_p_per_obj_to_keep_prob_serving_fixed(p=prob_obj_is_active, lambda_b_1=demand_b_1)
+
             prob_serving_model_list.append(prob_serving_model)
 
             if prob_serving_model < 0.01:
@@ -140,7 +142,8 @@ def manage_plot_frac_demand_vectors_covered_vs_b_w_joblib():
         # for b_max in [4]
         for b_max in [10]
         # for demand_b_1 in numpy.arange(0.2, 1.0, 0.1)
-        for demand_b_1 in numpy.arange(1, 2, 0.1)
+        for demand_b_1 in [round(demand, 2) for demand in numpy.arange(0.2, 1.0, 0.1)]
+        # for demand_b_1 in [round(demand, 2) for demand in numpy.arange(1, 2, 0.1)]
         # for demand_b_1 in [0.6]
         # for demand_b_1 in [1.1]
         # for demand_b_1 in [1.5]

@@ -4,13 +4,15 @@
 
 import mpmath as mp
 
+from src.utils.debug import *
+
 
 mp.dps = 100
 
 
 def _I_(k: int, n: int, m: int, c: int, e: int, a: int) -> float:
     sigma = sum(
-        mp.binomial(n - m + k - a, k - (a - c - e) -i) * mp.binomial(a - k, i)
+        mp.binomial(n - m + k - a, k - (a - c - e) - i) * mp.binomial(a - k, i)
         for i in range(max(0, c - (n - m - e)), a - k + 1)
     )
 
@@ -21,6 +23,8 @@ def _I_(k: int, n: int, m: int, c: int, e: int, a: int) -> float:
 
 
 def prob_kstar_leq_k(k: int, n: int, m: int, a: int) -> float:
+    log(DEBUG, "", k=k, n=n, m=m, a=a)
+
     if m >= n / 2:
         if k <= (a + 1) / 2:
             return 0
@@ -35,6 +39,9 @@ def prob_kstar_leq_k(k: int, n: int, m: int, a: int) -> float:
         )
 
     # m < n / 2
+    if k <= a / 2:
+        return 0
+
     A = (
         sum(
             mp.binomial(s, k - 1) * mp.binomial(n - s - 1, a - k)
@@ -66,4 +73,4 @@ def prob_kstar_leq_k(k: int, n: int, m: int, a: int) -> float:
         for y in range(max(r - k, k + x - 2 * m - 1), min(k - 1, x - m - 1) + 1)
     )
 
-    return 1 / mp.binomial(n, a) * (A + B + C)
+    return 1 - 1 / mp.binomial(n, a) * (A + B + C)

@@ -319,7 +319,7 @@ class CyclicDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.shift_size})"
-        return r"$\textrm{Cyclic}$, " + fr"$s={self.shift_size}$"
+        return r"$\textrm{Cyclic}$, " + fr"$d={self.d}$"
 
 
 @dataclasses.dataclass
