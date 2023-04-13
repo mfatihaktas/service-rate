@@ -4,7 +4,10 @@ import math
 import scipy.stats
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
-from src.model import generalized_birthday_problem
+from src.model import (
+    generalized_birthday_problem,
+    scan_stats,
+)
 
 from src.utils.debug import *
 
@@ -191,26 +194,59 @@ class ClusteringDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class CyclicDesignModel(ReplicaDesignModel):
-    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
-        """
-        m: Number of active objects.
+    def prob_serving_w_scan_stats_approx_for_given_k(
+        self,
+        k: int,
+        p: int,
+        lambda_: int,
+        upper_bound=True,
+    ) -> float:
+        span = k + self.d - 1
+        num_active_objs_handled_by_span = math.floor(span / lambda_)
+        if not upper_bound:
+            num_active_objs_handled_by_span -= 1
+
+        # k = self.d
+        r = num_active_objs_handled_by_span
+        if r / k <= p:
+            return 0
+
+        return scan_stats.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
+        # return scan_stats.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
+
+    def prob_serving_w_scan_stats_approx(self, p: int, lambda_: int, upper_bound=True) -> float:
+        """Demand can be served if maximum scan statistics for window of size d (M_d) is
+        \leq d.
+
+        Note: Uses the approximation presented at the end of page 69 of [1], which assumes
+        p < r/k != 1.
+
+        [Revise] This is why we use the downscaled version of the sufficiency condition
+        as M \leq 0.9 * d.
         """
 
-        num_nodes_needed_for_active_obj = math.ceil(lambda_)
-        # log(DEBUG, "",
-        #     lambda_=lambda_,
-        #     num_nodes_needed_for_active_obj=num_nodes_needed_for_active_obj,
-        # )
+        # if upper_bound:
+        #     span = 2 * self.d + 1
+        # else:
+        #     span = 2 * self.d
 
-        # return generalized_birthday_problem.prob_kstar_leq_k(
-        #     k=1, n=self.k, m=num_nodes_needed_for_active_obj, a=m
-        # )
-        return generalized_birthday_problem.prob_kstar_leq_k(
-            k=m/2, n=self.k, m=num_nodes_needed_for_active_obj, a=m
+        # num_active_objs_handled_by_span = math.floor(span / lambda_)
+
+        # span = 2 * self.d + 1
+        return self.prob_serving_w_scan_stats_approx_for_given_k(
+            k=self.d, p=p, lambda_=lambda_, upper_bound=upper_bound
         )
 
-    # def prob_serving_lower_bound(self, p: int, lambda_: int) -> float:
-    #     num_nodes_needed_for_active_obj = math.ceil(lambda_)
+    def prob_serving_w_scan_stats_approx_improved(self, p: int, lambda_: int, upper_bound=True) -> float:
+        prob_list = []
+        for k in range(self.d, 3 * self.d):
+        # for k in range(1, self.k - self.d):
+            prob = self.prob_serving_w_scan_stats_approx_for_given_k(
+                k=k, p=p, lambda_=lambda_, upper_bound=upper_bound
+            )
+            prob_list.append(prob)
 
-    #     prob_kstar_leq_k(k: int, n: int, m: int, a: int)
-    #     generalized_birthday_problem
+        if upper_bound:
+            return min(prob_list)
+        else:
+            return max(prob_list)
