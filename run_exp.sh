@@ -17,8 +17,8 @@
 # python exp/storage_overlap/exp_design.py
 # python exp/storage_overlap/exp_random_design.py
 # python exp/storage_overlap/exp_impact_of_b.py
-# python exp/storage_overlap/exp_impact_of_d_for_clustering.py
-python exp/storage_overlap/exp_impact_of_d_for_cyclic.py
+python exp/storage_overlap/exp_impact_of_d_for_clustering.py
+# python exp/storage_overlap/exp_impact_of_d_for_cyclic.py
 
 # python exp/storage_search/exp_search_with_replicas_and_mds.py
 # python exp/storage_search/exp_storage_searcher.py

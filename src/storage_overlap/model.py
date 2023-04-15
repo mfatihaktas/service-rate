@@ -3,6 +3,8 @@ import dataclasses
 import math
 import scipy.stats
 
+from mpmath import mp
+
 from src.allocation_w_complexes import model as allocation_w_complexes_model
 from src.model import (
     generalized_birthday_problem,
@@ -10,6 +12,9 @@ from src.model import (
 )
 
 from src.utils.debug import *
+
+
+mp.dps = 100
 
 
 @dataclasses.dataclass
@@ -181,6 +186,40 @@ class ClusteringDesignModel(ReplicaDesignModel):
         prob_single_cluster_is_stable = scipy.stats.binom.cdf(num_active_objs_handled_by_cluster, self.d * self.b, p_)
 
         return prob_single_cluster_is_stable**num_clusters
+
+    def prob_serving_upper_bound(self, p: int, lambda_: int) -> float:
+        check(self.b == 1, "", b=self.b)
+
+        p_ = mp.mpf(f"{p}")
+        lambda_ = mp.mpf(f"{lambda_}")
+
+        d_ = mp.mpf(f"{self.d}")
+        n_ = mp.mpf(f"{self.n}")
+
+        def kl_divergence(a, p):
+            log(DEBUG, "Started", a=a, p=p)
+            # log(DEBUG, "", a_over_p=(a / p), one_minus_a_over_one_minus_p=((1 - a) / (1 - p)))
+
+            # return a * math.log(a / p) + (1 - a) * math.log((1 - a) / (1 - p))
+
+            # a_ = mp.mpf(f"{a}")
+            # p_ = mp.mpf(f"{p}")
+            # return a_ * mp.log(a_ / p_) + (1 - a_) * mp.log((1 - a_) / (1 - p_))
+
+            try:
+                return a * mp.log(a / p) + (1 - a) * mp.log((1 - a) / (1 - p))
+            except ZeroDivisionError:
+                return None
+
+        num_clusters = n_ / d_
+        num_active_objs_handled_by_cluster = mp.floor(d_ / lambda_)
+
+        kl_divergence_ = kl_divergence(num_active_objs_handled_by_cluster / d_, p_)
+        if kl_divergence_ is None:
+            return None
+        prob_single_cluster_is_stable = mp.exp(-d_ * kl_divergence_)
+
+        return mp.power(prob_single_cluster_is_stable, num_clusters)
 
     def prob_serving_for_balls_into_bins_upper_bound(self, m: int, lambda_: int) -> float:
         num_bins = self.n / self.d

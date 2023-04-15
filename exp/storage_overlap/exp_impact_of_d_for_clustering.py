@@ -21,8 +21,8 @@ def plot_frac_demand_vectors_covered_vs_d(
 ):
     # k = 45
     # k = 111
-    # k = 120
-    k = 24
+    k = 120
+    # k = 24
     n = k
 
     log(INFO, "Started",
@@ -43,9 +43,10 @@ def plot_frac_demand_vectors_covered_vs_d(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
         prob_serving_model_list = []
+        prob_serving_upper_bound_list = []
 
         # for prob_obj_is_active in numpy.linspace(0.1, 0.8, 8):
-        for prob_obj_is_active in numpy.linspace(0.1, 1, 10):
+        for prob_obj_is_active in numpy.linspace(0.1, 1, 50):
             log(INFO, f"> prob_obj_is_active= {prob_obj_is_active}")
 
             prob_obj_is_active_list.append(prob_obj_is_active)
@@ -73,6 +74,9 @@ def plot_frac_demand_vectors_covered_vs_d(
             prob_serving_model = storage_model.prob_serving_downscaling_p_per_obj(p=prob_obj_is_active, lambda_=demand_for_active_obj)
             prob_serving_model_list.append(prob_serving_model)
 
+            prob_serving_upper_bound = storage_model.prob_serving_upper_bound(p=prob_obj_is_active, lambda_=demand_for_active_obj)
+            prob_serving_upper_bound_list.append(prob_serving_upper_bound)
+
             if prob_serving_model < 0.01:
                 break
 
@@ -83,10 +87,13 @@ def plot_frac_demand_vectors_covered_vs_d(
         )
 
         color = next(dark_color_cycle)
-        # plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"d={storage_model.d}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(prob_obj_is_active_list, prob_serving_model_list, label=f"d={storage_model.d}, b={storage_model.b}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # label = f"d={storage_model.d}, b={storage_model.b}"
+        label = f"d={storage_model.d}"
+        # plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{label}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(prob_obj_is_active_list, prob_serving_model_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(prob_obj_is_active_list, prob_serving_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-    use_cvxpy = True  # False
+    use_cvxpy = False  # True
     storage_design_model_list = [
         (
             design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
@@ -94,7 +101,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         )
         # for d in [2]
         for d in range(2, d_max + 1)
-        for b in range(1, 4)
+        for b in range(1, 2)
         if n % d == 0
     ]
 
@@ -140,8 +147,10 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
             num_sim_run=3,
         )
 
-        for d_max in [10]
-        for demand_for_active_obj in numpy.arange(1.01, 2, 0.1)
+        # for d_max in [10]
+        for d_max in [20]
+        for demand_for_active_obj in [1.8]
+        # for demand_for_active_obj in numpy.arange(1.01, 2, 0.1)
         # for demand_for_active_obj in numpy.arange(0.2, 1.0, 0.1)
         # for demand_for_active_obj in numpy.arange(1, 2, 0.1)
         # for demand_for_active_obj in [0.6]
