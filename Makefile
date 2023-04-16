@@ -21,7 +21,7 @@ venv:
 
 install:
 	# SCIPOPTDIR=/home/mfa51/scip_installation
-	export SCIPOPTDIR=/Users/mehmet/Desktop/scip-8.0.3/install
+	# export SCIPOPTDIR=/Users/mehmet/Desktop/scip-8.0.3/install
 	pip install --upgrade pip; \
 	pip install poetry; \
 	poetry install
