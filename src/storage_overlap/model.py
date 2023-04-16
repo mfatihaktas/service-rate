@@ -227,7 +227,7 @@ class ClusteringDesignModelForBernoulliObjDemands(ClusteringDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
-    def prob_serving(self, mean_obj_demand: int) -> float:
+    def prob_serving(self, mean_obj_demand: float) -> float:
         num_clusters = self.n / self.d
         num_objs_in_cluster = self.d * self.b
 
@@ -241,6 +241,11 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
         # )
 
         return prob_single_cluster_is_stable ** num_clusters
+
+    def prob_serving_w_downscaling_mean_obj_demand_w_b(self, mean_obj_demand_b_1: float) -> float:
+        mean_obj_demand = mean_obj_demand_b_1 / self.b
+
+        return self.prob_serving(mean_obj_demand=mean_obj_demand)
 
 
 @dataclasses.dataclass

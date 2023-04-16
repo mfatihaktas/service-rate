@@ -116,7 +116,8 @@ def plot_w_exp_obj_demands(
         E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
         std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-        prob_serving_model = storage_model.prob_serving(mean_obj_demand=mean_obj_demand)
+        # prob_serving_model = storage_model.prob_serving(mean_obj_demand=mean_obj_demand)
+        prob_serving_model = storage_model.prob_serving_w_downscaling_mean_obj_demand_w_b(mean_obj_demand_b_1=mean_obj_demand)
         prob_serving_model_list.append(prob_serving_model)
 
         # prob_serving_upper_bound = storage_model.prob_serving_upper_bound(mean_obj_demand=mean_obj_demand)
@@ -132,8 +133,8 @@ def plot_w_exp_obj_demands(
     )
 
     color = next(dark_color_cycle)
-    # label = f"d={storage_model.d}, b={storage_model.b}"
-    label = f"d={storage_model.d}"
+    label = f"d={storage_model.d}, b={storage_model.b}"
+    # label = f"d={storage_model.d}"
     # plot.errorbar(mean_obj_demand_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{label}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(mean_obj_demand_list, prob_serving_model_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     # plot.plot(mean_obj_demand_list, prob_serving_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
@@ -165,9 +166,9 @@ def plot_frac_demand_vectors_covered_vs_d(
             # model.ClusteringDesignModelForBernoulliObjDemands(k=k, n=n, b=b, d=d)
             model.ClusteringDesignModelForExpObjDemands(k=k, n=n, b=b, d=d)
         )
-        # for d in [2]
+        # for d in [1]
         for d in range(2, d_max + 1)
-        for b in range(1, 2)
+        for b in range(1, 3)
         if n % d == 0
     ]
 
