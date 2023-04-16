@@ -239,3 +239,121 @@ class BoundedZipf(RandomVariable):
 
     def sample(self) -> float:
         return self.dist.rvs(size=1)[0]
+
+
+class Pareto(RandomVariable):
+    def __init__(self, loc, a):
+        super().__init__(min_value=loc, max_value=float("inf"))
+
+        self.loc = loc
+        self.a = a
+
+    def __str__(self):
+        # return "Pareto(loc= {}, a= {})".format(self.loc, self.a)
+        return r"Pareto(s= {}, \alpha= {})".format(self.loc, self.a)
+
+    def to_latex(self):
+        return r"${}(\min= {}, \alpha= {})$".format(r"\mathrm{Pareto}", round(self.loc, 2), round(self.a, 2))
+
+    def tail(self, x):
+        if x <= self.l_l:
+            return 1
+        return (self.loc / x)**self.a
+
+    def cdf(self, x):
+        if x <= self.l_l:
+            return 0
+        return 1 - (self.loc / x)**self.a
+
+    def pdf(self, x):
+        if x <= self.l_l:
+            return 0
+        return self.a * self.loc**self.a / x**(self.a + 1)
+
+    def dpdf_dx(self, x):
+        if x <= self.l_l:
+            return 0
+        return sympy.mpmath.diff(lambda y: self.a*self.loc**self.a / y**(self.a+1), x)
+
+    def mean(self):
+        if self.a <= 1:
+            log(WARNING, "Mean is Infinity; a <= 1", a=self.a)
+            return float("inf")
+        else:
+            return self.loc * self.a / (self.a - 1)
+
+    def var(self):
+        if self.a <= 2:
+            log(WARNING, "Variance is Infinity; a= {} <= 2".format(self.a))
+            return float("inf")
+        else:
+            return self.a * self.loc**2 / (self.a-1)**2 / (self.a-2)
+
+    def sample(self):
+        # return pareto.ppf(numpy.random.uniform(0, 1), b=self.a, scale=self.loc)
+        return ((numpy.random.pareto(self.a, 1) + 1) * self.loc)[0]
+
+
+class TPareto(RandomVariable):  # Truncated
+    def __init__(self, min_value, max_value, a):
+        super().__init__(min_value=min_value, max_value=float("inf"))
+
+        self.a = a  # Tail index
+
+    def __repr__(self):
+        return (
+            "TPareto( \n"
+            f"\t min_value= {self.min_value} \n"
+            f"\t max_value= {self.max_value} \n"
+            f"\t a= {self.a} \n"
+            ")"
+        )
+
+    def to_latex(self):
+        return (
+            "\mathrm{TPareto}("
+            rf"\min= {round(self.min_value, 2)}, "
+            rf"\max= {round(self.max_value, 2)}, "
+            rf"\alpha= {round(self.a, 2)}"
+            ")"
+        )
+
+    def cdf(self, x):
+        if x < self.min_value:
+            return 0
+
+        elif x >= self.max_value:
+            return 1
+
+        else:
+            return (
+                (1 - (self.min_value / x) ** self.a)
+                / (1 - (self.min_value / self.max_value) ** self.a)
+            )
+
+    def tail(self, x):
+        return 1 - self.cdf(x)
+
+    def mean(self):
+        return self.moment(1)
+
+    def moment(self, k):
+        if k == self.a:
+            return math.log(self.max_value / self.min_value)
+
+        else:
+            return (
+                self.a * self.min_value ** k / (self.a - k)
+                * (1 - (self.min_value / self.u) ** (self.a - k))
+                / (1 - (self.min_value/self.max_value) ** self.a)
+            )
+
+    def sample(self):
+        u = random.uniform(0, 1)
+        return (
+            self.min_value
+            * (
+                1 - u
+                * (1 - (self.min_value / self.max_value) ** self.a)
+            ) ** (-1 / self.a)
+        )
