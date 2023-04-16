@@ -86,6 +86,8 @@ def sim_frac_of_demand_vectors_covered(
 
         num_covered = 0
         for sample_id in range(num_samples):
+            # log(DEBUG, f"sample_id= {sample_id}")
+
             # storage_design.reset()
 
             demand_vector = demand_vector_sampler.sample_demand_vector()

@@ -79,6 +79,8 @@ class Exponential(RandomVariable):
         self.D = D
         self.mu = mu
 
+        # self.dist = scipy.stats.expon(scale=1 / self.mu)
+
     def __repr__(self):
         return "Exponential( \n" f"\t D= {self.D} \n" f"\t mu= {self.mu} \n" ") \n"
 
@@ -122,6 +124,7 @@ class Exponential(RandomVariable):
 
     def sample(self) -> float:
         return self.D + random.expovariate(self.mu)
+        # return self.dist.rvs(size=1)[0]
 
 
 class Uniform(RandomVariable):

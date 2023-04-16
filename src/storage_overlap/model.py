@@ -161,6 +161,9 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
 class ClusteringDesignModel(ReplicaDesignModel):
     b: int
 
+
+@dataclasses.dataclass
+class ClusteringDesignModelForBernoulliObjDemands(ClusteringDesignModel):
     def prob_serving(self, p: int, lambda_: int) -> float:
         # log(DEBUG, "Started", p=p, lambda_=lambda_)
 
@@ -175,7 +178,7 @@ class ClusteringDesignModel(ReplicaDesignModel):
         #     prob_single_cluster_is_stable=prob_single_cluster_is_stable
         # )
 
-        return prob_single_cluster_is_stable**num_clusters
+        return prob_single_cluster_is_stable ** num_clusters
 
     def prob_serving_downscaling_p_per_obj(self, p: int, lambda_: int) -> float:
         p_ = p / self.b
@@ -221,14 +224,35 @@ class ClusteringDesignModel(ReplicaDesignModel):
 
         return mp.power(prob_single_cluster_is_stable, num_clusters)
 
-    def prob_serving_for_balls_into_bins_upper_bound(self, m: int, lambda_: int) -> float:
+
+@dataclasses.dataclass
+class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
+    def prob_serving(self, mean_obj_demand: int) -> float:
+        num_clusters = self.n / self.d
+        num_objs_in_cluster = self.d * self.b
+
+        prob_single_cluster_is_stable = scipy.stats.erlang.cdf(self.d, a=num_objs_in_cluster, loc=0, scale=mean_obj_demand)
+
+        # log(DEBUG, "",
+        #     d=self.d,
+        #     num_clusters=num_clusters,
+        #     num_active_objs_handled_by_cluster=num_active_objs_handled_by_cluster,
+        #     prob_single_cluster_is_stable=prob_single_cluster_is_stable
+        # )
+
+        return prob_single_cluster_is_stable ** num_clusters
+
+
+@dataclasses.dataclass
+class ClusteringDesignModelForBallsIntoBinsDemand(ClusteringDesignModel):
+    def prob_serving(self, m: int, lambda_: int) -> float:
         num_bins = self.n / self.d
         num_balls = m
         max_num_balls = math.floor(self.d / lambda_)
 
         prob_single_node_is_stable = scipy.stats.binom.cdf(max_num_balls, num_balls, 1 / num_bins)
 
-        return prob_single_node_is_stable**num_bins
+        return prob_single_node_is_stable ** num_bins
 
 
 @dataclasses.dataclass
