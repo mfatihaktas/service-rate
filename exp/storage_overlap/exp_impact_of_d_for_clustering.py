@@ -52,19 +52,19 @@ def plot_frac_demand_vectors_covered_vs_d(
             prob_obj_is_active_list.append(prob_obj_is_active)
 
             # frac_of_demand_vectors_covered_list = [0.02, 0.02]
-            # sample_demand_vector = lambda: demand.sample_demand_vector_w_bernoulli_demands(
-            #     num_objs=storage_design.k,
-            #     demand_for_active_obj=demand_for_active_obj,
-            #     prob_obj_is_active=prob_obj_is_active,
-            # )
+            demand_vector_sampler = demand.DemandVectorSamplerWithBernoulliObjDemands(
+                num_objs=storage_design.k,
+                demand_for_active_obj=demand_for_active_obj,
+                prob_obj_is_active=prob_obj_is_active,
+            )
 
             frac_of_demand_vectors_covered_list = [0, 0]
-            # frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
-            #     sample_demand_vector=sample_demand_vector,
-            #     storage_design=storage_design,
-            #     num_samples=num_samples,
-            #     num_sim_run=num_sim_run,
-            # )
+            frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                demand_vector_sampler=demand_vector_sampler,
+                storage_design=storage_design,
+                num_samples=num_samples,
+                num_sim_run=num_sim_run,
+            )
 
             E_frac_of_demand_vectors_covered = numpy.mean(frac_of_demand_vectors_covered_list)
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
@@ -147,8 +147,8 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
             num_sim_run=3,
         )
 
-        # for d_max in [10]
-        for d_max in [20]
+        for d_max in [3]
+        # for d_max in [20]
         for demand_for_active_obj in [1.8]
         # for demand_for_active_obj in numpy.arange(1.01, 2, 0.1)
         # for demand_for_active_obj in numpy.arange(0.2, 1.0, 0.1)

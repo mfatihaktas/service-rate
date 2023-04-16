@@ -4,7 +4,7 @@ import random
 import scipy
 import scipy.stats
 
-from src.debug_utils import *
+from src.utils.debug import *
 
 
 class RandomVariable:

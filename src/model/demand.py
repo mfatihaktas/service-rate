@@ -1,3 +1,5 @@
+import abc
+import dataclasses
 import functools
 import itertools
 import math
@@ -5,6 +7,8 @@ import numpy
 import random
 
 from typing import Tuple
+
+from src.sim import random_variable
 
 from src.utils.debug import *
 
@@ -103,58 +107,82 @@ def gen_demand_vector_w_zipf_law(
         yield demand_vector
 
 
-def sample_demand_vector_w_zipf_law(
-    num_objs: int,
-    num_popular_obj: int,
-    cum_demand: float,
-    zipf_tail_index: float,
-) -> list[float]:
-    ordered_demand_vector = get_ordered_demand_vector(
-        num_popular_obj=num_popular_obj,
-        cum_demand=cum_demand,
-        zipf_tail_index=zipf_tail_index,
-    )
-
-    # log(DEBUG, "",
-    #     ordered_demand_vector=ordered_demand_vector,
-    #     cum_demand=cum_demand,
-    #     zipf_tail_index=zipf_tail_index,
-    # )
-
-    demand_vector = num_objs * [0]
-    index_list = random.sample(list(range(num_objs)), num_popular_obj)
-    for i, index in enumerate(index_list):
-        demand_vector[index] = ordered_demand_vector[i]
-
-    return demand_vector
+@dataclasses.dataclass
+class DemandVectorSampler:
+    @abc.abstractmethod
+    def sample_demand_vector(self):
+        pass
 
 
-def sample_demand_vector_w_balls_into_bins(
-    num_objs: int,
-    cum_demand: float,
-    demand_for_active_obj: float,
-) -> list[float]:
-    num_demand_chunks = int(cum_demand / demand_for_active_obj)
+@dataclasses.dataclass
+class DemandVectorSamplerWithZipfLaw(DemandVectorSampler):
+    num_objs: int
+    num_popular_obj: int
+    cum_demand: float
+    zipf_tail_index: float
 
-    demand_vector = num_objs * [0]
-    for _ in range(num_demand_chunks):
-        obj_id = random.randint(0, num_objs - 1)
-        demand_vector[obj_id] += demand_for_active_obj
-
-    return demand_vector
-
-
-def sample_demand_vector_w_bernoulli_demands(
-    num_objs: int,
-    demand_for_active_obj: float,
-    prob_obj_is_active: float,
-) -> list[float]:
-    # uniform_samples = [random.uniform(0, 1) for _ in range(num_objs)]
-    # return [int(sample < prob_obj_is_active) for sample in uniform_samples]
-
-    uniform_sample_array = numpy.random.uniform(low=0.0, high=1.0, size=num_objs)
-    return list(
-        map(lambda sample: demand_for_active_obj * int(sample < prob_obj_is_active),
-            uniform_sample_array
+    def __post_init__(self):
+        self.ordered_demand_vector = get_ordered_demand_vector(
+            num_popular_obj=self.num_popular_obj,
+            cum_demand=self.cum_demand,
+            zipf_tail_index=self.zipf_tail_index,
         )
-    )
+
+    def sample_demand_vector(self) -> list[float]:
+        demand_vector = num_objs * [0]
+        index_list = random.sample(list(range(num_objs)), num_popular_obj)
+        for i, index in enumerate(index_list):
+            demand_vector[index] = self.ordered_demand_vector[i]
+
+        return demand_vector
+
+
+@dataclasses.dataclass
+class DemandVectorSamplerWithBallsIntoBins(DemandVectorSampler):
+    num_objs: int
+    cum_demand: float
+    demand_for_active_obj: float
+
+    def sample_demand_vector(self) -> list[float]:
+        num_demand_chunks = int(cum_demand / demand_for_active_obj)
+
+        demand_vector = num_objs * [0]
+        for _ in range(num_demand_chunks):
+            obj_id = random.randint(0, num_objs - 1)
+            demand_vector[obj_id] += demand_for_active_obj
+
+        return demand_vector
+
+
+@dataclasses.dataclass
+class DemandVectorSamplerWithBernoulliObjDemands(DemandVectorSampler):
+    num_objs: int
+    demand_for_active_obj: float
+    prob_obj_is_active: float
+
+    def sample_demand_vector(self) -> list[float]:
+        # uniform_samples = [random.uniform(0, 1) for _ in range(self.num_objs)]
+        # return [int(sample < self.prob_obj_is_active) for sample in uniform_samples]
+
+        uniform_sample_array = numpy.random.uniform(low=0.0, high=1.0, size=self.num_objs)
+        return list(
+            map(lambda sample: self.demand_for_active_obj * int(sample < self.prob_obj_is_active),
+                uniform_sample_array
+            )
+        )
+
+
+@dataclasses.dataclass
+class DemandVectorSamplerWithExpObjDemands(DemandVectorSampler):
+    num_objs: int
+    mean_obj_demand: float
+
+    def __post_init__(self):
+        check(self.mean_obj_demand, "", mean_obj_demand=self.mean_obj_demand)
+
+        self.obj_demand_rv = random_variable.Exponential(mu=1 / self.mean_obj_demand)
+
+    def sample_demand_vector(self) -> list[float]:
+        return [
+            self.obj_demand_rv.sample() for _ in range(self.num_objs)
+        ]

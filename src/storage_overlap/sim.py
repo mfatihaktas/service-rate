@@ -67,7 +67,7 @@ def sim_object_span_to_prob_map(
 
 
 def sim_frac_of_demand_vectors_covered(
-    sample_demand_vector: Callable,
+    demand_vector_sampler: demand.DemandVectorSampler,
     storage_design: design.StorageDesign,
     num_samples: int,
     num_sim_run: int = 1,
@@ -88,7 +88,7 @@ def sim_frac_of_demand_vectors_covered(
         for sample_id in range(num_samples):
             # storage_design.reset()
 
-            demand_vector = sample_demand_vector()
+            demand_vector = demand_vector_sampler.sample_demand_vector()
             # log(DEBUG, f"> sample_id= {sample_id}",
             #     num_nonzero_demands=sum(int(demand > 0) for demand in demand_vector),
             #     # demand_vector=demand_vector,
