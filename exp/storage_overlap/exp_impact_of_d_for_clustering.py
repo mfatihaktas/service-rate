@@ -52,7 +52,7 @@ def plot_frac_demand_vectors_covered_vs_d(
             prob_obj_is_active_list.append(prob_obj_is_active)
 
             # frac_of_demand_vectors_covered_list = [0.02, 0.02]
-            # sample_demand_vector = lambda: demand.sample_demand_vector_w_p(
+            # sample_demand_vector = lambda: demand.sample_demand_vector_w_bernoulli_demands(
             #     num_objs=storage_design.k,
             #     demand_for_active_obj=demand_for_active_obj,
             #     prob_obj_is_active=prob_obj_is_active,

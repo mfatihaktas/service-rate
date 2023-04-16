@@ -144,7 +144,7 @@ def sample_demand_vector_w_balls_into_bins(
     return demand_vector
 
 
-def sample_demand_vector_w_p(
+def sample_demand_vector_w_bernoulli_demands(
     num_objs: int,
     demand_for_active_obj: float,
     prob_obj_is_active: float,
