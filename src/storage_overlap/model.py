@@ -247,6 +247,24 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
 
         return self.prob_serving(mean_obj_demand=mean_obj_demand)
 
+    def prob_serving_lower_bound_w_chernoff(self, mean_obj_demand: float) -> float:
+        n, b, d = self.n, self.b, self.d
+        num_clusters = n / d
+        # num_objs_in_cluster = self.d * self.b
+
+        mu = 1 / mean_obj_demand
+        if mu <= b:  # Moment generating function of Exponential is undefined.
+            return 0
+
+        prob_single_cluster_is_stable = 1 - math.exp(-d * (mu - b + b * math.log(b / mu)))
+
+        return prob_single_cluster_is_stable ** num_clusters
+
+
+@dataclasses.dataclass
+class ClusteringDesignModelForParetoObjDemands(ClusteringDesignModel):
+    pass
+
 
 @dataclasses.dataclass
 class ClusteringDesignModelForBallsIntoBinsDemand(ClusteringDesignModel):

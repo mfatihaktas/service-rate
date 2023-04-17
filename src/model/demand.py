@@ -6,7 +6,7 @@ import math
 import numpy
 import random
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 from src.sim import random_variable
 
@@ -185,4 +185,31 @@ class DemandVectorSamplerWithExpObjDemands(DemandVectorSampler):
     def sample_demand_vector(self) -> list[float]:
         return [
             self.obj_demand_rv.sample() for _ in range(self.num_objs)
+        ]
+
+
+@dataclasses.dataclass
+class DemandVectorSamplerWithParetoObjDemands(DemandVectorSampler):
+    num_objs: int
+    min_value: float
+    a: float
+
+    max_value: Optional[float] = None
+    b: Optional[int] = 1
+
+    def __post_init__(self):
+        if self.max_value is None:
+            self.obj_demand_rv = random_variable.Pareto(
+                loc=self.min_value, a=self.a
+            )
+
+        else:
+            self.obj_demand_rv = random_variable.TPareto(
+                min_value=self.min_value, max_value=self.max_value, a=self.a
+            )
+
+    def sample_demand_vector(self) -> list[float]:
+        return [
+            self.obj_demand_rv.sample() / self.b
+            for _ in range(self.num_objs)
         ]
