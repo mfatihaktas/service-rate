@@ -263,7 +263,34 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModelForParetoObjDemands(ClusteringDesignModel):
-    pass
+    def prob_serving(self, min_value: float, tail_index: float) -> float:
+        """DEPRECATED: Could not use Sympy to find the CDF of sums of iid random variables.
+        """
+        import sympy
+        import sympy.stats
+        # from sympy import stats as sympy_stats
+
+        num_clusters = self.n / self.d
+        num_objs_in_cluster = self.d * self.b
+
+        X_list = []
+        for i in range(num_objs_in_cluster):
+            X = sympy.stats.Pareto(f"X_{i}", min_value, tail_index)
+            X_list.append(X)
+
+        # sympy.Sum(X_list[], (i, 1, num_objs_in_cluster))
+        sum_X = sum(X_list)
+        E_X = sympy.stats.E(sum_X)
+        # cdf_X = sympy.stats.cdf(sum_X)
+        # pdf_X = sympy.stats.density(sum_X)
+        log(DEBUG, "", sum_X=sum_X, E_X=E_X,
+            # pdf_X=pdf_X
+        )
+
+        # prob_single_cluster_is_stable = sympy.stats.cdf(sum_X)(self.d)
+        prob_single_cluster_is_stable = sum_X.pspace.distribution.pdf(1)
+
+        return prob_single_cluster_is_stable ** num_clusters
 
 
 @dataclasses.dataclass
