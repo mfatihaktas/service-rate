@@ -1,7 +1,8 @@
 """Contains the implementation of the results in [1]
 
 Refs:
-[1] Glaz, Joseph, Joseph I. Naus, and Sylvan Wallenstein. "Scan statistics."
+[1] Glaz, Joseph, Joseph I. Naus, and Sylvan Wallenstein. "Scan statistics.", 2000
+[2] Naus, Joseph I. "Approximations for distributions of scan statistics.", 1982.
 """
 
 import math
@@ -59,3 +60,63 @@ def scan_stats_approx_2(n: int, p: float, k: int, r: int):
     denominator = math.sqrt(2 * math.pi * r * k * (k - r))
 
     return math.exp(-n * numerator / denominator)
+
+
+def scan_stats_approx_by_naus(n: int, m: int, p: float, k: int):
+    """
+    - Theorem 2 in Section 4 in [2].
+    - (8.25) on page 185 in [1].
+
+    Pr{max of `m`-size scans over `n` Bernoulli trials >= k}.
+    """
+
+    def Q_l(l: int, n: int, m: int, p: float, k: int) -> float:
+        b_k = scipy.stats.binom.pmf(k, m, p)
+
+        if l == 2:
+            return (
+                scipy.stats.binom.cdf(k - 1, m, p) ** 2
+                - (k - 1) * b_k * scipy.stats.binom.cdf(k - 2, m, p)
+                + m * p * b_k * scipy.stats.binom.cdf(k - 3, m - 1, p)
+            )
+
+        elif l == 3:
+            A1 = (
+                2 * b_k * scipy.stats.binom.cdf(k - 1, m, p)
+                * (
+                    (k - 1) * scipy.stats.binom.cdf(k - 2, m, p)
+                    - m * p * scipy.stats.binom.cdf(k - 3, m - 1, p)
+                )
+            )
+
+            A2 = (
+                0.5 * (b_k ** 2)
+                * (
+                    (k - 1) * (k - 2) * scipy.stats.binom.cdf(k - 3, m, p)
+                    - 2 * (k - 2) * m * p * scipy.stats.binom.cdf(k - 4, m - 1, p)
+                    + m * (m - 1) * (p ** 2) * scipy.stats.binom.cdf(k - 5, m - 2, p)
+                )
+            )
+
+            A3 = sum(
+                scipy.stats.binom.pmf(2 * k - r, m, p) * scipy.stats.binom.cdf(r - 1, m, p) ** 2
+                for r in range(1, k)
+            )
+
+            A4 = sum(
+                scipy.stats.binom.pmf(2 * k - r, m, p) * scipy.stats.binom.pmf(r, m, p)
+                * (
+                    (r - 1) * scipy.stats.binom.cdf(r - 2, m, p)
+                    - m * p * scipy.stats.binom.cdf(r - 3, m - 1, p)
+                )
+                for r in range(2, k)
+            )
+
+            return (
+                scipy.stats.binom.cdf(k - 1, m, p) ** 3 - A1 + A2 + A3 - A4
+            )
+
+    L = n // m
+    Q_2 = Q_l(l=2, n=n, m=m, p=p, k=k)
+    Q_3 = Q_l(l=3, n=n, m=m, p=p, k=k)
+    return Q_2 * (Q_3 / Q_2) ** (L - 2)

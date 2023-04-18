@@ -321,11 +321,12 @@ class CyclicDesignModel(ReplicaDesignModel):
 
         # k = self.d
         r = num_active_objs_handled_by_span
-        if r / k <= p:
-            return 0
+        # if r / k <= p:
+        #     return 0
 
-        return scan_stats.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
+        # return scan_stats.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
         # return scan_stats.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
+        return scan_stats.scan_stats_approx_by_naus(n=self.k, m=k, p=p, k=r)
 
     def prob_serving_w_scan_stats_approx(self, p: int, lambda_: int, upper_bound=True) -> float:
         """Demand can be served if maximum scan statistics for window of size d (M_d) is
