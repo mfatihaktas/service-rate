@@ -6,10 +6,8 @@ import scipy.stats
 from mpmath import mp
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
-from src.model import (
-    generalized_birthday_problem,
-    scan_stats,
-)
+from src.model import generalized_birthday_problem
+from src.scan_stats import model as scan_stats_model
 
 from src.utils.debug import *
 
@@ -315,7 +313,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         upper_bound=True,
     ) -> float:
         span = k + self.d - 1
-        num_active_objs_handled_by_span = math.floor(span / lambda_)
+        num_active_objs_handled_by_span = math.ceil(span / lambda_)
         if not upper_bound:
             num_active_objs_handled_by_span -= 1
 
@@ -324,9 +322,9 @@ class CyclicDesignModel(ReplicaDesignModel):
         # if r / k <= p:
         #     return 0
 
-        # return scan_stats.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
-        # return scan_stats.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
-        return scan_stats.scan_stats_approx_by_naus(n=self.k, m=k, p=p, k=r)
+        # return scan_stats_model.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
+        # return scan_stats_model.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
+        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=self.k, m=k, p=p, k=r)
 
     def prob_serving_w_scan_stats_approx(self, p: int, lambda_: int, upper_bound=True) -> float:
         """Demand can be served if maximum scan statistics for window of size d (M_d) is
