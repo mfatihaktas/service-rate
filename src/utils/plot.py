@@ -24,7 +24,6 @@ dark_color_cycle = itertools.cycle(
         "purple",
         "blue",
         "magenta",
-        "purple",
         "gray",
         "brown",
         "turquoise",

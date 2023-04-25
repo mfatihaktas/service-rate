@@ -305,17 +305,28 @@ class ClusteringDesignModelForBallsIntoBinsDemand(ClusteringDesignModel):
 
 @dataclasses.dataclass
 class CyclicDesignModel(ReplicaDesignModel):
-    def prob_serving_w_scan_stats_approx_for_given_k(
+    def prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
         self,
         k: int,
         p: int,
         lambda_: int,
-        upper_bound=True,
+    ) -> float:
+        span = k
+        num_active_objs_handled_by_span = math.floor(span / lambda_)
+        r = num_active_objs_handled_by_span
+
+        # return scan_stats_model.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
+        # return scan_stats_model.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
+        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=self.k, m=k, p=p, k=r)
+
+    def prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
+        self,
+        k: int,
+        p: int,
+        lambda_: int,
     ) -> float:
         span = k + self.d - 1
         num_active_objs_handled_by_span = math.ceil(span / lambda_)
-        if not upper_bound:
-            num_active_objs_handled_by_span -= 1
 
         # k = self.d
         r = num_active_objs_handled_by_span
@@ -326,7 +337,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         # return scan_stats_model.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
         return scan_stats_model.scan_stats_cdf_approx_by_naus(n=self.k, m=k, p=p, k=r)
 
-    def prob_serving_w_scan_stats_approx(self, p: int, lambda_: int, upper_bound=True) -> float:
+    def prob_serving_upper_bound_w_scan_stats_approx(self, p: int, lambda_: int) -> float:
         """Demand can be served if maximum scan statistics for window of size d (M_d) is
         \leq d.
 
@@ -336,29 +347,28 @@ class CyclicDesignModel(ReplicaDesignModel):
         [Revise] This is why we use the downscaled version of the sufficiency condition
         as M \leq 0.9 * d.
         """
-
-        # if upper_bound:
-        #     span = 2 * self.d + 1
-        # else:
-        #     span = 2 * self.d
-
-        # num_active_objs_handled_by_span = math.floor(span / lambda_)
-
-        # span = 2 * self.d + 1
-        return self.prob_serving_w_scan_stats_approx_for_given_k(
-            k=self.d, p=p, lambda_=lambda_, upper_bound=upper_bound
+        return self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
+            k=self.d, p=p, lambda_=lambda_
         )
 
-    def prob_serving_w_scan_stats_approx_improved(self, p: int, lambda_: int, upper_bound=True) -> float:
+    def prob_serving_upper_bound_w_scan_stats_approx_improved(self, p: int, lambda_: int) -> float:
         prob_list = []
         for k in range(self.d, 3 * self.d):
         # for k in range(1, self.k - self.d):
-            prob = self.prob_serving_w_scan_stats_approx_for_given_k(
-                k=k, p=p, lambda_=lambda_, upper_bound=upper_bound
+            prob = self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
+                k=k, p=p, lambda_=lambda_
             )
             prob_list.append(prob)
 
-        if upper_bound:
-            return min(prob_list)
-        else:
-            return max(prob_list)
+        return min(prob_list)
+
+    def prob_serving_lower_bound_w_scan_stats_approx_improved(self, p: int, lambda_: int) -> float:
+        prob_list = []
+        for k in range(self.d, 3 * self.d):
+        # for k in range(1, self.k - self.d):
+            prob = self.prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
+                k=k, p=p, lambda_=lambda_
+            )
+            prob_list.append(prob)
+
+        return max(prob_list)

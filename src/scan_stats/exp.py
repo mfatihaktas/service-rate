@@ -59,21 +59,21 @@ def plot_scan_stats_cdf(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            # prob_serving_upper_bound = storage_model.prob_serving_w_scan_stats_approx_improved(
+            # prob_serving_upper_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx_improved(
             #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=True
             # )
-            prob_serving_upper_bound = storage_model.prob_serving_w_scan_stats_approx(
+            prob_serving_upper_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx(
                 p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=True
             )
             prob_serving_upper_bound_list.append(prob_serving_upper_bound)
 
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx_improved(
+            # prob_serving_lower_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx_improved(
             #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
             # )
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx(
+            # prob_serving_lower_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx(
             #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
             # )
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx_for_given_k(
+            # prob_serving_lower_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx_for_given_k(
             #     k=(storage_model.d + 1), p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
             # )
             # prob_serving_lower_bound_list.append(prob_serving_lower_bound)

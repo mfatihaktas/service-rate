@@ -36,6 +36,7 @@ def plot_frac_demand_vectors_covered_vs_d(
     def plot_(
         storage_design: design.CyclicDesign,
         storage_model: model.CyclicDesignModel,
+        run_sim=False,
     ):
         log(INFO, f">> storage_design= {storage_design}")
 
@@ -44,9 +45,11 @@ def plot_frac_demand_vectors_covered_vs_d(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
         prob_serving_upper_bound_list = []
+        prob_serving_upper_bound_improved_list = []
         prob_serving_lower_bound_list = []
+        prob_serving_lower_bound_improved_list = []
 
-        for prob_obj_is_active in numpy.linspace(0.1, 1, 10):
+        for prob_obj_is_active in numpy.linspace(0.1, 0.8, 10):
             log(INFO, f"> prob_obj_is_active= {prob_obj_is_active}")
 
             prob_obj_is_active_list.append(prob_obj_is_active)
@@ -58,40 +61,44 @@ def plot_frac_demand_vectors_covered_vs_d(
             )
 
             frac_of_demand_vectors_covered_list = [0.02, 0.02]
-            # frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
-            #     demand_vector_sampler=demand_vector_sampler,
-            #     storage_design=storage_design,
-            #     num_samples=num_samples,
-            #     num_sim_run=num_sim_run,
-            # )
+            if run_sim:
+                frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                    demand_vector_sampler=demand_vector_sampler,
+                    storage_design=storage_design,
+                    num_samples=num_samples,
+                    num_sim_run=num_sim_run,
+                )
 
             E_frac_of_demand_vectors_covered = numpy.mean(frac_of_demand_vectors_covered_list)
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            # prob_serving_upper_bound = storage_model.prob_serving_w_scan_stats_approx_improved(
-            #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=True
-            # )
-            prob_serving_upper_bound = storage_model.prob_serving_w_scan_stats_approx(
-                p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=True
+            # Upper bound
+            prob_serving_upper_bound = storage_model.prob_serving_upper_bound_w_scan_stats_approx(
+                p=prob_obj_is_active, lambda_=demand_for_active_obj
             )
             prob_serving_upper_bound_list.append(prob_serving_upper_bound)
 
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx_improved(
-            #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
-            # )
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx(
-            #     p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
-            # )
-            # prob_serving_lower_bound = storage_model.prob_serving_w_scan_stats_approx_for_given_k(
-            #     k=(storage_model.d + 1), p=prob_obj_is_active, lambda_=demand_for_active_obj, upper_bound=False
-            # )
-            # prob_serving_lower_bound_list.append(prob_serving_lower_bound)
+            prob_serving_upper_bound_improved = storage_model.prob_serving_upper_bound_w_scan_stats_approx_improved(
+                p=prob_obj_is_active, lambda_=demand_for_active_obj
+            )
+            prob_serving_upper_bound_improved_list.append(prob_serving_upper_bound_improved)
 
-            # if E_frac_of_demand_vectors_covered < 0.01:
+            # Lower bound
+            prob_serving_lower_bound = storage_model.prob_serving_lower_bound_w_scan_stats_approx_improved(
+                p=prob_obj_is_active, lambda_=demand_for_active_obj
+            )
+            prob_serving_lower_bound_list.append(prob_serving_lower_bound)
+
+            prob_serving_lower_bound_improved = storage_model.prob_serving_lower_bound_w_scan_stats_approx_improved(
+                p=prob_obj_is_active, lambda_=demand_for_active_obj
+            )
+            prob_serving_lower_bound_improved_list.append(prob_serving_lower_bound_improved)
+
+            if E_frac_of_demand_vectors_covered < 0.01:
             # if prob_serving_upper_bound < 0.01:
-            #     log(WARNING, "Early break", prob_obj_is_active=prob_obj_is_active)
-            #     break
+                log(WARNING, "Early break", prob_obj_is_active=prob_obj_is_active)
+                break
 
         log(INFO, f"storage_design= {storage_design}",
             prob_obj_is_active_list=prob_obj_is_active_list,
@@ -101,9 +108,12 @@ def plot_frac_demand_vectors_covered_vs_d(
         )
 
         color = next(dark_color_cycle)
-        # plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"d={storage_design.d}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(prob_obj_is_active_list, prob_serving_upper_bound_list, label=f"d={storage_design.d}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        if run_sim:
+            plot.errorbar(prob_obj_is_active_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"d={storage_design.d}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.plot(prob_obj_is_active_list, prob_serving_upper_bound_list, label=f"d={storage_design.d}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(prob_obj_is_active_list, prob_serving_upper_bound_improved_list, label=f"d={storage_design.d}, UB*", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         # plot.plot(prob_obj_is_active_list, prob_serving_lower_bound_list, label=f"d={storage_design.d}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(prob_obj_is_active_list, prob_serving_lower_bound_improved_list, label=f"d={storage_design.d}, LB*", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     use_cvxpy = True  # False
     storage_design_model_list = [
@@ -115,11 +125,12 @@ def plot_frac_demand_vectors_covered_vs_d(
         for d in range(2, d_max + 1)
     ]
 
+    run_sim = True  # False
     for storage_design, storage_model in storage_design_model_list:
-        plot_(storage_design=storage_design, storage_model=storage_model)
+        plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
     fontsize = 14
-    plot.legend(fontsize=fontsize)
+    plot.legend(fontsize=fontsize, loc="center right", bbox_to_anchor=(1.25, 0.5))
     # plot.yscale("log")
     plot.ylabel(r"$\mathcal{P}_{p, \lambda}$", fontsize=fontsize)
     plot.xlabel(r"$p$", fontsize=fontsize)
@@ -157,9 +168,9 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
             num_sim_run=3,
         )
 
-        for d_max in [10]
+        for d_max in [6]
         # for d_max in [4]
-        # for demand_for_active_obj in [1.5]
+        # for demand_for_active_obj in [3]
         # for demand_for_active_obj in [1.5, 2]
         for demand_for_active_obj in [1.5, 2, 3, 4, 5]
         # for demand_for_active_obj in numpy.arange(1.01, 2, 0.1)
