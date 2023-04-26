@@ -54,9 +54,10 @@ def scan_stats_approx_2(n: int, p: float, k: int, r: int):
     check(r_over_k > p, "Approximation requires r / k > p", r_over_k=r_over_k, p=p)
 
     H_value = H(r_over_k, p)
-    # h_value = h(r_over_k, p)
+    h_value = h(r_over_k, p)
+    ro = 1 / n
 
-    numerator = (r - k * p) * math.exp(-k * H_value)  # - ro * h_value
+    numerator = (r - k * p) * math.exp(-k * H_value - ro * h_value)
     denominator = math.sqrt(2 * math.pi * r * k * (k - r))
 
     return math.exp(-n * numerator / denominator)

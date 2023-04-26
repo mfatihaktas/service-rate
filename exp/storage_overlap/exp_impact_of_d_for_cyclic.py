@@ -85,7 +85,7 @@ def plot_frac_demand_vectors_covered_vs_d(
             prob_serving_upper_bound_improved_list.append(prob_serving_upper_bound_improved)
 
             # Lower bound
-            prob_serving_lower_bound = storage_model.prob_serving_lower_bound_w_scan_stats_approx_improved(
+            prob_serving_lower_bound = storage_model.prob_serving_lower_bound_w_scan_stats_approx(
                 p=prob_obj_is_active, lambda_=demand_for_active_obj
             )
             prob_serving_lower_bound_list.append(prob_serving_lower_bound)
@@ -125,7 +125,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         for d in range(2, d_max + 1)
     ]
 
-    run_sim = True  # False
+    run_sim = False
     for storage_design, storage_model in storage_design_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
