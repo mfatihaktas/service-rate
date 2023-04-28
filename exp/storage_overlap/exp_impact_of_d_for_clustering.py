@@ -81,10 +81,15 @@ def plot_w_bernoulli_obj_demands(
 def plot_w_exp_obj_demands(
     storage_design: design.ReplicaDesign,
     storage_model: model.ClusteringDesignModelForExpObjDemands,
+    maximal_load: float,
     num_samples: int,
     num_sim_run: int,
 ):
-    log(INFO, "Started", storage_design=storage_design, storage_model=storage_model)
+    log(INFO, "Started",
+        storage_design=storage_design,
+        storage_model=storage_model,
+        maximal_load=maximal_load
+    )
 
     mean_obj_demand_list = []
 
@@ -118,13 +123,15 @@ def plot_w_exp_obj_demands(
         std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
         # prob_serving_model = storage_model.prob_serving(mean_obj_demand=mean_obj_demand)
-        prob_serving_model = storage_model.prob_serving_w_downscaling_mean_obj_demand_w_b(mean_obj_demand_b_1=mean_obj_demand)
+        prob_serving_model = storage_model.prob_serving_w_downscaling_mean_obj_demand_w_b(
+            mean_obj_demand_b_1=mean_obj_demand, maximal_load=maximal_load
+        )
         prob_serving_model_list.append(prob_serving_model)
 
         prob_serving_lower_bound = storage_model.prob_serving_lower_bound_w_chernoff(mean_obj_demand=mean_obj_demand)
         prob_serving_lower_bound_list.append(prob_serving_lower_bound)
 
-        if prob_serving_model < 0.01:
+        if prob_serving_model < 0.0001:
             break
 
     log(INFO, f"storage_design= {storage_design}",
@@ -134,11 +141,11 @@ def plot_w_exp_obj_demands(
     )
 
     color = next(dark_color_cycle)
-    label = f"d={storage_model.d}, b={storage_model.b}"
+    label = f"b={storage_model.b}" if storage_model.d == 1 else f"d={storage_model.d}, b={storage_model.b}"
     # label = f"d={storage_model.d}"
     # plot.errorbar(mean_obj_demand_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{label}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(mean_obj_demand_list, prob_serving_model_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(mean_obj_demand_list, prob_serving_lower_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(mean_obj_demand_list, prob_serving_lower_bound_list, label=f"{label}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
 
 def plot_w_pareto_obj_demands(
@@ -211,6 +218,7 @@ def plot_w_pareto_obj_demands(
 def plot_frac_demand_vectors_covered_vs_d(
     d_max: int,
     mean_obj_demand: int,
+    maximal_load: float = 1,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
@@ -223,6 +231,7 @@ def plot_frac_demand_vectors_covered_vs_d(
     log(INFO, "Started",
         d_max=d_max,
         mean_obj_demand=mean_obj_demand,
+        maximal_load=maximal_load,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
@@ -232,15 +241,15 @@ def plot_frac_demand_vectors_covered_vs_d(
         (
             design.ClusteringDesign(k=k * b, n=n, d=d, use_cvxpy=use_cvxpy),
             # model.ClusteringDesignModelForBernoulliObjDemands(k=k, n=n, b=b, d=d)
-            # model.ClusteringDesignModelForExpObjDemands(k=k, n=n, b=b, d=d)
-            model.ClusteringDesignModelForParetoObjDemands(k=k, n=n, b=b, d=d)
+            model.ClusteringDesignModelForExpObjDemands(k=k, n=n, b=b, d=d)
+            # model.ClusteringDesignModelForParetoObjDemands(k=k, n=n, b=b, d=d)
         )
 
-        # for d in [1]
-        for d in range(2, d_max + 1)
-        for b in [1]
+        for d in [1]
+        # for d in range(2, d_max + 1)
+        # for b in [1]
         # for b in [2]
-        # for b in range(1, 4)
+        for b in range(1, 10)
         if n % d == 0
     ]
 
@@ -258,6 +267,7 @@ def plot_frac_demand_vectors_covered_vs_d(
             plot_w_exp_obj_demands(
                 storage_design=storage_design,
                 storage_model=storage_model,
+                maximal_load=maximal_load,
                 num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
@@ -273,22 +283,27 @@ def plot_frac_demand_vectors_covered_vs_d(
     fontsize = 14
     plot.legend(fontsize=fontsize)
     # plot.yscale("log")
-    plot.ylabel(r"$\mathcal{P}_{p, \lambda}$", fontsize=fontsize)
-    plot.xlabel(r"$p$", fontsize=fontsize)
+    # plot.ylabel(r"$\mathcal{P}_{p, \lambda}$", fontsize=fontsize)
+    plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
+    # plot.xlabel(r"$p$", fontsize=fontsize)
+    plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
 
     plot.title(
-        r"$\lambda= $" + fr"${mean_obj_demand}$, "
-        r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
-        r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
+        f"$d= 1$, "
+        f"$m= {maximal_load}$"
+        # r"$\lambda= $" + fr"${mean_obj_demand}$, "
+        # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
+        # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
 
     # Save the plot
     plot.gcf().set_size_inches(8, 6)
     file_name = (
-        "plots/plot_frac_demand_vectors_covered_vs_d_for_clustering"
+        # "plots/plot_frac_demand_vectors_covered_vs_d_for_clustering"
+        "plots/plot_P_vs_b_for_clustering"
         + f"_k_{k}"
-        + f"_d_max_{d_max}"
-        + "_lambda_{}_".format(f"{mean_obj_demand}".replace(".", "_"))
+        # + f"_d_max_{d_max}"
+        # + "_lambda_{}_".format(f"{mean_obj_demand}".replace(".", "_"))
         + ".png"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -304,6 +319,7 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
         joblib.delayed(plot_frac_demand_vectors_covered_vs_d)(
             d_max=d_max,
             mean_obj_demand=round(mean_obj_demand, 1),
+            maximal_load=0.7,
             num_samples=200,
             # num_samples=300,
             # num_samples=1000,

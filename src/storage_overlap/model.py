@@ -225,11 +225,18 @@ class ClusteringDesignModelForBernoulliObjDemands(ClusteringDesignModel):
 
 @dataclasses.dataclass
 class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
-    def prob_serving(self, mean_obj_demand: float) -> float:
+    def prob_serving(
+        self,
+        mean_obj_demand: float,
+        maximal_load: float = 1,
+    ) -> float:
         num_clusters = self.n / self.d
         num_objs_in_cluster = self.d * self.b
 
-        prob_single_cluster_is_stable = scipy.stats.erlang.cdf(self.d, a=num_objs_in_cluster, loc=0, scale=mean_obj_demand)
+        cluster_capacity = maximal_load * self.d
+        prob_single_cluster_is_stable = scipy.stats.erlang.cdf(
+            cluster_capacity, a=num_objs_in_cluster, loc=0, scale=mean_obj_demand
+        )
 
         # log(DEBUG, "",
         #     d=self.d,
@@ -240,10 +247,14 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
 
         return prob_single_cluster_is_stable ** num_clusters
 
-    def prob_serving_w_downscaling_mean_obj_demand_w_b(self, mean_obj_demand_b_1: float) -> float:
+    def prob_serving_w_downscaling_mean_obj_demand_w_b(
+        self,
+        mean_obj_demand_b_1: float,
+        maximal_load: float,
+    ) -> float:
         mean_obj_demand = mean_obj_demand_b_1 / self.b
 
-        return self.prob_serving(mean_obj_demand=mean_obj_demand)
+        return self.prob_serving(mean_obj_demand=mean_obj_demand, maximal_load=maximal_load)
 
     def prob_serving_lower_bound_w_chernoff(self, mean_obj_demand: float) -> float:
         n, b, d = self.n, self.b, self.d
@@ -365,6 +376,7 @@ class CyclicDesignModel(ReplicaDesignModel):
 
         return scan_stats_model.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Upper bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def prob_serving_upper_bound_w_scan_stats_approx(
         self,
         p: int,
@@ -396,16 +408,28 @@ class CyclicDesignModel(ReplicaDesignModel):
         lambda_: int,
         asymptotic=False,
     ) -> float:
-        prob_list = [
-            self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
-                k=k, p=p, lambda_=lambda_, asymptotic=asymptotic
-            )
-            for k in range(self.d, 3 * self.d)
-            # for k in range(1, self.k - self.d)
-        ]
+        prob_list = []
+
+        for k in range(self.d, 3 * self.d):
+        # for k in range(1, self.k - self.d):
+            if asymptotic:
+                prob = self.prob_serving_necessary_cond_w_asymptotic_scan_stats_approx_for_given_k(
+                    k=k, p=p, lambda_=lambda_
+                )
+
+            else:
+                prob = self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
+                    k=k, p=p, lambda_=lambda_
+                )
+
+            if prob is None:
+                prob = float("Inf")
+
+            prob_list.append(prob)
 
         return min(prob_list)
 
+    # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Lower bound  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ #
     def prob_serving_lower_bound_w_scan_stats_approx(
         self,
         p: int,
@@ -428,12 +452,23 @@ class CyclicDesignModel(ReplicaDesignModel):
         lambda_: int,
         asymptotic=False,
     ) -> float:
-        prob_list = [
-            self.prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
-                k=k, p=p, lambda_=lambda_, asymptotic=asymptotic
-            )
-            # for k in range(self.d, 3 * self.d)
-            for k in range(self.d, self.k - self.d)
-        ]
+        prob_list = []
+
+        for k in range(self.d, 3 * self.d):
+        # for k in range(self.d, self.k - self.d):
+            if asymptotic:
+                prob = self.prob_serving_sufficient_cond_w_asymptotic_scan_stats_approx_for_given_k(
+                    k=k, p=p, lambda_=lambda_
+                )
+
+            else:
+                prob = self.prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
+                    k=k, p=p, lambda_=lambda_
+                )
+
+            if prob is None:
+                prob = float("-Inf")
+
+            prob_list.append(prob)
 
         return max(prob_list)

@@ -13,7 +13,9 @@ from src.utils.debug import *
 
 
 def H(theta: float, p: float) -> float:
-    check(0 < theta < 1 and 0 < p < 1, "", theta=theta, p=p)
+    # check(0 < theta < 1 and 0 < p < 1, "", theta=theta, p=p)
+    if not (0 < theta < 1 and 0 < p < 1):
+        return None
 
     return (
         theta * math.log(theta / p)
@@ -22,7 +24,9 @@ def H(theta: float, p: float) -> float:
 
 
 def h(theta: float, p: float) -> float:
-    check(0 < theta < 1 and 0 < p < 1, "")
+    # check(0 < theta < 1 and 0 < p < 1, "")
+    if not (0 < theta < 1 and 0 < p < 1):
+        return None
 
     return math.log((theta * (1 - p)) / (p * (1 - theta)))
 
@@ -51,11 +55,17 @@ def scan_stats_approx_2(n: int, p: float, k: int, r: int):
     log(DEBUG, "Started", n=n, p=p, k=k, r=r)
 
     r_over_k = r / k
-    check(r_over_k > p, "Approximation requires r / k > p", r_over_k=r_over_k, p=p)
+    # check(r_over_k > p, "Approximation requires r / k > p", r_over_k=r_over_k, p=p)
+    if not r_over_k > p:
+        return None
 
     H_value = H(r_over_k, p)
     h_value = h(r_over_k, p)
-    ro = 1 / n
+    if H_value is None or h_value is None:
+        return None
+
+    # ro = 1 / n
+    ro = 0
 
     numerator = (r - k * p) * math.exp(-k * H_value - ro * h_value)
     denominator = math.sqrt(2 * math.pi * r * k * (k - r))
