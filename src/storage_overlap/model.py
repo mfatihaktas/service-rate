@@ -77,31 +77,51 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
         self,
         m: int,
         lambda_: float,
+        maximal_load: float,
     ) -> float:
-        min_span = math.ceil(m * lambda_)
+        min_span = math.ceil(m * lambda_ / maximal_load)
         return allocation_w_complexes_model.prob_num_nonempty_cells_geq_c(
             n=self.n, m=m, d=self.d, c=min_span
         )
 
-    def prob_serving(self, m: int, lambda_: int) -> float:
+    def prob_serving_upper_bound_for_given_m(
+        self,
+        m: int,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        if m == 0:
+            return 1
+
         return min(
             self.prob_span_is_larger_than_m_times_lambda(
-                m=m_,
-                lambda_=lambda_,
+                m=m_, lambda_=lambda_, maximal_load=maximal_load
             )
             for m_ in range(1, m + 1)
         )
 
-    def prob_serving_upper_bound(self, m: int, lambda_: int) -> float:
-        return min(
-            self.prob_span_is_larger_than_m_times_lambda(
-                m=m_,
-                lambda_=lambda_,
+    def prob_serving_upper_bound(
+        self,
+        p: float,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        return sum(
+            (
+                scipy.stats.binom.pmf(m, self.k, p)
+                * self.prob_serving_upper_bound_for_given_m(
+                    m=m, lambda_=lambda_, maximal_load=maximal_load
+                )
             )
-            for m_ in range(1, m + 1)
+            for m in range(self.k + 1)
         )
 
-    def prob_serving_upper_bound_(self, m: int, lambda_: int) -> float:
+        # Em = int(self.k * p)
+        # return self.prob_serving_upper_bound_for_given_m(
+        #     m=Em, lambda_=lambda_, maximal_load=maximal_load
+        # )
+
+    def prob_serving_upper_bound_for_given_m_(self, m: int, lambda_: int) -> float:
         return min(
             allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_upper_bound(
                 n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
@@ -109,50 +129,44 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
             for m_ in range(1, m + 1)
         )
 
-    def wrong_prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
-        return math.prod(
-            [
-                self.prob_span_is_larger_than_m_times_lambda(
-                    m=m_,
-                    lambda_=lambda_,
-                )
-                for m_ in range(1, m + 1)
-            ]
-        )
-
-    def _prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
-        # return allocation_w_complexes_model.prob_expand_span_by_e_with_each_complex(
-        #     n=self.n, m=m, d=self.d, e=lambda_
-        # )
-
-        # return allocation_w_complexes_model.prob_expand_span_by_e_with_each_complex(
-        #     n=self.n, m=m, d=self.d, e=1
-        # )
-
-        # return allocation_w_complexes_model.prob_expand_span_by_at_least_e_with_each_complex(
-        #     n=self.n, m=m, d=self.d, e=lambda_ - 1
-        # )
-
-        return allocation_w_complexes_model.prob_expand_span_as_necessary_faster(
-            n=self.n, m=m, d=self.d, lambda_=lambda_
-        )
-
-    def prob_serving_lower_bound(self, m: int, lambda_: int) -> float:
-        # return max(
-        #     allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_lower_bound(
-        #         n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
-        #     )
-        #     for m_ in range(1, m + 1)
-        # )
+    def prob_serving_lower_bound_for_given_m(
+        self,
+        m: int,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        if m == 0:
+            return 1
 
         return math.prod(
             [
                 allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_alternative(
-                    n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_)
+                    n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_ / maximal_load)
                 )
                 for m_ in range(1, m + 1)
             ]
         )
+
+    def prob_serving_lower_bound(
+        self,
+        p: float,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        return sum(
+            (
+                scipy.stats.binom.pmf(m, self.k, p)
+                * self.prob_serving_lower_bound_for_given_m(
+                    m=m, lambda_=lambda_, maximal_load=maximal_load
+                )
+            )
+            for m in range(self.k + 1)
+        )
+
+        # Em = int(self.k * p)
+        # return self.prob_serving_lower_bound_for_given_m(
+        #     m=Em, lambda_=lambda_, maximal_load=maximal_load
+        # )
 
 
 @dataclasses.dataclass
@@ -331,7 +345,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         k: int,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
     ) -> float:
         span = maximal_load * (self.d)
@@ -346,7 +360,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         k: int,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
     ) -> float:
         span = maximal_load * (k + self.d - 1)
@@ -366,7 +380,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         k: int,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
     ) -> float:
         span = maximal_load * self.d
@@ -379,7 +393,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         k: int,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
     ) -> float:
         span = maximal_load * (k + self.d - 1)
@@ -396,7 +410,7 @@ class CyclicDesignModel(ReplicaDesignModel):
     def prob_serving_upper_bound_w_scan_stats_approx(
         self,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float = 1,
         asymptotic=False,
     ) -> float:
@@ -422,7 +436,7 @@ class CyclicDesignModel(ReplicaDesignModel):
     def prob_serving_upper_bound_w_scan_stats_approx_improved(
         self,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
         asymptotic=False,
     ) -> float:
@@ -451,7 +465,7 @@ class CyclicDesignModel(ReplicaDesignModel):
     def prob_serving_lower_bound_w_scan_stats_approx(
         self,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
         asymptotic=False,
     ) -> float:
@@ -468,7 +482,7 @@ class CyclicDesignModel(ReplicaDesignModel):
     def prob_serving_lower_bound_w_scan_stats_approx_improved(
         self,
         p: int,
-        lambda_: int,
+        lambda_: float,
         maximal_load: float,
         asymptotic=False,
     ) -> float:

@@ -167,8 +167,8 @@ def manage_plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_po
         joblib.delayed(plot_frac_demand_vectors_covered_for_given_combination_size_vs_num_popular_objs)(
             d=d,
             demand_for_popular=demand_for_popular,
-            # num_samples=300,
-            num_samples=1000,
+            num_samples=300,
+            # num_samples=1000,
             num_sim_run=3,
         )
         # for d in range(2, 3)

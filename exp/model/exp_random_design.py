@@ -38,15 +38,7 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     for num_popular_obj in num_popular_obj_list:
         log(INFO, f"> num_popular_obj= {num_popular_obj}")
 
-        if (
-            # True or
-            len(E_frac_of_demand_vectors_covered_list) > 0
-            and E_frac_of_demand_vectors_covered_list[-1] <= 0.01
-        ):
-            frac_of_demand_vectors_covered_list = [0]
-
-        else:
-            # frac_of_demand_vectors_covered_list = [0]
+        if run_sim:
             frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
                 storage_design=storage_design,
                 num_popular_obj=num_popular_obj,
@@ -56,16 +48,20 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
                 num_sim_run=num_sim_run,
             )
 
-        E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
-        std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
+            E_frac_of_demand_vectors_covered_list.append(numpy.mean(frac_of_demand_vectors_covered_list))
+            std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
         frac_of_demand_vectors_covered_lower_bound = storage_design_model.prob_serving_lower_bound(m=num_popular_obj, lambda_=demand_for_popular)
-        frac_of_demand_vectors_covered_lower_bound = storage_design_model.wrong_prob_serving_lower_bound(m=num_popular_obj, lambda_=demand_for_popular)
+        # frac_of_demand_vectors_covered_lower_bound = storage_design_model.wrong_prob_serving_lower_bound(m=num_popular_obj, lambda_=demand_for_popular)
         frac_of_demand_vectors_covered_lower_bound_list.append(frac_of_demand_vectors_covered_lower_bound)
         frac_of_demand_vectors_covered_lower_bound_power_d_list.append(frac_of_demand_vectors_covered_lower_bound**(storage_design.d))
 
         frac_of_demand_vectors_covered_upper_bound = storage_design_model.prob_serving_upper_bound(m=num_popular_obj, lambda_=demand_for_popular)
         frac_of_demand_vectors_covered_upper_bound_list.append(frac_of_demand_vectors_covered_upper_bound)
+
+        if frac_of_demand_vectors_covered_upper_bound < 0.01:
+            log(WARNING, "Early break", prob_obj_is_active=prob_obj_is_active)
+            break
 
     log(INFO, "",
         storage_design=storage_design,
@@ -78,10 +74,11 @@ def plot_frac_demand_vectors_covered_vs_num_popular_objs_for_storage_design(
     )
 
     color = next(dark_color_cycle)
-    # plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    if run_sim:
+        plot.errorbar(num_popular_obj_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, Sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_upper_bound_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_power_d_list, label=f"{storage_design.repr_for_plot()}, LB**d", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+    # plot.plot(num_popular_obj_list, frac_of_demand_vectors_covered_lower_bound_power_d_list, label=f"{storage_design.repr_for_plot()}, LB**d", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     fontsize = 14
     plot.legend(fontsize=fontsize)
