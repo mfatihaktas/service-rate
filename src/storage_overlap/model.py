@@ -256,7 +256,11 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
 
         return self.prob_serving(mean_obj_demand=mean_obj_demand, maximal_load=maximal_load)
 
-    def prob_serving_lower_bound_w_chernoff(self, mean_obj_demand: float) -> float:
+    def prob_serving_lower_bound_w_chernoff(
+        self,
+        mean_obj_demand: float,
+        maximal_load: float,
+    ) -> float:
         n, b, d = self.n, self.b, self.d
         num_clusters = n / d
         # num_objs_in_cluster = self.d * self.b
@@ -265,7 +269,13 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
         if mu <= b:  # Moment generating function of Exponential is undefined.
             return 0
 
-        prob_single_cluster_is_stable = 1 - math.exp(-d * (mu - b + b * math.log(b / mu)))
+        prob_single_cluster_is_stable = (
+            1 - math.exp(
+                -d * (
+                    mu * maximal_load - b + b * math.log(b / mu / maximal_load)
+                )
+            )
+        )
 
         return prob_single_cluster_is_stable ** num_clusters
 
