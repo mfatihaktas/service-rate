@@ -29,7 +29,11 @@ class ServiceRateInspectorBase:
         # Capacity of each node
         self.C = C
 
-    def is_in_cap_region(self, obj_demand_list: list[float]) -> bool:
+    def is_in_cap_region(
+        self,
+        obj_demand_list: list[float],
+        maximal_load: float = 1,
+    ) -> bool:
         """
         demand_vector = numpy.array(obj_demand_list).reshape((self.k, 1))
 
@@ -49,7 +53,7 @@ class ServiceRateInspectorBase:
         max_load = self.max_load(obj_demand_list)
         # log(DEBUG, "", max_load=max_load, obj_demand_list=obj_demand_list)
 
-        return max_load < 1.001
+        return max_load <= maximal_load
 
     def max_load(self, obj_demand_list: list[float]) -> float:
         """Returns the load at the the maximally loaded node (i.e., maximal load)

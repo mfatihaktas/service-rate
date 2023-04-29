@@ -72,11 +72,13 @@ def sim_frac_of_demand_vectors_covered(
     num_samples: int,
     num_sim_run: int = 1,
     combination_size_for_is_demand_vector_covered: int = None,
+    maximal_load: float = 1,
 ) -> list[float]:
     log(DEBUG, "Started",
         num_samples=num_samples,
         num_sim_run=num_sim_run,
         combination_size_for_is_demand_vector_covered=combination_size_for_is_demand_vector_covered,
+        maximal_load=maximal_load,
     )
 
     frac_of_demand_vectors_covered_list = []
@@ -103,7 +105,9 @@ def sim_frac_of_demand_vectors_covered(
                 ):
                     num_covered += 1
 
-            elif storage_design.is_demand_vector_covered(demand_vector=demand_vector):
+            elif storage_design.is_demand_vector_covered(
+                demand_vector=demand_vector, maximal_load=maximal_load
+            ):
                 num_covered += 1
 
         frac_of_demand_vectors_covered = num_covered / num_samples

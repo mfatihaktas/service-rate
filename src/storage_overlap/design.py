@@ -87,6 +87,7 @@ class StorageDesign:
     def is_demand_vector_covered(
         self,
         demand_vector: list[float],
+        maximal_load: float = 1,
     ) -> bool:
         # log(DEBUG, "Started", demand_vector=demand_vector)
 
@@ -94,9 +95,13 @@ class StorageDesign:
             # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
             # load_across_nodes = self.service_rate_inspector.load_across_nodes(demand_vector)
             # log(DEBUG, "", load_across_nodes=load_across_nodes)
-            return self.service_rate_inspector.is_in_cap_region(demand_vector)
+            return self.service_rate_inspector.is_in_cap_region(
+                obj_demand_list=demand_vector, maximal_load=maximal_load
+            )
 
-        return self.is_demand_vector_covered_w_service_choice_union(demand_vector=demand_vector)
+        return self.is_demand_vector_covered_w_service_choice_union(
+            demand_vector=demand_vector, maximal_load=maximal_load
+        )
 
     def is_demand_vector_covered_w_service_choice_union(
         self,

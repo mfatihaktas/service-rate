@@ -146,11 +146,11 @@ def plot_w_exp_obj_demands(
     )
 
     color = next(dark_color_cycle)
-    # label = f"b={storage_model.b}" if storage_model.d == 1 else f"d={storage_model.d}"  # f"d={storage_model.d}, b={storage_model.b}"
-    label = rf"$d={storage_model.d}$"
+    label = f"b={storage_model.b}" if storage_model.d == 1 else f"d={storage_model.d}"  # f"d={storage_model.d}, b={storage_model.b}"
+    # label = rf"$d={storage_model.d}$"
     # plot.errorbar(mean_obj_demand_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{label}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
     plot.plot(mean_obj_demand_list, prob_serving_model_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-    plot.plot(mean_obj_demand_list, prob_serving_model_power_d_list, label=f"{label}, **d", color=color, marker=None, linestyle="--", lw=2, mew=3, ms=5)
+    # plot.plot(mean_obj_demand_list, prob_serving_model_power_d_list, label=f"{label}, **d", color=color, marker=None, linestyle="--", lw=2, mew=3, ms=5)
     # plot.plot(mean_obj_demand_list, prob_serving_lower_bound_list, label=f"{label}, LB", color=color, marker=None, linestyle="--", lw=2, mew=3, ms=5)
 
 
@@ -251,11 +251,11 @@ def plot_frac_demand_vectors_covered_vs_d(
             # model.ClusteringDesignModelForParetoObjDemands(k=k, n=n, b=b, d=d)
         )
 
-        # for d in [1]
-        for d in range(1, d_max + 1)
-        for b in [1]
+        for d in [1]
+        # for d in range(1, d_max + 1)
+        # for b in [1]
         # for b in [2]
-        # for b in range(1, 10)
+        for b in range(1, 10)
         if n % d == 0
     ]
 
@@ -289,13 +289,14 @@ def plot_frac_demand_vectors_covered_vs_d(
     fontsize = 14
     plot.legend(fontsize=fontsize)
     # plot.yscale("log")
-    # plot.ylabel(r"$\mathcal{P}_{p, \lambda}$", fontsize=fontsize)
-    plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
+    plot.ylabel(r"$\mathcal{P}$ with no redundancy", fontsize=fontsize)
+    # plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
     # plot.xlabel(r"$p$", fontsize=fontsize)
     plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
 
     plot.title(
-        rf"$k= n= {k}$, "
+        rf"$k= {k}$, "
+        # rf"$k= n= {k}$, "
         # f"$d= 1$, "
         rf"$m= {maximal_load}$, "
         r"$\rho \sim$ Exp"
@@ -309,8 +310,8 @@ def plot_frac_demand_vectors_covered_vs_d(
     plot.gcf().set_size_inches(6, 4)
     file_name = (
         # "plots/plot_frac_demand_vectors_covered_vs_d_for_clustering"
-        # "plots/plot_P_vs_b_for_clustering"
-        "plots/plot_P_vs_d_for_clustering"
+        "plots/plot_P_vs_b_for_clustering"
+        # "plots/plot_P_vs_d_for_clustering"
         + f"_k_{k}"
         # + f"_d_max_{d_max}"
         # + "_lambda_{}_".format(f"{mean_obj_demand}".replace(".", "_"))

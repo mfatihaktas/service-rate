@@ -332,39 +332,44 @@ class CyclicDesignModel(ReplicaDesignModel):
         k: int,
         p: int,
         lambda_: int,
+        maximal_load: float,
     ) -> float:
-        span = self.d
+        span = maximal_load * (self.d)
         # span = k
         num_active_objs_handled_by_span = math.floor(span / lambda_)
         r = num_active_objs_handled_by_span
 
-        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=self.k, m=k, p=p, k=r)
+        n_ = self.k  # + k - 1
+        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=n_, m=k, p=p, k=r)
 
     def prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
         self,
         k: int,
         p: int,
         lambda_: int,
+        maximal_load: float,
     ) -> float:
-        span = k + self.d - 1
-        num_active_objs_handled_by_span = math.ceil(span / lambda_)
+        span = maximal_load * (k + self.d - 1)
+        num_active_objs_handled_by_span = math.floor(span / lambda_)
 
         # k = self.d
         r = num_active_objs_handled_by_span
         # if r / k <= p:
         #     return 0
 
+        n_ = self.k + k - 1
         # return scan_stats_model.scan_stats_approx_1(n=self.k, p=p, k=k, r=r)
         # return scan_stats_model.scan_stats_approx_2(n=self.k, p=p, k=k, r=r)
-        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=self.k, m=k, p=p, k=r)
+        return scan_stats_model.scan_stats_cdf_approx_by_naus(n=n_, m=k, p=p, k=r)
 
     def prob_serving_sufficient_cond_w_asymptotic_scan_stats_approx_for_given_k(
         self,
         k: int,
         p: int,
         lambda_: int,
+        maximal_load: float,
     ) -> float:
-        span = self.d
+        span = maximal_load * self.d
         num_active_objs_handled_by_span = math.floor(span / lambda_)
         r = num_active_objs_handled_by_span
 
@@ -375,9 +380,10 @@ class CyclicDesignModel(ReplicaDesignModel):
         k: int,
         p: int,
         lambda_: int,
+        maximal_load: float,
     ) -> float:
-        span = k + self.d - 1
-        num_active_objs_handled_by_span = math.ceil(span / lambda_)
+        span = maximal_load * (k + self.d - 1)
+        num_active_objs_handled_by_span = math.floor(span / lambda_)
 
         # k = self.d
         r = num_active_objs_handled_by_span
@@ -391,6 +397,7 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         p: int,
         lambda_: int,
+        maximal_load: float = 1,
         asymptotic=False,
     ) -> float:
         """Demand can be served if maximum scan statistics for window of size d (M_d) is
@@ -404,18 +411,19 @@ class CyclicDesignModel(ReplicaDesignModel):
         """
         if asymptotic:
             return self.prob_serving_necessary_cond_w_asymptotic_scan_stats_approx_for_given_k(
-                k=self.d, p=p, lambda_=lambda_
+                k=self.d, p=p, lambda_=lambda_, maximal_load=maximal_load
             )
 
         else:
             return self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
-                k=self.d, p=p, lambda_=lambda_
+                k=self.d, p=p, lambda_=lambda_, maximal_load=maximal_load
             )
 
     def prob_serving_upper_bound_w_scan_stats_approx_improved(
         self,
         p: int,
         lambda_: int,
+        maximal_load: float,
         asymptotic=False,
     ) -> float:
         prob_list = []
@@ -424,12 +432,12 @@ class CyclicDesignModel(ReplicaDesignModel):
         # for k in range(1, self.k - self.d):
             if asymptotic:
                 prob = self.prob_serving_necessary_cond_w_asymptotic_scan_stats_approx_for_given_k(
-                    k=k, p=p, lambda_=lambda_
+                    k=k, p=p, lambda_=lambda_, maximal_load=maximal_load
                 )
 
             else:
                 prob = self.prob_serving_necessary_cond_w_scan_stats_approx_for_given_k(
-                    k=k, p=p, lambda_=lambda_
+                    k=k, p=p, lambda_=lambda_, maximal_load=maximal_load
                 )
 
             if prob is None:
@@ -444,22 +452,24 @@ class CyclicDesignModel(ReplicaDesignModel):
         self,
         p: int,
         lambda_: int,
+        maximal_load: float,
         asymptotic=False,
     ) -> float:
         if asymptotic:
             return self.prob_serving_sufficient_cond_w_asymptotic_scan_stats_approx_for_given_k(
-                k=self.d, p=p, lambda_=lambda_
+                k=self.d, p=p, lambda_=lambda_, maximal_load=maximal_load
             )
 
         else:
             return self.prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
-                k=self.d, p=p, lambda_=lambda_
+                k=self.d, p=p, lambda_=lambda_, maximal_load=maximal_load
             )
 
     def prob_serving_lower_bound_w_scan_stats_approx_improved(
         self,
         p: int,
         lambda_: int,
+        maximal_load: float,
         asymptotic=False,
     ) -> float:
         prob_list = []
@@ -468,12 +478,12 @@ class CyclicDesignModel(ReplicaDesignModel):
         # for k in range(self.d, self.k - self.d):
             if asymptotic:
                 prob = self.prob_serving_sufficient_cond_w_asymptotic_scan_stats_approx_for_given_k(
-                    k=k, p=p, lambda_=lambda_
+                    k=k, p=p, lambda_=lambda_, maximal_load=maximal_load
                 )
 
             else:
                 prob = self.prob_serving_sufficient_cond_w_scan_stats_approx_for_given_k(
-                    k=k, p=p, lambda_=lambda_
+                    k=k, p=p, lambda_=lambda_, maximal_load=maximal_load
                 )
 
             if prob is None:
