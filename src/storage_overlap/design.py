@@ -397,7 +397,8 @@ class RandomBlockDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"RandomBlockDesign(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{RandomBlockDesign}$"
+        # return r"$\textrm{RandomBlockDesign}$"
+        return r"$\textrm{Block}$" + fr", $d= {self.d}$"
 
 
 @dataclasses.dataclass
@@ -433,7 +434,8 @@ class RandomExpanderDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"RandomExpanderDesign(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{RandomDesign}$" + fr", $d={self.d}$"
+        # return r"$\textrm{RandomDesign}$" + fr", $d={self.d}$"
+        return r"$\textrm{Random}$" + fr", $d={self.d}$"
 
 
 @dataclasses.dataclass

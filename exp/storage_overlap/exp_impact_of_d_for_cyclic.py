@@ -181,7 +181,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         + f"_k_{k}"
         # + f"_d_max_{d_max}"
         + f"_lambda_{demand_for_active_obj}"
-        + ".png"
+        + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
     plot.gcf().clear()

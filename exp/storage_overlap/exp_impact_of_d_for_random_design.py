@@ -104,9 +104,9 @@ def plot_frac_demand_vectors_covered_vs_d(
 
         color = next(dark_color_cycle)
         if run_sim:
-            plot.errorbar(x_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=rf"$d={storage_design.d}$, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(x_list, prob_serving_upper_bound_list, label=f"d={storage_design.d}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(x_list, prob_serving_lower_bound_list, label=f"d={storage_design.d}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.errorbar(x_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=fr"$d={storage_design.d}$, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(x_list, prob_serving_upper_bound_list, label=fr"$d={storage_design.d}$, ub", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(x_list, prob_serving_lower_bound_list, label=fr"$d={storage_design.d}$, lb", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     use_cvxpy = True  # False
     storage_design_model_list = [
@@ -119,7 +119,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         # for d in set(range(2, d_max + 1)) - set([4])
         # for d in [2, 3]
         # for d in [4, 5]
-        for d in [2, 3, 4, 5]
+        for d in [2, 3, 5]
         # for d in range(4, d_max + 1)
     ]
 
@@ -128,7 +128,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
     fontsize = 14
-    plot.legend(fontsize=fontsize, loc="center right", bbox_to_anchor=(1.25, 0.5))
+    plot.legend(fontsize=fontsize, loc="center right", bbox_to_anchor=(1.25, 0.65))
     # plot.yscale("log")
     plot.ylabel(r"$\mathcal{P}$ for random design", fontsize=fontsize)
     # plot.xlabel(r"$p$", fontsize=fontsize)
@@ -153,7 +153,7 @@ def plot_frac_demand_vectors_covered_vs_d(
         + f"_k_{k}"
         # + f"_d_max_{d_max}"
         + f"_lambda_{demand_for_active_obj}"
-        + ".png"
+        + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
     plot.gcf().clear()
@@ -169,8 +169,8 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
             d_max=d_max,
             demand_for_active_obj=round(demand_for_active_obj, 1),
             maximal_load=0.7,  # 0.7,
-            num_samples=300,
-            # num_samples=1000,
+            # num_samples=100,
+            num_samples=1000,
             num_sim_run=3,
         )
 
