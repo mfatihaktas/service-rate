@@ -72,12 +72,14 @@ def sim_frac_of_demand_vectors_covered(
     num_samples: int,
     num_sim_run: int = 1,
     combination_size_for_is_demand_vector_covered: int = None,
+    split_obj_demands_evenly_across_choices: bool = False,
     maximal_load: float = 1,
 ) -> list[float]:
     log(DEBUG, "Started",
         num_samples=num_samples,
         num_sim_run=num_sim_run,
         combination_size_for_is_demand_vector_covered=combination_size_for_is_demand_vector_covered,
+        split_obj_demands_evenly_across_choices=split_obj_demands_evenly_across_choices,
         maximal_load=maximal_load,
     )
 
@@ -102,6 +104,12 @@ def sim_frac_of_demand_vectors_covered(
                 if storage_design.is_demand_vector_covered_for_given_combination_size(
                         demand_vector=demand_vector,
                         combination_size=combination_size_for_is_demand_vector_covered,
+                ):
+                    num_covered += 1
+
+            elif split_obj_demands_evenly_across_choices:
+                if storage_design.is_demand_vector_covered_by_splitting_obj_demands_evenly_across_choices(
+                    demand_vector=demand_vector, maximal_load=maximal_load
                 ):
                     num_covered += 1
 

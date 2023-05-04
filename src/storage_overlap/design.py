@@ -159,6 +159,28 @@ class StorageDesign:
 
         return True
 
+    def is_demand_vector_covered_by_splitting_obj_demands_evenly_across_choices(
+        self,
+        demand_vector: list[float],
+        maximal_load: float,
+    ) -> bool:
+        node_id_to_demand_map = collections.defaultdict(int)
+
+        for obj_id, demand in enumerate(demand_vector):
+            if demand == 0:
+                continue
+
+            node_id_set = self.obj_id_to_node_id_set_map[obj_id]
+
+            demand_to_assign_to_each_node = demand / len(node_id_set)
+            for node_id in node_id_set:
+                node_id_to_demand_map[node_id] += demand_to_assign_to_each_node
+
+                if node_id_to_demand_map[node_id] >= maximal_load:
+                    return False
+
+        return True
+
     def is_demand_vector_covered_w_joblib(
         self,
         demand_vector: list[float],
