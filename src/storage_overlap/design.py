@@ -181,6 +181,30 @@ class StorageDesign:
 
         return True
 
+    def is_demand_vector_covered_by_assigning_to_leftmost_choice_first(
+        self,
+        demand_vector: list[float],
+        maximal_load: float,
+    ) -> bool:
+        node_id_to_demand_map = collections.defaultdict(int)
+
+        for obj_id, demand in enumerate(demand_vector):
+            node_id_set = self.obj_id_to_node_id_set_map[obj_id]
+
+            for node_id in node_id_set:
+                avail_node_cap = maximal_load - node_id_to_demand_map[node_id]
+
+                if avail_node_cap:
+                    demand_to_assign = min(avail_node_cap, demand)
+
+                    node_id_to_demand_map[node_id] += demand_to_assign
+                    demand -= demand_to_assign
+
+            if demand > 0:
+                return False
+
+        return True
+
     def is_demand_vector_covered_w_joblib(
         self,
         demand_vector: list[float],

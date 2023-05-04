@@ -39,8 +39,8 @@ def plot_P_for_given_params(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
 
-        E_P_evenly_split_obj_demands_across_choices_list = []
-        std_P_evenly_split_obj_demands_across_choices_list = []
+        E_P_lb_list = []
+        std_P_lb_list = []
 
         for num_active_objs in range(1, storage_design.k):
             log(INFO, f"> num_active_objs= {num_active_objs}")
@@ -67,18 +67,19 @@ def plot_P_for_given_params(
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # LB
-            sim_P_evenly_split_obj_demands_across_choices_list = sim.sim_frac_of_demand_vectors_covered(
+            sim_P_lb_list = sim.sim_frac_of_demand_vectors_covered(
                 demand_vector_sampler=demand_vector_sampler,
                 storage_design=storage_design,
                 num_samples=num_samples,
                 num_sim_run=num_sim_run,
-                split_obj_demands_evenly_across_choices=True,
+                # split_obj_demands_evenly_across_choices=True,
+                assign_obj_demands_to_leftmost_choice_first=True,
                 maximal_load=maximal_load,
             )
 
-            E_P_evenly_split_obj_demands_across_choices = numpy.mean(sim_P_evenly_split_obj_demands_across_choices_list)
-            E_P_evenly_split_obj_demands_across_choices_list.append(E_P_evenly_split_obj_demands_across_choices)
-            std_P_evenly_split_obj_demands_across_choices_list.append(numpy.std(sim_P_evenly_split_obj_demands_across_choices_list))
+            E_P_lb = numpy.mean(sim_P_lb_list)
+            E_P_lb_list.append(E_P_lb)
+            std_P_lb_list.append(numpy.std(sim_P_lb_list))
 
             if E_frac_of_demand_vectors_covered < 0.01:
                 break
@@ -91,7 +92,7 @@ def plot_P_for_given_params(
 
         color = next(dark_color_cycle)
         plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_active_objs_list, E_P_evenly_split_obj_demands_across_choices_list, yerr=std_P_evenly_split_obj_demands_across_choices_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_active_objs_list, E_P_lb_list, yerr=std_P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True  # False
