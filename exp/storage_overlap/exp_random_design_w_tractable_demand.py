@@ -73,10 +73,13 @@ def plot_P_for_given_params(
             P_ub_list.append(P_ub)
 
             # LB
-            P_ub = storage_model.prob_serving_lower_bound_for_given_m(
-                m=num_active_objs, lambda_=demand_for_active_obj, maximal_load=maximal_load
-            )
-            P_lb_list.append(P_ub)
+            if P_lb_list and P_lb_list[-1] < 0.01:
+                P_lb = 0
+            else:
+                P_lb = storage_model.prob_serving_lower_bound_for_given_m_w_joblib(
+                    m=num_active_objs, lambda_=demand_for_active_obj, maximal_load=maximal_load
+                )
+            P_lb_list.append(P_lb)
 
             if E_frac_of_demand_vectors_covered < 0.01:
                 break
@@ -113,7 +116,8 @@ def plot_P(
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
-    k = 120
+    k = 60
+    # k = 120
     # k = 6
 
     plot_P_for_given_params(

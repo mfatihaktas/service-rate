@@ -169,6 +169,24 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
             ]
         )
 
+    def prob_serving_lower_bound_for_given_m_w_joblib(
+        self,
+        m: int,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        if m == 0:
+            return 1
+
+        result_list = joblib.Parallel(n_jobs=-1, prefer="processes")(
+            joblib.delayed(allocation_w_complexes_model.prob_span_of_every_t_complexes_geq_u_alternative_w_joblib)(
+                n=self.n, m=m, d=self.d, t=m_, u=math.ceil(m_ * lambda_ / maximal_load)
+            )
+            for m_ in range(1, m + 1)
+        )
+
+        return math.prod(result_list)
+
     def prob_serving_lower_bound(
         self,
         p: float,

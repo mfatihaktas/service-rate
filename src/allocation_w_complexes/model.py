@@ -358,3 +358,21 @@ def prob_span_of_every_t_complexes_geq_u_alternative(
     )
 
     return prob
+
+
+@functools.cache
+def prob_span_of_every_t_complexes_geq_u_alternative_w_joblib(
+    n: int,
+    m: int,
+    d: int,
+    t: int,
+    u: int,
+) -> float:
+    result_list = joblib.Parallel(n_jobs=-1, prefer="processes")(
+        joblib.delayed(prob_num_nonempty_cells_geq_c)(
+            n=n, m=t, d=d, c=u
+        )
+        for _ in range(int(mp.binomial(m, t)))
+    )
+
+    return math.prod(result_list)
