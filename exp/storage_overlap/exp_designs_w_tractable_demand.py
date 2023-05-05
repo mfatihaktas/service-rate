@@ -39,6 +39,9 @@ def plot_P_for_given_params(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
 
+        E_P_ub_list = []
+        std_P_ub_list = []
+
         E_P_lb_list = []
         std_P_lb_list = []
 
@@ -66,20 +69,34 @@ def plot_P_for_given_params(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            # LB
-            sim_P_lb_list = sim.sim_frac_of_demand_vectors_covered(
+            # UB
+            sim_P_ub_list = sim.sim_frac_of_demand_vectors_covered(
                 demand_vector_sampler=demand_vector_sampler,
                 storage_design=storage_design,
                 num_samples=num_samples,
                 num_sim_run=num_sim_run,
-                # split_obj_demands_evenly_across_choices=True,
-                assign_obj_demands_to_leftmost_choice_first=True,
+                combination_size_for_is_demand_vector_covered=2,
                 maximal_load=maximal_load,
             )
 
-            E_P_lb = numpy.mean(sim_P_lb_list)
-            E_P_lb_list.append(E_P_lb)
-            std_P_lb_list.append(numpy.std(sim_P_lb_list))
+            E_P_ub = numpy.mean(sim_P_ub_list)
+            E_P_ub_list.append(E_P_ub)
+            std_P_ub_list.append(numpy.std(sim_P_ub_list))
+
+            # LB
+            # sim_P_lb_list = sim.sim_frac_of_demand_vectors_covered(
+            #     demand_vector_sampler=demand_vector_sampler,
+            #     storage_design=storage_design,
+            #     num_samples=num_samples,
+            #     num_sim_run=num_sim_run,
+            #     # split_obj_demands_evenly_across_choices=True,
+            #     assign_obj_demands_to_leftmost_choice_first=True,
+            #     maximal_load=maximal_load,
+            # )
+
+            # E_P_lb = numpy.mean(sim_P_lb_list)
+            # E_P_lb_list.append(E_P_lb)
+            # std_P_lb_list.append(numpy.std(sim_P_lb_list))
 
             if E_frac_of_demand_vectors_covered < 0.01:
                 break
@@ -92,7 +109,8 @@ def plot_P_for_given_params(
 
         color = next(dark_color_cycle)
         plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_active_objs_list, E_P_lb_list, yerr=std_P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.errorbar(num_active_objs_list, E_P_lb_list, yerr=std_P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_active_objs_list, E_P_ub_list, yerr=std_P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True  # False
