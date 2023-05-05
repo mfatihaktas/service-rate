@@ -1,4 +1,5 @@
 import functools
+import joblib
 import math
 import scipy
 
@@ -166,7 +167,12 @@ def prob_num_empty_cells_eq_c_w_mpmath_deprecated(n: int, m: int, d: int, c: int
 
 
 @functools.cache
-def prob_num_nonempty_cells_eq_c(n: int, m: int, d: int, c: int) -> float:
+def prob_num_nonempty_cells_eq_c(
+    n: int,
+    m: int,
+    d: int,
+    c: int,
+) -> float:
     num_empty_cells = n - c
     return prob_num_empty_cells_eq_c_w_mpmath(n=n, m=m, d=d, c=num_empty_cells)
 
@@ -177,6 +183,18 @@ def prob_num_nonempty_cells_geq_c(n: int, m: int, d: int, c: int) -> float:
         prob_num_nonempty_cells_eq_c(n=n, m=m, d=d, c=c_)
         for c_ in range(c, n + 1)
     )
+
+
+@functools.cache
+def prob_num_nonempty_cells_geq_c_w_joblib(n: int, m: int, d: int, c: int) -> float:
+    result_list = joblib.Parallel(n_jobs=-1, prefer="processes")(
+        joblib.delayed(prob_num_nonempty_cells_eq_c)(
+            n=n, m=m, d=d, c=c_,
+        )
+        for c_ in range(c, n + 1)
+    )
+
+    return sum(result_list)
 
 
 def prob_expand_span_by_e_with_each_complex(n: int, m: int, d: int, e: int) -> float:

@@ -1,5 +1,6 @@
 import abc
 import dataclasses
+import joblib
 import math
 import scipy.stats
 
@@ -80,7 +81,8 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
         maximal_load: float,
     ) -> float:
         min_span = math.ceil(m * lambda_ / maximal_load)
-        return allocation_w_complexes_model.prob_num_nonempty_cells_geq_c(
+
+        return allocation_w_complexes_model.prob_num_nonempty_cells_geq_c_w_joblib(
             n=self.n, m=m, d=self.d, c=min_span
         )
 
@@ -99,6 +101,26 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
             )
             for m_ in range(1, m + 1)
         )
+
+    def prob_serving_upper_bound_for_given_m_w_joblib(
+        self,
+        m: int,
+        lambda_: float,
+        maximal_load: float,
+    ) -> float:
+        if m == 0:
+            return 1
+
+        prob_span_is_larger_than_m_times_lambda_list = joblib.Parallel(n_jobs=-1, prefer="processes")(
+            joblib.delayed(self.prob_span_is_larger_than_m_times_lambda)(
+                m=m_,
+                lambda_=lambda_,
+                maximal_load=maximal_load,
+            )
+            for m_ in range(1, m + 1)
+        )
+
+        return min(prob_span_is_larger_than_m_times_lambda_list)
 
     def prob_serving_upper_bound(
         self,

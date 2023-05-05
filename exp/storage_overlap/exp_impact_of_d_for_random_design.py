@@ -169,8 +169,8 @@ def manage_plot_frac_demand_vectors_covered_vs_d_w_joblib():
             d_max=d_max,
             demand_for_active_obj=round(demand_for_active_obj, 1),
             maximal_load=0.7,  # 0.7,
-            # num_samples=100,
-            num_samples=1000,
+            num_samples=100,
+            # num_samples=1000,
             num_sim_run=3,
         )
 
