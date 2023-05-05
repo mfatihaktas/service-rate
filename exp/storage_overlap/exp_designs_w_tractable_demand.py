@@ -39,8 +39,11 @@ def plot_P_for_given_params(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
 
-        E_P_ub_list = []
-        std_P_ub_list = []
+        E_P_ub_w_combination_size_2_list = []
+        std_P_ub_w_combination_size_2_list = []
+
+        E_P_ub_w_combination_size_3_list = []
+        std_P_ub_w_combination_size_3_list = []
 
         E_P_lb_list = []
         std_P_lb_list = []
@@ -69,7 +72,7 @@ def plot_P_for_given_params(
             E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
             std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
-            # UB
+            # UB, with combination_size = 2
             sim_P_ub_list = sim.sim_frac_of_demand_vectors_covered(
                 demand_vector_sampler=demand_vector_sampler,
                 storage_design=storage_design,
@@ -80,8 +83,22 @@ def plot_P_for_given_params(
             )
 
             E_P_ub = numpy.mean(sim_P_ub_list)
-            E_P_ub_list.append(E_P_ub)
-            std_P_ub_list.append(numpy.std(sim_P_ub_list))
+            E_P_ub_w_combination_size_2_list.append(E_P_ub)
+            std_P_ub_w_combination_size_2_list.append(numpy.std(sim_P_ub_list))
+
+            # UB, with combination_size = 3
+            sim_P_ub_list = sim.sim_frac_of_demand_vectors_covered(
+                demand_vector_sampler=demand_vector_sampler,
+                storage_design=storage_design,
+                num_samples=num_samples,
+                num_sim_run=num_sim_run,
+                combination_size_for_is_demand_vector_covered=3,
+                maximal_load=maximal_load,
+            )
+
+            E_P_ub = numpy.mean(sim_P_ub_list)
+            E_P_ub_w_combination_size_3_list.append(E_P_ub)
+            std_P_ub_w_combination_size_3_list.append(numpy.std(sim_P_ub_list))
 
             # LB
             # sim_P_lb_list = sim.sim_frac_of_demand_vectors_covered(
@@ -110,7 +127,8 @@ def plot_P_for_given_params(
         color = next(dark_color_cycle)
         plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         # plot.errorbar(num_active_objs_list, E_P_lb_list, yerr=std_P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.errorbar(num_active_objs_list, E_P_ub_list, yerr=std_P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_active_objs_list, E_P_ub_w_combination_size_2_list, yerr=std_P_ub_w_combination_size_2_list, label=f"{storage_design.repr_for_plot()}, UB-2", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.errorbar(num_active_objs_list, E_P_ub_w_combination_size_3_list, yerr=std_P_ub_w_combination_size_3_list, label=f"{storage_design.repr_for_plot()}, UB-3", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True  # False
@@ -208,7 +226,8 @@ def manage_plot_P_w_joblib():
         for d in [3, 4]
         # for d in range(2, 7)
         # for d in [3, 4]
-        for demand_for_active_obj in [d - 1]
+        # for demand_for_active_obj in [d - 1]
+        for demand_for_active_obj in [3 * d / 4]
     )
 
     log(INFO, "Done")
