@@ -10,16 +10,17 @@ from src.utils.debug import *
 
 
 def prob_cum_demand_leq_cum_supply(
-    num_objs: int,
-    obj_demand_pdf: Callable[[float], float],
+    num_demands: int,
+    demand_pdf: Callable[[float], float],
     d: int,
-    cum_supply: float,
+    span_size: float,
+    maximal_load: float = 1,
 ) -> float:
     """
     Computes the following integral:
-    Suppose `num_objs` = 3
-    \int_{0}^{d} \int_{0}^{cum_supply - x1} \int_{0}^{cum_supply - x1 - x2}
-    obj_demand_pdf(x1, x2, x3) dx3 dx2 dx1
+    Suppose `num_demands` = 3
+    \int_{0}^{d} \int_{0}^{span_size - x1} \int_{0}^{span_size - x1 - x2}
+    demand_pdf(x1, x2, x3) dx3 dx2 dx1
 
     E.g.,
     def f3():
@@ -34,12 +35,18 @@ def prob_cum_demand_leq_cum_supply(
     Ref: https://stackoverflow.com/questions/63443828/is-there-a-multiple-integrator-in-python-providing-both-variable-integration-lim
     """
 
+    check(num_demands <= 3, "mpmath.quad supports at most 3 dimensions.")
+
     log(DEBUG, "Started",
-        num_objs=num_objs,
-        obj_demand_pdf=obj_demand_pdf,
+        num_demands=num_demands,
+        demand_pdf=demand_pdf,
         d=d,
-        cum_supply=cum_supply,
+        span_size=span_size,
+        maximal_load=maximal_load,
     )
+
+    d_ = d * maximal_load
+    cum_supply_ = span_size * maximal_load
 
     def helper(
         *args,
@@ -49,23 +56,23 @@ def prob_cum_demand_leq_cum_supply(
 
         # log(DEBUG, "", args=args, integral_limits_list=integral_limits_list)
 
-        if len(args) == num_objs:
+        if len(args) == num_demands:
             return math.prod(
                 [
-                    obj_demand_pdf(arg) for arg in args
+                    demand_pdf(arg) for arg in args
                 ]
             )
 
         integral_limits_list_ = [
             *integral_limits_list,
-            [0, min(d, cum_supply - sum(args))]
+            [0, min(d_, cum_supply_ - sum(args))]
         ]
         # log(DEBUG, "", integral_limits_list_=integral_limits_list_)
 
         return mp.quad(
             lambda x, *args: helper(x, *args, integral_limits_list=integral_limits_list_),
             *integral_limits_list_,
-            verbose=True,
+            # verbose=True,
             error=True,
             maxdegree=4,
             # lambda x: x**2, *integral_limits_list

@@ -7,13 +7,13 @@ import scipy.stats
 from mpmath import mp
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
-from src.model import generalized_birthday_problem
 from src.scan_stats import model as scan_stats_model
+from src.storage_overlap import design, math_utils
 
 from src.utils.debug import *
 
 
-mp.dps = 100
+# mp.dps = 100
 
 
 @dataclasses.dataclass
@@ -546,3 +546,28 @@ class CyclicDesignModel(ReplicaDesignModel):
             prob_list.append(prob)
 
         return max(prob_list)
+
+
+@dataclasses.dataclass
+class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
+    def prob_serving_upper_bound(
+        self,
+        combination_size: int,
+        mean_obj_demand: float,
+        maximal_load: float = 1,
+    ) -> float:
+        cyclic_design = design.CyclicDesign(k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False)
+        span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size),
+
+        demand_rv = random_variable.Exponential(mu=1)
+
+        return sum(
+            freq * math_utils.prob_cum_demand_leq_cum_supply(
+                num_demands=combination_size,
+                demand_pdf=demand_rv.pdf,
+                d=self.d,
+                span_size=span_size,
+                maximal_load=maximal_load,
+            )
+            for span_size, freq in span_size_to_freq_map.items()
+        )

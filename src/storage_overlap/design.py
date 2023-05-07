@@ -267,44 +267,35 @@ class StorageDesign:
 
         return node_overlap_size_to_counter_map
 
-    def get_num_obj_to_span_size_to_count_map(
+    def get_span_size_to_count_map(
         self,
-        max_num_obj: int = None,
+        combination_size: int,
     ) -> dict[int, int, int]:
-        if max_num_obj is None:
-            max_num_obj = self.k
+        span_size_to_count_map = collections.defaultdict(int)
 
-        num_obj_to_span_size_to_count_map = collections.defaultdict(lambda: collections.defaultdict(int))
+        for obj_id_tuple in itertools.combinations(list(range(self.k)), r=combination_size):
+            node_id_set = set()
+            for obj_id in obj_id_tuple:
+                node_id_set |= self.obj_id_to_node_id_set_map[obj_id]
 
-        obj_id_list = list(range(self.k))
-        for num_obj in range(2, max_num_obj + 1):
-            for obj_id_tuple in itertools.combinations(obj_id_list, r=num_obj):
-                node_id_set = set()
-                for obj_id in obj_id_tuple:
-                    node_id_set |= self.obj_id_to_node_id_set_map[obj_id]
+            span_size = len(node_id_set)
+            span_size_to_count_map[span_size] += 1
 
-                span_size = len(node_id_set)
-                num_obj_to_span_size_to_count_map[num_obj][span_size] += 1
+        return span_size_to_count_map
 
-        return num_obj_to_span_size_to_count_map
-
-    def get_num_obj_to_span_size_to_freq_map(
+    def get_span_size_to_freq_map(
         self,
-        max_num_obj: int,
-    ) -> dict[float, float, float]:
-        num_obj_to_span_size_to_count_map = self.get_num_obj_to_span_size_to_count_map(
-            max_num_obj=max_num_obj,
+        combination_size: int,
+    ) -> dict[int, int, float]:
+        span_size_to_count_map = self.get_span_size_to_count_map(
+            combination_size=combination_size,
         )
+        num_spans = sum(span_size_to_count_map.values())
 
-        num_obj_to_span_size_to_freq_map = {}
-        for num_obj, span_size_to_count_map in num_obj_to_span_size_to_count_map.items():
-            num_spans = sum(span_size_to_count_map.values())
-            num_obj_to_span_size_to_freq_map[num_obj] = {
-                span_size: count / num_spans
-                for span_size, count in span_size_to_count_map.items()
-            }
-
-        return num_obj_to_span_size_to_freq_map
+        return {
+            span_size: count / num_spans
+            for span_size, count in span_size_to_count_map.items()
+        }
 
 
 @dataclasses.dataclass(repr=False)
