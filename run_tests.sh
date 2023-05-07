@@ -33,6 +33,9 @@ elif [ $1 = "o" ]; then
 elif [ $1 = "p" ]; then
   ${PYTEST} "tests/test_popularity.py::test_PopModel_wZipf"
 
+elif [ $1 = "m" ]; then
+  ${PYTEST} "tests/storage_overlap/math_utils.py::test_prob_cum_demand_leq_cum_supply"
+
 else
   echo "Unexpected arg= $1"
 fi

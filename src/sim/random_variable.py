@@ -256,22 +256,22 @@ class Pareto(RandomVariable):
         return r"${}(\min= {}, \alpha= {})$".format(r"\mathrm{Pareto}", round(self.loc, 2), round(self.a, 2))
 
     def tail(self, x):
-        if x <= self.l_l:
+        if x <= self.min_value:
             return 1
         return (self.loc / x)**self.a
 
     def cdf(self, x):
-        if x <= self.l_l:
+        if x <= self.min_value:
             return 0
         return 1 - (self.loc / x)**self.a
 
     def pdf(self, x):
-        if x <= self.l_l:
+        if x <= self.min_value:
             return 0
         return self.a * self.loc**self.a / x**(self.a + 1)
 
     def dpdf_dx(self, x):
-        if x <= self.l_l:
+        if x <= self.min_value:
             return 0
         return sympy.mpmath.diff(lambda y: self.a*self.loc**self.a / y**(self.a+1), x)
 

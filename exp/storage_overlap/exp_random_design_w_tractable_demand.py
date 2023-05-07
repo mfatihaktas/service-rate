@@ -176,9 +176,8 @@ def manage_plot_P_w_joblib():
             num_sim_run=3,
         )
         # for d in [2, 3]
-        for d in [3, 4]
-        # for d in range(2, 7)
         # for d in [3, 4]
+        for d in [7, 8]
         for demand_for_active_obj in [d - 1]
         # for demand_for_active_obj in [3 * d / 4]
     )
