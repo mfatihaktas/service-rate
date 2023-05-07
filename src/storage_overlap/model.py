@@ -8,6 +8,7 @@ from mpmath import mp
 
 from src.allocation_w_complexes import model as allocation_w_complexes_model
 from src.scan_stats import model as scan_stats_model
+from src.sim import random_variable
 from src.storage_overlap import design, math_utils
 
 from src.utils.debug import *
@@ -556,8 +557,14 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
         mean_obj_demand: float,
         maximal_load: float = 1,
     ) -> float:
+        log(DEBUG, "Started",
+            combination_size=combination_size,
+            mean_obj_demand=mean_obj_demand,
+            maximal_load=maximal_load,
+        )
+
         cyclic_design = design.CyclicDesign(k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False)
-        span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size),
+        span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size)
 
         demand_rv = random_variable.Exponential(mu=1)
 

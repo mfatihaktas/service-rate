@@ -74,7 +74,7 @@ def prob_cum_demand_leq_cum_supply(
             *integral_limits_list_,
             # verbose=True,
             error=True,
-            maxdegree=4,
+            maxdegree=3,  # 4,
             # lambda x: x**2, *integral_limits_list
         )[0]
 
