@@ -7,6 +7,7 @@ from src.storage_overlap import (
     sim,
 )
 from src.model import demand
+from src.sim import random_variable
 
 from src.utils.plot import *
 
@@ -14,6 +15,7 @@ from src.utils.plot import *
 def plot_P_for_given_params(
     k: int,
     d: int,
+    num_active_objs: int,
     maximal_load: float,
     num_samples: int = 300,
     num_sim_run: int = 3,
@@ -21,6 +23,7 @@ def plot_P_for_given_params(
     log(INFO, "Started",
         k=k,
         d=d,
+        num_active_objs=num_active_objs,
         maximal_load=maximal_load,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
@@ -39,16 +42,16 @@ def plot_P_for_given_params(
         std_frac_of_demand_vectors_covered_list = []
 
         P_ub_list = []
-        P_lb_list = []
 
         for mean_obj_demand in numpy.linspace(0.1, 3, 10):
             log(INFO, f"> mean_obj_demand= {mean_obj_demand}")
 
             mean_obj_demand_list.append(mean_obj_demand)
 
-            demand_vector_sampler = demand.DemandVectorSamplerWithExpObjDemands(
+            demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
                 num_objs=storage_design.k,
-                mean_obj_demand=mean_obj_demand,
+                num_active_objs=num_active_objs,
+                active_obj_demand_rv=random_variable.Exponential(mu=1 / mean_obj_demand),
             )
 
             # Sim
@@ -69,6 +72,8 @@ def plot_P_for_given_params(
             # UB
             P_ub = storage_model.prob_serving_upper_bound(
                 mean_obj_demand=mean_obj_demand,
+                # max_combination_size=2,
+                max_combination_size=num_active_objs,
             )
             P_ub_list.append(P_ub)
 
@@ -101,26 +106,41 @@ def plot_P_for_given_params(
         )
     ]
 
-    run_sim = False
+    run_sim = True
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
 
 def plot_P(
-    d: int,
+    d_list: list[int],
+    num_active_objs: int,
     maximal_load: float,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     k = 120
 
-    plot_P_for_given_params(
-        k=k,
-        d=d,
-        maximal_load=maximal_load,
-        num_samples=num_samples,
-        num_sim_run=num_sim_run,
-    )
+    for d in d_list:
+        plot_P_for_given_params(
+            k=k,
+            d=d,
+            num_active_objs=num_active_objs,
+            maximal_load=maximal_load,
+            num_samples=num_samples,
+            num_sim_run=num_sim_run,
+        )
+
+    # joblib.Parallel(n_jobs=-1, prefer="processes")(
+    #     joblib.delayed(plot_P_for_given_params)(
+    #         k=k,
+    #         d=d,
+    #         num_active_objs=num_active_objs,
+    #         maximal_load=maximal_load,
+    #         num_samples=num_samples,
+    #         num_sim_run=num_sim_run,
+    #     )
+    #     for d in d_list
+    # )
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
@@ -130,6 +150,7 @@ def plot_P(
     plot.title(
         fr"$k= n= {k}$, "
         fr"$m= {maximal_load}$, "
+        r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
         r"$\rho \sim$ Exp"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
@@ -140,8 +161,8 @@ def plot_P(
     file_name = (
         "plots/plot_cyclic_design_w_general_demand_distribution"
         + f"_k_{k}"
-        + f"_d_{d}"
         + f"_m_{maximal_load}"
+        + f"_n_active_{num_active_objs}"
         + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -155,16 +176,16 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d=d,
+            d_list=[2, 3, 4, 5],
+            num_active_objs=num_active_objs,
             maximal_load=1,  # 0.7,
             num_samples=100,  # 300,
             # num_samples=1000,
             num_sim_run=3,
         )
-        for d in [2]
-        # for d in [2, 3]
-        # for d in [3, 4]
-        # for d in [7, 8]
+        # for num_active_objs in [3]
+        # for num_active_objs in [2, 3]
+        for num_active_objs in [4, 5]
     )
 
     log(INFO, "Done")

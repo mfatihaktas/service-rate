@@ -582,6 +582,7 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
     def prob_serving_upper_bound(
         self,
         mean_obj_demand: float,
+        max_combination_size: int,
         maximal_load: float = 1,
     ) -> float:
         return min(
@@ -590,6 +591,5 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
                 mean_obj_demand=mean_obj_demand,
                 maximal_load=maximal_load,
             )
-            # for combination_size in range(2, self.k)
-            for combination_size in range(2, 5)
+            for combination_size in range(2, max_combination_size + 1)
         )

@@ -169,6 +169,20 @@ class DemandVectorSamplerWithFixedActiveObjDemand(DemandVectorSampler):
 
 
 @dataclasses.dataclass
+class DemandVectorSamplerWithFixedNumActiveObjs(DemandVectorSampler):
+    num_objs: int
+    num_active_objs: int
+    active_obj_demand_rv: random_variable.RandomVariable
+
+    def sample_demand_vector(self) -> list[float]:
+        demand_vector = [0] * self.num_objs
+        for i in random.sample(list(range(self.num_objs)), self.num_active_objs):
+            demand_vector[i] = self.active_obj_demand_rv.sample()
+
+        return demand_vector
+
+
+@dataclasses.dataclass
 class DemandVectorSamplerWithBernoulliObjDemands(DemandVectorSampler):
     num_objs: int
     demand_for_active_obj: float
