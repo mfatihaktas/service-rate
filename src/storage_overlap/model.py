@@ -550,11 +550,16 @@ class CyclicDesignModel(ReplicaDesignModel):
 
 
 @dataclasses.dataclass
-class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
+class CyclicDesignModelForGivenDemandDistribution(ReplicaDesignModel):
+    def __post_init__(self):
+        self.cyclic_design = design.CyclicDesign(
+            k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False
+        )
+
     def prob_serving_upper_bound_for_given_combination_size(
         self,
+        demand_rv: random_variable.RandomVariable,
         combination_size: int,
-        mean_obj_demand: float,
         maximal_load: float = 1,
     ) -> float:
         # log(DEBUG, "Started",
@@ -563,10 +568,7 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
         #     maximal_load=maximal_load,
         # )
 
-        cyclic_design = design.CyclicDesign(k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False)
-        span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size)
-
-        demand_rv = random_variable.Exponential(mu=1 / mean_obj_demand)
+        span_size_to_freq_map = self.cyclic_design.get_span_size_to_freq_map(combination_size)
 
         return sum(
             freq * math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
@@ -581,14 +583,14 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
 
     def prob_serving_upper_bound(
         self,
-        mean_obj_demand: float,
+        demand_rv: random_variable.RandomVariable,
         max_combination_size: int,
         maximal_load: float = 1,
     ) -> float:
         return min(
             self.prob_serving_upper_bound_for_given_combination_size(
+                demand_rv=demand_rv,
                 combination_size=combination_size,
-                mean_obj_demand=mean_obj_demand,
                 maximal_load=maximal_load,
             )
             for combination_size in range(2, max_combination_size + 1)
