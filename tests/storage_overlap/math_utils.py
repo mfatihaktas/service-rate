@@ -23,8 +23,21 @@ def demand_pdf(request) -> Callable[[float], float]:
 def test_prob_cum_demand_leq_cum_supply(
     demand_pdf: Callable[[float], float],
 ):
-    prob = math_utils.prob_cum_demand_leq_cum_supply(
+    prob = math_utils.prob_cum_demand_leq_cum_supply_w_mpmath(
         num_demands=2,
+        demand_pdf=demand_pdf,
+        d=2,
+        span_size=3,
+    )
+
+    log(DEBUG, "", prob=prob)
+
+
+def test_prob_cum_demand_leq_cum_supply_w_scipy(
+    demand_pdf: Callable[[float], float],
+):
+    prob = math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
+        num_demands=1,
         demand_pdf=demand_pdf,
         d=2,
         span_size=3,

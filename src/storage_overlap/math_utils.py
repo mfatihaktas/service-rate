@@ -1,5 +1,6 @@
 import math
 import mpmath as mp
+import scipy
 
 from typing import Callable
 
@@ -9,7 +10,7 @@ from src.utils.debug import *
 # mp.dps = 100
 
 
-def prob_cum_demand_leq_cum_supply(
+def prob_cum_demand_leq_cum_supply_w_mpmath(
     num_demands: int,
     demand_pdf: Callable[[float], float],
     d: int,
@@ -74,8 +75,54 @@ def prob_cum_demand_leq_cum_supply(
             *integral_limits_list_,
             # verbose=True,
             error=True,
-            maxdegree=3,  # 4,
+            # maxdegree=3,  # 4,
             # lambda x: x**2, *integral_limits_list
         )[0]
 
     return helper()
+
+
+def prob_cum_demand_leq_cum_supply_w_scipy(
+    num_demands: int,
+    demand_pdf: Callable[[float], float],
+    d: int,
+    span_size: float,
+    maximal_load: float = 1,
+) -> float:
+    """
+    Computes the following integral:
+    Suppose `num_demands` = 3
+    \int_{0}^{d} \int_{0}^{span_size - x1} \int_{0}^{span_size - x1 - x2}
+    demand_pdf(x1, x2, x3) dx3 dx2 dx1
+
+    Ref: https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.nquad.html#scipy.integrate.nquad
+    """
+
+    log(DEBUG, "Started",
+        num_demands=num_demands,
+        demand_pdf=demand_pdf,
+        d=d,
+        span_size=span_size,
+        maximal_load=maximal_load,
+    )
+
+    d_ = d * maximal_load
+    cum_supply_ = span_size * maximal_load
+
+    def func(*args) -> float:
+        return math.prod(
+            [
+                demand_pdf(arg) for arg in args
+            ]
+        )
+
+    integral_result = scipy.integrate.nquad(
+        func=func,
+        ranges=[
+            lambda *args: [0, min(d_, cum_supply_ - sum(args))]
+            for i in range(num_demands)
+        ],
+    )
+    log(DEBUG, "", integral_result=integral_result)
+
+    return integral_result[0]

@@ -11,7 +11,8 @@ def test_CyclicDesignModelForExpObjDemands():
 
     log(DEBUG, "", cyclic_model=cyclic_model)
 
-    for mean_obj_demand in numpy.linspace(0.1, 0.9):
+    # for mean_obj_demand in numpy.linspace(0.1, 0.9, 3):
+    for mean_obj_demand in numpy.linspace(0.1, 1, 10):
         P_ub = cyclic_model.prob_serving_upper_bound(
             combination_size=2,
             mean_obj_demand=mean_obj_demand,

@@ -566,10 +566,10 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
         cyclic_design = design.CyclicDesign(k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False)
         span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size)
 
-        demand_rv = random_variable.Exponential(mu=1)
+        demand_rv = random_variable.Exponential(mu=1 / mean_obj_demand)
 
         return sum(
-            freq * math_utils.prob_cum_demand_leq_cum_supply(
+            freq * math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
                 num_demands=combination_size,
                 demand_pdf=demand_rv.pdf,
                 d=self.d,
