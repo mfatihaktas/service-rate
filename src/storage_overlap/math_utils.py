@@ -122,6 +122,10 @@ def prob_cum_demand_leq_cum_supply_w_scipy(
             lambda *args: [0, min(d_, cum_supply_ - sum(args))]
             for i in range(num_demands)
         ],
+        opts={
+            # "limit": 10,
+            "epsabs": 0.001
+        }
     )
     log(DEBUG, "", integral_result=integral_result)
 
