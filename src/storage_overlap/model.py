@@ -551,17 +551,17 @@ class CyclicDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
-    def prob_serving_upper_bound(
+    def prob_serving_upper_bound_for_given_combination_size(
         self,
         combination_size: int,
         mean_obj_demand: float,
         maximal_load: float = 1,
     ) -> float:
-        log(DEBUG, "Started",
-            combination_size=combination_size,
-            mean_obj_demand=mean_obj_demand,
-            maximal_load=maximal_load,
-        )
+        # log(DEBUG, "Started",
+        #     combination_size=combination_size,
+        #     mean_obj_demand=mean_obj_demand,
+        #     maximal_load=maximal_load,
+        # )
 
         cyclic_design = design.CyclicDesign(k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False)
         span_size_to_freq_map = cyclic_design.get_span_size_to_freq_map(combination_size)
@@ -577,4 +577,19 @@ class CyclicDesignModelForExpObjDemands(ReplicaDesignModel):
                 maximal_load=maximal_load,
             )
             for span_size, freq in span_size_to_freq_map.items()
+        )
+
+    def prob_serving_upper_bound(
+        self,
+        mean_obj_demand: float,
+        maximal_load: float = 1,
+    ) -> float:
+        return min(
+            self.prob_serving_upper_bound_for_given_combination_size(
+                combination_size=combination_size,
+                mean_obj_demand=mean_obj_demand,
+                maximal_load=maximal_load,
+            )
+            # for combination_size in range(2, self.k)
+            for combination_size in range(2, 5)
         )

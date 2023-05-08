@@ -167,7 +167,7 @@ def plot_P_vs_E_ro(
         "plots/plot_P_vs_design"
         + f"_k_{k}"
         + f"_d_{d}"
-        + f"_maximal_load_{maximal_load}"
+        + f"_m_{maximal_load}"
         + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
