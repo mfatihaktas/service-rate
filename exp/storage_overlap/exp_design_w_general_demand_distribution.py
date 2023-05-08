@@ -150,7 +150,7 @@ def plot_P_w_pareto_demand_distribution(
 
         P_ub_list = []
 
-        for tail_index in range(10, 1, -1):
+        for tail_index in range(8, 1, -1):
             log(INFO, f"> tail_index= {tail_index}")
 
             tail_index_list.append(tail_index)
@@ -209,10 +209,15 @@ def plot_P_w_pareto_demand_distribution(
     use_cvxpy = True
 
     storage_design_and_model_list = [
+        # (
+        #     design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+        #     model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
+
         (
-            design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-            model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        )
+            design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
     ]
 
     run_sim = True
@@ -230,16 +235,7 @@ def plot_P(
     k = 120
 
     for d in d_list:
-        plot_P_w_exp_demand_distribution(
-            k=k,
-            d=d,
-            num_active_objs=num_active_objs,
-            maximal_load=maximal_load,
-            num_samples=num_samples,
-            num_sim_run=num_sim_run,
-        )
-
-        # plot_P_w_pareto_demand_distribution(
+        # plot_P_w_exp_demand_distribution(
         #     k=k,
         #     d=d,
         #     num_active_objs=num_active_objs,
@@ -247,6 +243,15 @@ def plot_P(
         #     num_samples=num_samples,
         #     num_sim_run=num_sim_run,
         # )
+
+        plot_P_w_pareto_demand_distribution(
+            k=k,
+            d=d,
+            num_active_objs=num_active_objs,
+            maximal_load=maximal_load,
+            num_samples=num_samples,
+            num_sim_run=num_sim_run,
+        )
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
