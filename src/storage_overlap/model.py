@@ -550,12 +550,7 @@ class CyclicDesignModel(ReplicaDesignModel):
 
 
 @dataclasses.dataclass
-class CyclicDesignModelForGivenDemandDistribution(ReplicaDesignModel):
-    def __post_init__(self):
-        self.cyclic_design = design.CyclicDesign(
-            k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False
-        )
-
+class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
     def prob_serving_upper_bound_for_given_combination_size(
         self,
         demand_rv: random_variable.RandomVariable,
@@ -568,7 +563,7 @@ class CyclicDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         #     maximal_load=maximal_load,
         # )
 
-        span_size_to_freq_map = self.cyclic_design.get_span_size_to_freq_map(combination_size)
+        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
 
         return sum(
             freq * math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
@@ -594,4 +589,28 @@ class CyclicDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 maximal_load=maximal_load,
             )
             for combination_size in range(2, max_combination_size + 1)
+        )
+
+
+@dataclasses.dataclass
+class CyclicDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):
+    def __post_init__(self):
+        self.storage_design = design.CyclicDesign(
+            k=self.k, n=self.n, d=self.d, shift_size=1, use_cvxpy=False
+        )
+
+
+@dataclasses.dataclass
+class RandomDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):
+    def __post_init__(self):
+        self.storage_design = design.RandomExpanderDesign(
+            k=self.k, n=self.n, d=self.d, use_cvxpy=False
+        )
+
+
+@dataclasses.dataclass
+class BlockDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):
+    def __post_init__(self):
+        self.storage_design = design.RandomBlockDesign(
+            k=self.k, n=self.n, d=self.d, use_cvxpy=False
         )
