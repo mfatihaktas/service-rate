@@ -114,7 +114,7 @@ def plot_P_w_exp_demand_distribution(
         ),
     ]
 
-    run_sim = True
+    run_sim = False
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
@@ -220,7 +220,7 @@ def plot_P_w_pareto_demand_distribution(
         ),
     ]
 
-    run_sim = True
+    run_sim = False
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
@@ -235,16 +235,7 @@ def plot_P(
     k = 120
 
     for d in d_list:
-        # plot_P_w_exp_demand_distribution(
-        #     k=k,
-        #     d=d,
-        #     num_active_objs=num_active_objs,
-        #     maximal_load=maximal_load,
-        #     num_samples=num_samples,
-        #     num_sim_run=num_sim_run,
-        # )
-
-        plot_P_w_pareto_demand_distribution(
+        plot_P_w_exp_demand_distribution(
             k=k,
             d=d,
             num_active_objs=num_active_objs,
@@ -252,6 +243,15 @@ def plot_P(
             num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
+
+        # plot_P_w_pareto_demand_distribution(
+        #     k=k,
+        #     d=d,
+        #     num_active_objs=num_active_objs,
+        #     maximal_load=maximal_load,
+        #     num_samples=num_samples,
+        #     num_sim_run=num_sim_run,
+        # )
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
@@ -288,7 +288,8 @@ def manage_plot_P_w_joblib():
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
             # d_list=[2, 3, 4, 5],
-            d_list=[2, 3],
+            # d_list=[2, 3],
+            d_list=[5, 6],
             num_active_objs=num_active_objs,
             maximal_load=1,  # 0.7,
             num_samples=100,  # 300,
@@ -296,8 +297,8 @@ def manage_plot_P_w_joblib():
             num_sim_run=3,
         )
         # for num_active_objs in [3]
-        for num_active_objs in [2, 3]
-        # for num_active_objs in [4, 5]
+        # for num_active_objs in [2, 3]
+        for num_active_objs in [4, 5]
     )
 
     log(INFO, "Done")
