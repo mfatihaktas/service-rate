@@ -240,6 +240,121 @@ def plot_P_w_pareto_demand_distribution(
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
 
+def plot_P_w_bernoulli_demand_distribution(
+    k: int,
+    d: int,
+    num_active_objs: int,
+    maximal_load: float,
+    num_samples: int = 300,
+    num_sim_run: int = 3,
+):
+    log(INFO, "Started",
+        k=k,
+        d=d,
+        num_active_objs=num_active_objs,
+        maximal_load=maximal_load,
+        num_samples=num_samples,
+        num_sim_run=num_sim_run,
+    )
+
+    def plot_(
+        storage_design: design.CyclicDesign,
+        storage_model: model.CyclicDesignModelForGivenDemandDistribution,
+        run_sim: bool = False,
+    ):
+        log(INFO, f">> storage_design= {storage_design}")
+
+        active_obj_demand_list = []
+
+        E_frac_of_demand_vectors_covered_list = []
+        std_frac_of_demand_vectors_covered_list = []
+
+        P_ub_list = []
+
+        for active_obj_demand in numpy.linspace(0.1, 3, 10):
+            log(INFO, f"> active_obj_demand= {active_obj_demand}")
+
+            active_obj_demand_list.append(active_obj_demand)
+
+            active_obj_demand_rv = random_variable.CustomDiscrete(
+                value_list=[active_obj_demand],
+                prob_weight_list=[1],
+            )
+
+            demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
+                num_objs=storage_design.k,
+                num_active_objs=num_active_objs,
+                active_obj_demand_rv=active_obj_demand_rv,
+            )
+
+            # Sim
+            E_frac_of_demand_vectors_covered = 0.02
+            if run_sim:
+                frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                    demand_vector_sampler=demand_vector_sampler,
+                    storage_design=storage_design,
+                    num_samples=num_samples,
+                    num_sim_run=num_sim_run,
+                    maximal_load=maximal_load,
+                )
+
+                E_frac_of_demand_vectors_covered = numpy.mean(frac_of_demand_vectors_covered_list)
+                E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
+                std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
+
+            # UB
+            # P_ub = storage_model.prob_serving_upper_bound(
+            #     demand_rv=active_obj_demand_rv,
+            #     # max_combination_size=2,
+            #     max_combination_size=num_active_objs,
+            #     maximal_load=maximal_load,
+            # )
+            # P_ub_list.append(P_ub)
+
+            if E_frac_of_demand_vectors_covered < 0.01:
+                break
+
+        log(INFO, f"storage_design= {storage_design}",
+            active_obj_demand_list=active_obj_demand_list,
+            E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
+            std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+        )
+
+        color = next(dark_color_cycle)
+        if run_sim:
+            plot.errorbar(active_obj_demand_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.plot(active_obj_demand_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
+    n = k
+    use_cvxpy = True
+
+    storage_design_and_model_list = [
+        (
+            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
+
+        (
+            design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+            model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
+
+        # (
+        #     design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
+
+        (
+            design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
+    ]
+
+    run_sim = True
+    for storage_design, storage_model in storage_design_and_model_list:
+        plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
+
+
 def plot_P(
     d_list: list[int],
     num_active_objs: int,
@@ -259,7 +374,16 @@ def plot_P(
         #     num_sim_run=num_sim_run,
         # )
 
-        plot_P_w_pareto_demand_distribution(
+        # plot_P_w_pareto_demand_distribution(
+        #     k=k,
+        #     d=d,
+        #     num_active_objs=num_active_objs,
+        #     maximal_load=maximal_load,
+        #     num_samples=num_samples,
+        #     num_sim_run=num_sim_run,
+        # )
+
+        plot_P_w_bernoulli_demand_distribution(
             k=k,
             d=d,
             num_active_objs=num_active_objs,
@@ -267,6 +391,7 @@ def plot_P(
             num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
+
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
