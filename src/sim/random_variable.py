@@ -203,6 +203,28 @@ class CustomDiscrete(RandomVariable):
         return self.dist.rvs()
 
 
+class Bernoulli(RandomVariable):
+    def __init__(self, p: float, D: float):
+        super().__init__(min_value=0, max_value=D)
+
+        self.p = p
+        self.D = D
+
+        self.dist = scipy.stats.bernoulli(p)
+
+    def __str__(self):
+        return r"Bernoulli(p= {}, D= {})".format(self.p, self.D)
+
+    def to_latex(self):
+        return r"${} \times {}(p= {})$".format(self.D, r"\mathrm{Bernoulli}", self.p)
+
+    def pdf(self, x: float):
+        return self.dist.pmf(x / self.D)
+
+    def sample(self) -> float:
+        return self.dist.rvs(size=1)[0]
+
+
 class BoundedZipf(RandomVariable):
     def __init__(self, min_value, max_value, a=1):
         super().__init__(min_value=min_value, max_value=max_value)
