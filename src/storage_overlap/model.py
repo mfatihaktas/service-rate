@@ -564,6 +564,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         # )
 
         span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
+        log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
 
         return sum(
             freq * math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
@@ -589,6 +590,14 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 maximal_load=maximal_load,
             )
             for combination_size in range(2, max_combination_size + 1)
+        )
+
+
+@dataclasses.dataclass
+class ClusteringDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):
+    def __post_init__(self):
+        self.storage_design = design.ClusteringDesign(
+            k=self.k, n=self.n, d=self.d, use_cvxpy=False
         )
 
 
