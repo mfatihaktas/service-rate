@@ -551,6 +551,38 @@ class CyclicDesignModel(ReplicaDesignModel):
 
 @dataclasses.dataclass
 class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
+    def prob_cum_demand_leq_cum_supply_for_constant_demand(
+        self,
+        combination_size: int,
+        demand_rv: random_variable.RandomVariable,
+        span_size: int,
+    ) -> float:
+        cum_demand = combination_size * demand_rv.value
+        return int(span_size >= cum_demand)
+
+    def prob_cum_demand_leq_cum_supply(
+        self,
+        combination_size: int,
+        demand_rv: random_variable.RandomVariable,
+        span_size: int,
+    ) -> float:
+        if isinstance(demand_rv, random_variable.Constant):
+            return self.prob_cum_demand_leq_cum_supply_for_constant_demand(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
+                span_size=span_size,
+            )
+
+        else:
+            log(WARNING, "Using numeric integral")
+            return math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
+                num_demands=combination_size,
+                demand_pdf=demand_rv.pdf,
+                d=self.d,
+                span_size=span_size,
+                maximal_load=maximal_load,
+            )
+
     def prob_serving_upper_bound_for_given_combination_size(
         self,
         demand_rv: random_variable.RandomVariable,
@@ -567,12 +599,10 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
 
         return sum(
-            freq * math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
-                num_demands=combination_size,
-                demand_pdf=demand_rv.pdf,
-                d=self.d,
+            freq * self.prob_cum_demand_leq_cum_supply(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
                 span_size=span_size,
-                maximal_load=maximal_load,
             )
             for span_size, freq in span_size_to_freq_map.items()
         )
@@ -590,21 +620,6 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 maximal_load=maximal_load,
             )
             for combination_size in range(2, max_combination_size + 1)
-        )
-
-    def prob_serving_upper_bound_for_constant_demand(
-        self,
-        demand: float,
-        combination_size: int,
-        maximal_load: float = 1,
-    ) -> float:
-        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
-        log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
-
-        cum_demand = combination_size * combination_size
-        return sum(
-            freq * int(span_size >= cum_demand)
-            for span_size, freq in span_size_to_freq_map.items()
         )
 
 

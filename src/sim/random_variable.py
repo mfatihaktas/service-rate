@@ -86,7 +86,7 @@ class Exponential(RandomVariable):
 
     def to_latex(self) -> str:
         if self.D == 0:
-            return r"\textrm{Exp}" + f"(\mu={self.mu})"
+            return r"\textrm{Exp}" + f"(\mu={round(self.mu, 2)})"
 
         return f"{self.D}" + r"\textrm{Exp}" + f"(\mu={self.mu})"
 

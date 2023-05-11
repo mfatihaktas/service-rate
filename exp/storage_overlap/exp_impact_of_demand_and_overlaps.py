@@ -131,13 +131,10 @@ def plot_P(
 ):
     k = 120
 
+    # active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
+    # active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
     active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=1, a=tail_index)
-    # active_obj_demand_rv = random_variable.CustomDiscrete(
-    #     value_list=[active_obj_demand],
-    #     prob_weight_list=[1],
-    # )
-    # active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
 
     run_sim = True
     for d in d_list:
@@ -193,7 +190,8 @@ def manage_plot_P_w_joblib():
             # num_samples=1000,
             num_sim_run=3,
         )
-        for active_obj_demand in [1.5, 2]
+        # for active_obj_demand in [1.5, 2]
+        for active_obj_demand in [2, 3]
     )
 
     log(INFO, "Done")
