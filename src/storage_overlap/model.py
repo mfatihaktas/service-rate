@@ -592,6 +592,21 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
             for combination_size in range(2, max_combination_size + 1)
         )
 
+    def prob_serving_upper_bound_for_constant_demand(
+        self,
+        demand: float,
+        combination_size: int,
+        maximal_load: float = 1,
+    ) -> float:
+        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
+        log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
+
+        cum_demand = combination_size * combination_size
+        return sum(
+            freq * int(span_size >= cum_demand)
+            for span_size, freq in span_size_to_freq_map.items()
+        )
+
 
 @dataclasses.dataclass
 class ClusteringDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):

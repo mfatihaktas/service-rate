@@ -203,6 +203,16 @@ class CustomDiscrete(RandomVariable):
         return self.dist.rvs()
 
 
+class Constant(RandomVariable):
+    def __init__(self, value: float):
+        super().__init__(min_value=value, max_value=value)
+
+        self.value = value
+
+    def sample(self) -> float:
+        return self.value
+
+
 class Bernoulli(RandomVariable):
     def __init__(self, p: float, D: float):
         super().__init__(min_value=0, max_value=D)
@@ -222,7 +232,7 @@ class Bernoulli(RandomVariable):
         return self.dist.pmf(x / self.D)
 
     def sample(self) -> float:
-        return self.dist.rvs(size=1)[0]
+        return self.dist.rvs(size=1)[0] * self.D
 
 
 class BoundedZipf(RandomVariable):

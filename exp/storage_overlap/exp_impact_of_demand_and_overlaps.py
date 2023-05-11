@@ -131,13 +131,13 @@ def plot_P(
 ):
     k = 120
 
-    # active_obj_demand_rv = random_variable.Exponential(mu=1 / mean_obj_demand)
+    active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=1, a=tail_index)
     # active_obj_demand_rv = random_variable.CustomDiscrete(
     #     value_list=[active_obj_demand],
     #     prob_weight_list=[1],
     # )
-    active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
+    # active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
 
     run_sim = True
     for d in d_list:
@@ -159,7 +159,7 @@ def plot_P(
     plot.title(
         fr"$k= n= {k}$, "
         fr"$m= {maximal_load}$, "
-        r"$\rho \sim$ Exp"
+        fr"$\rho \sim {active_obj_demand_rv.to_latex()}$"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -167,7 +167,7 @@ def plot_P(
     # Save the plot
     plot.gcf().set_size_inches(6, 4)
     file_name = (
-        "plots/plot_design_w_general_demand_distribution"
+        "plots/plot_impact_of_demand_and_overlaps"
         + f"_k_{k}"
         + f"_m_{maximal_load}"
         + f"_active_obj_demand_{active_obj_demand}"
