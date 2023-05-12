@@ -209,6 +209,9 @@ class Constant(RandomVariable):
 
         self.value = value
 
+    def to_latex(self):
+        return "{}({})".format(r"\mathrm{Constant}", self.value)
+
     def sample(self) -> float:
         return self.value
 

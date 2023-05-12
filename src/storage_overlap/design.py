@@ -283,12 +283,47 @@ class StorageDesign:
 
         return span_size_to_count_map
 
+    def get_span_size_to_count_map_w_monte_carlo(
+        self,
+        combination_size: int,
+        num_samples: int,
+    ) -> dict[int, int, int]:
+        span_size_to_count_map = collections.defaultdict(int)
+
+        for _ in range(num_samples):
+            obj_id_list = random.sample(list(range(self.k)), combination_size)
+
+            node_id_set = set()
+            for obj_id in obj_id_list:
+                node_id_set |= self.obj_id_to_node_id_set_map[obj_id]
+
+            span_size = len(node_id_set)
+            span_size_to_count_map[span_size] += 1
+
+        return span_size_to_count_map
+
     def get_span_size_to_freq_map(
         self,
         combination_size: int,
     ) -> dict[int, int, float]:
         span_size_to_count_map = self.get_span_size_to_count_map(
             combination_size=combination_size,
+        )
+        num_spans = sum(span_size_to_count_map.values())
+
+        return {
+            span_size: count / num_spans
+            for span_size, count in span_size_to_count_map.items()
+        }
+
+    def get_span_size_to_freq_map_w_monte_carlo(
+        self,
+        combination_size: int,
+        num_samples: int,
+    ) -> dict[int, int, float]:
+        span_size_to_count_map = self.get_span_size_to_count_map_w_monte_carlo(
+            combination_size=combination_size,
+            num_samples=num_samples,
         )
         num_spans = sum(span_size_to_count_map.values())
 

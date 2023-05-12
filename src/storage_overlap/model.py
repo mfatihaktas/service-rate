@@ -555,22 +555,49 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         self,
         combination_size: int,
         demand_rv: random_variable.RandomVariable,
-        span_size: int,
+        cum_supply: int,
     ) -> float:
         cum_demand = combination_size * demand_rv.value
-        return int(span_size >= cum_demand)
+        return int(cum_demand <= cum_supply)
+
+    def prob_cum_demand_leq_cum_supply_for_exp_demand(
+        self,
+        combination_size: int,
+        demand_rv: random_variable.Exponential,
+        cum_supply: int,
+    ) -> float:
+        return scipy.stats.erlang.cdf(
+            cum_supply, a=combination_size, loc=0, scale=demand_rv.mean()
+        )
 
     def prob_cum_demand_leq_cum_supply(
         self,
         combination_size: int,
         demand_rv: random_variable.RandomVariable,
         span_size: int,
+        maximal_load: float,
     ) -> float:
+        # log(DEBUG, "Started",
+        #     combination_size=combination_size,
+        #     demand_rv=demand_rv,
+        #     span_size=span_size,
+        #     maximal_load=maximal_load,
+        # )
+
+        cum_supply = span_size * maximal_load
+
         if isinstance(demand_rv, random_variable.Constant):
             return self.prob_cum_demand_leq_cum_supply_for_constant_demand(
                 combination_size=combination_size,
                 demand_rv=demand_rv,
-                span_size=span_size,
+                cum_supply=cum_supply,
+            )
+
+        elif isinstance(demand_rv, random_variable.Exponential):
+            return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
+                cum_supply=cum_supply,
             )
 
         else:
@@ -590,12 +617,16 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         maximal_load: float = 1,
     ) -> float:
         # log(DEBUG, "Started",
+        #     demand_rv=demand_rv,
         #     combination_size=combination_size,
-        #     mean_obj_demand=mean_obj_demand,
         #     maximal_load=maximal_load,
         # )
 
-        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
+        # span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
+        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
+            combination_size=combination_size,
+            num_samples=1000,
+        )
         log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
 
         return sum(
@@ -603,6 +634,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 combination_size=combination_size,
                 demand_rv=demand_rv,
                 span_size=span_size,
+                maximal_load=maximal_load,
             )
             for span_size, freq in span_size_to_freq_map.items()
         )

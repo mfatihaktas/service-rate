@@ -71,13 +71,13 @@ def plot_P_for_given_params(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-            # P_ub = storage_model.prob_serving_upper_bound(
-            #     demand_rv=active_obj_demand_rv,
-            #     # max_combination_size=2,
-            #     max_combination_size=num_active_objs,
-            #     maximal_load=maximal_load,
-            # )
-            # P_ub_list.append(P_ub)
+            P_ub = storage_model.prob_serving_upper_bound(
+                demand_rv=active_obj_demand_rv,
+                # max_combination_size=2,
+                max_combination_size=num_active_objs,
+                maximal_load=maximal_load,
+            )
+            P_ub_list.append(P_ub)
 
             if E_frac_of_demand_vectors_covered < 0.01:
                 break
@@ -91,7 +91,8 @@ def plot_P_for_given_params(
         color = next(dark_color_cycle)
         if run_sim:
             plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        # plot.plot(num_active_objs_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
+        plot.plot(num_active_objs_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
@@ -136,7 +137,7 @@ def plot_P(
     active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=1, a=tail_index)
 
-    run_sim = True
+    run_sim = False
     for d in d_list:
         plot_P_for_given_params(
             k=k,
@@ -151,7 +152,8 @@ def plot_P(
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
-    plot.xlabel(r"$n_{\textrm{active}}$", fontsize=fontsize)
+    # plot.xlabel(r"$n_{\textrm{active}}$", fontsize=fontsize)
+    plot.xlabel("Number of active objects", fontsize=fontsize)
 
     plot.title(
         fr"$k= n= {k}$, "
