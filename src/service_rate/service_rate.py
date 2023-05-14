@@ -53,7 +53,7 @@ class ServiceRateInspectorBase:
         max_load = self.max_load(obj_demand_list)
         # log(DEBUG, "", max_load=max_load, obj_demand_list=obj_demand_list)
 
-        return max_load <= maximal_load + 0.001
+        return max_load <= (maximal_load + 0.001)
 
     def max_load(self, obj_demand_list: list[float]) -> float:
         """Returns the load at the the maximally loaded node (i.e., maximal load)

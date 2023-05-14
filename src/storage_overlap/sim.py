@@ -98,7 +98,8 @@ def sim_frac_of_demand_vectors_covered(
 
             demand_vector = demand_vector_sampler.sample_demand_vector()
             # log(DEBUG, f"> sample_id= {sample_id}",
-            #     num_nonzero_demands=sum(int(demand > 0) for demand in demand_vector),
+            #     # num_nonzero_demands=sum(int(demand > 0) for demand in demand_vector),
+            #     objs_w_nonzero_demands=[i for i, demand in enumerate(demand_vector) if demand > 0],
             #     # demand_vector=demand_vector,
             # )
 

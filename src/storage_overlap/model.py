@@ -2,6 +2,7 @@ import abc
 import dataclasses
 import joblib
 import math
+import scipy.special
 import scipy.stats
 
 from mpmath import mp
@@ -558,7 +559,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         cum_supply: int,
     ) -> float:
         cum_demand = combination_size * demand_rv.value
-        return int(cum_demand <= cum_supply)
+        return int(demand_rv.value <= self.d and cum_demand <= cum_supply)
 
     def prob_cum_demand_leq_cum_supply_for_exp_demand(
         self,
@@ -593,12 +594,12 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 cum_supply=cum_supply,
             )
 
-        elif isinstance(demand_rv, random_variable.Exponential):
-            return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
-                combination_size=combination_size,
-                demand_rv=demand_rv,
-                cum_supply=cum_supply,
-            )
+        # elif isinstance(demand_rv, random_variable.Exponential):
+        #     return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
+        #         combination_size=combination_size,
+        #         demand_rv=demand_rv,
+        #         cum_supply=cum_supply,
+        #     )
 
         else:
             log(WARNING, "Using numeric integral")
@@ -627,7 +628,12 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
             combination_size=combination_size,
             num_samples=1000,
         )
-        log(DEBUG, "", span_size_to_freq_map=span_size_to_freq_map)
+        log(DEBUG, "",
+            demand_rv=demand_rv,
+            d=self.d,
+            combination_size=combination_size,
+            span_size_to_freq_map=span_size_to_freq_map,
+        )
 
         return sum(
             freq * self.prob_cum_demand_leq_cum_supply(
@@ -642,6 +648,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
     def prob_serving_upper_bound(
         self,
         demand_rv: random_variable.RandomVariable,
+        num_active_objs: int,
         max_combination_size: int,
         maximal_load: float = 1,
     ) -> float:
@@ -651,7 +658,27 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 combination_size=combination_size,
                 maximal_load=maximal_load,
             )
+            # ) ** scipy.special.comb(num_active_objs, combination_size)
+            # ) ** (num_active_objs // combination_size)
             for combination_size in range(2, max_combination_size + 1)
+        )
+
+    def prob_serving_lower_bound(
+        self,
+        demand_rv: random_variable.RandomVariable,
+        num_active_objs: int,
+        max_combination_size: int,
+        maximal_load: float = 1,
+    ) -> float:
+        return math.prod(
+            [
+                self.prob_serving_upper_bound_for_given_combination_size(
+                    demand_rv=demand_rv,
+                    combination_size=combination_size,
+                    maximal_load=maximal_load,
+                )
+                for combination_size in range(2, max_combination_size + 1)
+            ]
         )
 
 

@@ -290,8 +290,10 @@ class StorageDesign:
     ) -> dict[int, int, int]:
         span_size_to_count_map = collections.defaultdict(int)
 
+        _obj_id_list = list(range(self.k))
+
         for _ in range(num_samples):
-            obj_id_list = random.sample(list(range(self.k)), combination_size)
+            obj_id_list = random.sample(_obj_id_list, combination_size)
 
             node_id_set = set()
             for obj_id in obj_id_list:
@@ -309,10 +311,10 @@ class StorageDesign:
         span_size_to_count_map = self.get_span_size_to_count_map(
             combination_size=combination_size,
         )
-        num_spans = sum(span_size_to_count_map.values())
+        total_count = sum(span_size_to_count_map.values())
 
         return {
-            span_size: count / num_spans
+            span_size: count / total_count
             for span_size, count in span_size_to_count_map.items()
         }
 
@@ -325,10 +327,10 @@ class StorageDesign:
             combination_size=combination_size,
             num_samples=num_samples,
         )
-        num_spans = sum(span_size_to_count_map.values())
+        total_count = sum(span_size_to_count_map.values())
 
         return {
-            span_size: count / num_spans
+            span_size: count / total_count
             for span_size, count in span_size_to_count_map.items()
         }
 

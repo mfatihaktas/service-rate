@@ -43,8 +43,11 @@ def plot_P_for_given_params(
         std_frac_of_demand_vectors_covered_list = []
 
         P_ub_list = []
+        P_lb_list = []
 
-        for num_active_objs in range(2, k // 2):
+        # for num_active_objs in range(2, k // 2):
+        # for num_active_objs in range(2, k // 10):
+        for num_active_objs in range(2, 6):
             log(INFO, f"> num_active_objs= {num_active_objs}")
 
             num_active_objs_list.append(num_active_objs)
@@ -56,7 +59,7 @@ def plot_P_for_given_params(
             )
 
             # Sim
-            E_frac_of_demand_vectors_covered = 0.02
+            E_frac_of_demand_vectors_covered = None
             if run_sim:
                 frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
                     demand_vector_sampler=demand_vector_sampler,
@@ -73,19 +76,34 @@ def plot_P_for_given_params(
             # UB
             P_ub = storage_model.prob_serving_upper_bound(
                 demand_rv=active_obj_demand_rv,
+                num_active_objs=num_active_objs,
                 # max_combination_size=2,
+                # max_combination_size=storage_design.d,
                 max_combination_size=num_active_objs,
                 maximal_load=maximal_load,
             )
             P_ub_list.append(P_ub)
 
-            if E_frac_of_demand_vectors_covered < 0.01:
+            P_lb = storage_model.prob_serving_upper_bound(
+                demand_rv=active_obj_demand_rv,
+                num_active_objs=num_active_objs,
+                max_combination_size=num_active_objs,
+                maximal_load=maximal_load,
+            )
+            P_lb_list.append(P_lb)
+
+            if (
+                (E_frac_of_demand_vectors_covered and E_frac_of_demand_vectors_covered < 0.01)
+                or (P_ub and P_ub < 0.01)
+            ):
                 break
 
         log(INFO, f"storage_design= {storage_design}",
             num_active_objs_list=num_active_objs_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+            P_ub_list=P_ub_list,
+            P_lb_list=P_lb_list,
         )
 
         color = next(dark_color_cycle)
@@ -93,15 +111,16 @@ def plot_P_for_given_params(
             plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
         plot.plot(num_active_objs_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(num_active_objs_list, P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
 
     storage_design_and_model_list = [
-        (
-            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        ),
+        # (
+        #     design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
 
         (
             design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
@@ -133,11 +152,11 @@ def plot_P(
     k = 120
 
     # active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
-    # active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
-    active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
-    # active_obj_demand_rv = random_variable.Pareto(loc=1, a=tail_index)
+    active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
+    # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
+    # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
-    run_sim = False
+    run_sim = True
     for d in d_list:
         plot_P_for_given_params(
             k=k,
@@ -170,6 +189,7 @@ def plot_P(
         + f"_k_{k}"
         + f"_m_{maximal_load}"
         + f"_active_obj_demand_{active_obj_demand}"
+        + f"_demand_dist_{active_obj_demand_rv.to_short_repr()}"
         + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -183,9 +203,10 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            # d_list=[2, 3, 4, 5],
+            # d_list=[2, 3, 4],
             d_list=[2, 3],
             # d_list=[5, 6],
+            # d_list=[3],
             active_obj_demand=active_obj_demand,
             maximal_load=1,  # 0.7,
             num_samples=100,  # 300,
@@ -193,7 +214,9 @@ def manage_plot_P_w_joblib():
             num_sim_run=3,
         )
         # for active_obj_demand in [1.5, 2]
-        for active_obj_demand in [2, 3]
+        # for active_obj_demand in [2, 3]
+        # for active_obj_demand in [2]
+        for active_obj_demand in [3]
     )
 
     log(INFO, "Done")

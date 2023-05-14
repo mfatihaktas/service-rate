@@ -84,6 +84,9 @@ class Exponential(RandomVariable):
     def __repr__(self):
         return "Exponential( \n" f"\t D= {self.D} \n" f"\t mu= {self.mu} \n" ") \n"
 
+    def to_short_repr(self):
+        return "exp"
+
     def to_latex(self) -> str:
         if self.D == 0:
             return r"\textrm{Exp}" + f"(\mu={round(self.mu, 2)})"
@@ -209,6 +212,12 @@ class Constant(RandomVariable):
 
         self.value = value
 
+    def __repr__(self):
+        return f"Constant({self.value})"
+
+    def to_short_repr(self):
+        return "constant"
+
     def to_latex(self):
         return "{}({})".format(r"\mathrm{Constant}", self.value)
 
@@ -282,6 +291,9 @@ class Pareto(RandomVariable):
 
         self.loc = loc
         self.a = a
+
+    def to_short_repr(self):
+        return "pareto"
 
     def __str__(self):
         # return "Pareto(loc= {}, a= {})".format(self.loc, self.a)
