@@ -45,9 +45,10 @@ def plot_P_for_given_params(
         P_ub_list = []
         P_lb_list = []
 
-        # for num_active_objs in range(2, k // 2):
+        for num_active_objs in range(2, k // 2):
         # for num_active_objs in range(2, k // 10):
-        for num_active_objs in range(2, 6):
+        # for num_active_objs in range(2, 6):
+        # for num_active_objs in range(2, 11):
             log(INFO, f"> num_active_objs= {num_active_objs}")
 
             num_active_objs_list.append(num_active_objs)
@@ -151,8 +152,8 @@ def plot_P(
 ):
     k = 120
 
-    # active_obj_demand_rv = random_variable.Bernoulli(p=1, D=active_obj_demand)
-    active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
+    active_obj_demand_rv = random_variable.Bernoulli(p=0.5, D=active_obj_demand)
+    # active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
     # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
@@ -214,9 +215,9 @@ def manage_plot_P_w_joblib():
             num_sim_run=3,
         )
         # for active_obj_demand in [1.5, 2]
-        # for active_obj_demand in [2, 3]
+        for active_obj_demand in [2, 3]
         # for active_obj_demand in [2]
-        for active_obj_demand in [3]
+        # for active_obj_demand in [3]
     )
 
     log(INFO, "Done")

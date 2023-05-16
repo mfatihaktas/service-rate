@@ -555,7 +555,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
     def prob_cum_demand_leq_cum_supply_for_constant_demand(
         self,
         combination_size: int,
-        demand_rv: random_variable.RandomVariable,
+        demand_rv: random_variable.Constant,
         cum_supply: int,
     ) -> float:
         cum_demand = combination_size * demand_rv.value
@@ -569,6 +569,22 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
     ) -> float:
         return scipy.stats.erlang.cdf(
             cum_supply, a=combination_size, loc=0, scale=demand_rv.mean()
+        )
+
+    def prob_cum_demand_leq_cum_supply_for_bernoulli_demand(
+        self,
+        combination_size: int,
+        demand_rv: random_variable.Bernoulli,
+        cum_supply: int,
+    ) -> float:
+        if demand_rv.D >= self.d:
+            return 0
+
+        num_active_objs_rv = scipy.stats.binom(combination_size, demand_rv.p)
+        return sum(
+            num_active_objs_rv.pmf(num_active_objs)
+            for num_active_objs in range(combination_size + 1)
+            if demand_rv.D * num_active_objs <= cum_supply
         )
 
     def prob_cum_demand_leq_cum_supply(
@@ -594,12 +610,19 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 cum_supply=cum_supply,
             )
 
-        # elif isinstance(demand_rv, random_variable.Exponential):
-        #     return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
-        #         combination_size=combination_size,
-        #         demand_rv=demand_rv,
-        #         cum_supply=cum_supply,
-        #     )
+        elif isinstance(demand_rv, random_variable.Exponential):
+            return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
+                cum_supply=cum_supply,
+            )
+
+        elif isinstance(demand_rv, random_variable.Bernoulli):
+            return self.prob_cum_demand_leq_cum_supply_for_bernoulli_demand(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
+                cum_supply=cum_supply,
+            )
 
         else:
             log(WARNING, "Using numeric integral")
