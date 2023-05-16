@@ -681,8 +681,8 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 demand_rv=demand_rv,
                 combination_size=combination_size,
                 maximal_load=maximal_load,
-            # )
-            ) ** scipy.special.comb(num_active_objs, combination_size)
+            )
+            # ) ** scipy.special.comb(num_active_objs, combination_size)
             # ) ** (num_active_objs // combination_size)
             # ) ** (num_active_objs - combination_size + 1)
             for combination_size in range(2, max_combination_size + 1)
@@ -705,6 +705,32 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 for combination_size in range(2, max_combination_size + 1)
             ]
         )
+
+    def prob_serving_upper_bound_for_bernoulli_demand(
+        self,
+        demand_rv: random_variable.Bernoulli,
+        maximal_load: float = 1,
+    ) -> float:
+        num_active_objs_rv = scipy.stats.binom(self.k, demand_rv.p)
+
+        if demand_rv.D > self.d:
+            return num_active_objs_rv.pmf(0)
+
+        prob = 0
+        for num_active_objs in range(self.k + 1):
+            span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
+                combination_size=num_active_objs,
+                num_samples=1000,
+            )
+
+            cum_demand = demand_rv.D * num_active_objs
+            prob += num_active_objs_rv.pmf(num_active_objs) * sum(
+                freq
+                for cum_supply, freq in span_size_to_freq_map.items()
+                if cum_supply >= cum_demand
+            )
+
+        return prob
 
 
 @dataclasses.dataclass
