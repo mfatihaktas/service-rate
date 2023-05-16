@@ -732,6 +732,48 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
 
         return prob
 
+    def prob_serving_upper_bound_for_bernoulli_demand_(
+        self,
+        demand_rv: random_variable.Bernoulli,
+        maximal_load: float = 1,
+    ) -> float:
+        num_active_objs_rv = scipy.stats.binom(self.k, demand_rv.p)
+
+        if demand_rv.D > self.d:
+            return num_active_objs_rv.pmf(0)
+
+        combination_size_to_span_size_to_freq_map = {}
+        for combination_size in range(2, self.k + 1):
+            combination_size_to_span_size_to_freq_map[combination_size] = (
+                self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
+                    combination_size=combination_size,
+                    num_samples=2000,
+                )
+            )
+
+        prob = 0
+        for num_active_objs in range(self.k + 1):
+            prob_for_combination_size_list = []
+            for combination_size in range(2, num_active_objs + 1):
+                span_size_to_freq_map = combination_size_to_span_size_to_freq_map[combination_size]
+
+                cum_demand = demand_rv.D * combination_size
+                prob_for_combination_size = sum(
+                    freq
+                    for cum_supply, freq in span_size_to_freq_map.items()
+                    if cum_supply >= cum_demand
+                )
+                prob_for_combination_size_list.append(
+                    # prob_for_combination_size ** (num_active_objs - combination_size + 1)
+                    prob_for_combination_size ** scipy.special.comb(num_active_objs, combination_size)
+                )
+
+            prob_helper = min(prob_for_combination_size_list) if len(prob_for_combination_size_list) else 0
+            # prob_helper = math.prod(prob_for_combination_size_list) if len(prob_for_combination_size_list) else 0
+            prob += num_active_objs_rv.pmf(num_active_objs) * prob_helper
+
+        return prob
+
 
 @dataclasses.dataclass
 class ClusteringDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDemandDistribution):

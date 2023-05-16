@@ -77,7 +77,7 @@ def plot_P_for_bernoulli_demand(
 
             # UB
 
-            P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand(
+            P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand_(
                 demand_rv=active_obj_demand_rv_,
                 maximal_load=1,
             )
@@ -292,7 +292,7 @@ def plot_P(
     # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
-    run_sim = True
+    run_sim = False
     for d in d_list:
         if isinstance(active_obj_demand_rv, random_variable.Bernoulli):
             plot_P_for_bernoulli_demand(
