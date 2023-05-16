@@ -577,10 +577,11 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         demand_rv: random_variable.Bernoulli,
         cum_supply: int,
     ) -> float:
-        if demand_rv.D >= self.d:
-            return 0
-
         num_active_objs_rv = scipy.stats.binom(combination_size, demand_rv.p)
+
+        if demand_rv.D > self.d:
+            return num_active_objs_rv.pmf(0)
+
         return sum(
             num_active_objs_rv.pmf(num_active_objs)
             for num_active_objs in range(combination_size + 1)
@@ -651,12 +652,12 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
             combination_size=combination_size,
             num_samples=1000,
         )
-        log(DEBUG, "",
-            demand_rv=demand_rv,
-            d=self.d,
-            combination_size=combination_size,
-            span_size_to_freq_map=span_size_to_freq_map,
-        )
+        # log(DEBUG, "",
+        #     demand_rv=demand_rv,
+        #     d=self.d,
+        #     combination_size=combination_size,
+        #     span_size_to_freq_map=span_size_to_freq_map,
+        # )
 
         return sum(
             freq * self.prob_cum_demand_leq_cum_supply(
@@ -680,9 +681,10 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 demand_rv=demand_rv,
                 combination_size=combination_size,
                 maximal_load=maximal_load,
-            )
-            # ) ** scipy.special.comb(num_active_objs, combination_size)
+            # )
+            ) ** scipy.special.comb(num_active_objs, combination_size)
             # ) ** (num_active_objs // combination_size)
+            # ) ** (num_active_objs - combination_size + 1)
             for combination_size in range(2, max_combination_size + 1)
         )
 

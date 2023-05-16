@@ -45,10 +45,12 @@ def plot_P_for_given_params(
         P_ub_list = []
         P_lb_list = []
 
-        for num_active_objs in range(2, k // 2):
+        # for num_active_objs in [2]:
+        # for num_active_objs in range(2, k // 2):
         # for num_active_objs in range(2, k // 10):
         # for num_active_objs in range(2, 6):
         # for num_active_objs in range(2, 11):
+        for num_active_objs in range(2, 31):
             log(INFO, f"> num_active_objs= {num_active_objs}")
 
             num_active_objs_list.append(num_active_objs)
@@ -157,7 +159,7 @@ def plot_P(
     # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
-    run_sim = True
+    run_sim = False
     for d in d_list:
         plot_P_for_given_params(
             k=k,

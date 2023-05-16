@@ -238,7 +238,10 @@ class Bernoulli(RandomVariable):
         return r"Bernoulli(p= {}, D= {})".format(self.p, self.D)
 
     def to_latex(self):
-        return r"${} \times {}(p= {})$".format(self.D, r"\mathrm{Bernoulli}", self.p)
+        return r"{} \times {}(p= {})".format(self.D, r"\mathrm{Bernoulli}", self.p)
+
+    def to_short_repr(self):
+        return "Bernoulli"
 
     def pdf(self, x: float):
         return self.dist.pmf(x / self.D)
