@@ -720,7 +720,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         for num_active_objs in range(self.k + 1):
             span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
                 combination_size=num_active_objs,
-                num_samples=1000,
+                num_samples=2000,
             )
 
             cum_demand = demand_rv.D * num_active_objs
