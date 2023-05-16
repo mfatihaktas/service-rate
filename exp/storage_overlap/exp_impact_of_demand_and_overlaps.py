@@ -45,7 +45,8 @@ def plot_P_for_bernoulli_demand(
         P_ub_list = []
         P_lb_list = []
 
-        for p in numpy.linspace(0.1, 0.8, 10):
+        # for p in numpy.linspace(0.1, 0.8, 10):
+        for p in numpy.linspace(0.1, 0.6, 20):
             log(INFO, f"> p= {p}")
 
             active_obj_demand_rv_ = random_variable.Bernoulli(
@@ -76,7 +77,10 @@ def plot_P_for_bernoulli_demand(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-
+            # P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand(
+            #     demand_rv=active_obj_demand_rv_,
+            #     maximal_load=1,
+            # )
             P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand_(
                 demand_rv=active_obj_demand_rv_,
                 maximal_load=1,
@@ -292,7 +296,7 @@ def plot_P(
     # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
-    run_sim = False
+    run_sim = True
     for d in d_list:
         if isinstance(active_obj_demand_rv, random_variable.Bernoulli):
             plot_P_for_bernoulli_demand(
@@ -361,7 +365,9 @@ def manage_plot_P_w_joblib():
             # num_samples=1000,
             num_sim_run=3,
         )
-        for active_obj_demand in [1.5, 2.5]
+        # for active_obj_demand in [1.5, 2.5]
+        # for active_obj_demand in [2, 3]
+        for active_obj_demand in [1.5, 2, 2.5, 3]
         # for active_obj_demand in [2, 3]
         # for active_obj_demand in [2]
         # for active_obj_demand in [3]

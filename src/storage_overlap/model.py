@@ -2,6 +2,7 @@ import abc
 import dataclasses
 import joblib
 import math
+import numpy
 import scipy.special
 import scipy.stats
 
@@ -764,13 +765,19 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                     if cum_supply >= cum_demand
                 )
                 prob_for_combination_size_list.append(
+                    prob_for_combination_size
                     # prob_for_combination_size ** (num_active_objs - combination_size + 1)
-                    prob_for_combination_size ** scipy.special.comb(num_active_objs, combination_size)
+                    # prob_for_combination_size ** scipy.special.comb(num_active_objs, combination_size)
                 )
 
+            # prob_helper = numpy.mean(prob_for_combination_size_list) if len(prob_for_combination_size_list) else 0
             prob_helper = min(prob_for_combination_size_list) if len(prob_for_combination_size_list) else 0
             # prob_helper = math.prod(prob_for_combination_size_list) if len(prob_for_combination_size_list) else 0
             prob += num_active_objs_rv.pmf(num_active_objs) * prob_helper
+
+        # TODO: Remove.
+        if prob > 1:
+            return 1
 
         return prob
 
