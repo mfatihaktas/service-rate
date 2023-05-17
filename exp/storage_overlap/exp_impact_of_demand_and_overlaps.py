@@ -155,6 +155,7 @@ def plot_P_for_given_params(
     active_obj_demand_rv: random_variable.RandomVariable,
     maximal_load: float,
     run_sim: bool = False,
+    plot_models: bool = True,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
@@ -164,6 +165,7 @@ def plot_P_for_given_params(
         active_obj_demand_rv=active_obj_demand_rv,
         maximal_load=maximal_load,
         run_sim=run_sim,
+        plot_models=plot_models,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
@@ -183,11 +185,11 @@ def plot_P_for_given_params(
         P_lb_list = []
 
         # for num_active_objs in [2]:
-        # for num_active_objs in range(2, k // 2):
+        for num_active_objs in range(2, k // 2):
         # for num_active_objs in range(2, k // 10):
         # for num_active_objs in range(2, 6):
         # for num_active_objs in range(2, 11):
-        for num_active_objs in range(2, 31):
+        # for num_active_objs in range(2, 31):
             log(INFO, f"> num_active_objs= {num_active_objs}")
 
             num_active_objs_list.append(num_active_objs)
@@ -214,23 +216,25 @@ def plot_P_for_given_params(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-            P_ub = storage_model.prob_serving_upper_bound(
-                demand_rv=active_obj_demand_rv,
-                num_active_objs=num_active_objs,
-                # max_combination_size=2,
-                # max_combination_size=storage_design.d,
-                max_combination_size=num_active_objs,
-                maximal_load=maximal_load,
-            )
-            P_ub_list.append(P_ub)
+            P_ub = None
+            if plot_models:
+                P_ub = storage_model.prob_serving_upper_bound(
+                    demand_rv=active_obj_demand_rv,
+                    num_active_objs=num_active_objs,
+                    # max_combination_size=2,
+                    # max_combination_size=storage_design.d,
+                    max_combination_size=num_active_objs,
+                    maximal_load=maximal_load,
+                )
+                P_ub_list.append(P_ub)
 
-            P_lb = storage_model.prob_serving_upper_bound(
-                demand_rv=active_obj_demand_rv,
-                num_active_objs=num_active_objs,
-                max_combination_size=num_active_objs,
-                maximal_load=maximal_load,
-            )
-            P_lb_list.append(P_lb)
+                P_lb = storage_model.prob_serving_upper_bound(
+                    demand_rv=active_obj_demand_rv,
+                    num_active_objs=num_active_objs,
+                    max_combination_size=num_active_objs,
+                    maximal_load=maximal_load,
+                )
+                P_lb_list.append(P_lb)
 
             if (
                 (E_frac_of_demand_vectors_covered and E_frac_of_demand_vectors_covered < 0.01)
@@ -250,17 +254,18 @@ def plot_P_for_given_params(
         if run_sim:
             plot.errorbar(num_active_objs_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-        plot.plot(num_active_objs_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(num_active_objs_list, P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        if plot_models:
+            plot.plot(num_active_objs_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.plot(num_active_objs_list, P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
 
     storage_design_and_model_list = [
-        # (
-        #     design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        #     model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        # ),
+        (
+            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
 
         (
             design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
@@ -281,6 +286,9 @@ def plot_P_for_given_params(
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model)
 
+    fontsize = 14
+    plot.xlabel("Number of active objects", fontsize=fontsize)
+
 
 def plot_P(
     d_list: list[int],
@@ -291,9 +299,9 @@ def plot_P(
 ):
     k = 120
 
-    active_obj_demand_rv = random_variable.Bernoulli(p=0.5, D=active_obj_demand)
+    # active_obj_demand_rv = random_variable.Bernoulli(p=0.5, D=active_obj_demand)
     # active_obj_demand_rv = random_variable.Constant(value=active_obj_demand)
-    # active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
+    active_obj_demand_rv = random_variable.Exponential(mu=1 / active_obj_demand)
     # active_obj_demand_rv = random_variable.Pareto(loc=active_obj_demand, a=3)
 
     run_sim = True
@@ -316,6 +324,7 @@ def plot_P(
                 active_obj_demand_rv=active_obj_demand_rv,
                 maximal_load=maximal_load,
                 run_sim=run_sim,
+                plot_models=False,
                 num_samples=num_samples,
                 num_sim_run=num_sim_run,
             )
@@ -323,7 +332,6 @@ def plot_P(
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
-    # plot.xlabel(r"$n_{\textrm{active}}$", fontsize=fontsize)
     # plot.xlabel("Number of active objects", fontsize=fontsize)
 
     plot.title(
