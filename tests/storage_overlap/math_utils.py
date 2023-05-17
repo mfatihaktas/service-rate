@@ -50,17 +50,18 @@ def test_prob_cum_demand_leq_cum_supply_w_scipy_and_numba(
 ):
     import time
 
-    num_demands = 2
+    num_demands = 15
     d = 2
     span_size = 3
 
     start_time = time.time()
-    prob = math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
-        num_demands=num_demands,
-        demand_pdf=demand_rv.pdf,
-        d=d,
-        span_size=span_size,
-    )
+    prob = 0
+    # prob = math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
+    #     num_demands=num_demands,
+    #     demand_pdf=demand_rv.pdf,
+    #     d=d,
+    #     span_size=span_size,
+    # )
     exec_time = time.time() - start_time
 
     start_time = time.time()

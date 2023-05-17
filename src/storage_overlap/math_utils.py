@@ -1,5 +1,7 @@
 import math
 import mpmath as mp
+import numba
+import numpy
 import scipy
 
 from typing import Callable
@@ -139,8 +141,11 @@ def prob_cum_demand_leq_cum_supply_w_scipy_and_numba_for_exp_demand(
     span_size: float,
     maximal_load: float = 1,
 ) -> float:
-    import numba
-    import numpy
+    """Refs:
+    - https://stackoverflow.com/questions/51109429/how-to-use-numba-to-perform-multiple-integration-in-scipy-with-an-arbitrary-numb
+    - https://stackoverflow.com/questions/49683653/how-to-pass-additional-parameters-to-numba-cfunc-passed-as-lowlevelcallable-to-s
+    - https://numba.pydata.org/numba-doc/0.42.0/user/cfunc.html
+    """
 
     log(DEBUG, "Started",
         num_demands=num_demands,
@@ -154,7 +159,7 @@ def prob_cum_demand_leq_cum_supply_w_scipy_and_numba_for_exp_demand(
     cum_supply_ = span_size * maximal_load
 
     def jit_integrand_function(integrand_function):
-        jitted_function = numba.njit(integrand_function)
+        jitted_function = numba.njit(integrand_function, fastmath=True)
 
         @numba.cfunc(
             numba.types.float64(
@@ -168,21 +173,7 @@ def prob_cum_demand_leq_cum_supply_w_scipy_and_numba_for_exp_demand(
         return scipy.LowLevelCallable(wrapped.ctypes)
 
     @jit_integrand_function
-    # def func(*args) -> float:
     def func(args) -> float:
-        # print(f"args= {args}")
-
-        # num_args = len(args)
-        # array = numpy.zeros(num_args)
-
-        # for i in range(num_args):
-        #     array[i] = numpy.exp(args[i])
-
-        # a = numpy.asarray(args, dtype=numpy.float32)
-        # a_ = numpy.exp(numpy.array([-arg for arg in args]))
-
-        # return numpy.prod(a_)
-
         return numpy.prod(
             numpy.exp(
                 numpy.array([-mu * arg for arg in args])
