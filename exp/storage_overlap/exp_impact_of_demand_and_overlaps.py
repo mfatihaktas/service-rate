@@ -77,14 +77,14 @@ def plot_P_for_bernoulli_demand(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-            # P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand(
-            #     demand_rv=active_obj_demand_rv_,
-            #     maximal_load=1,
-            # )
-            P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand_(
+            P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand(
                 demand_rv=active_obj_demand_rv_,
                 maximal_load=1,
             )
+            # P_ub = storage_model.prob_serving_upper_bound_for_bernoulli_demand_(
+            #     demand_rv=active_obj_demand_rv_,
+            #     maximal_load=1,
+            # )
             P_ub_list.append(P_ub)
 
             # max_combination_size = storage_design.k // 2

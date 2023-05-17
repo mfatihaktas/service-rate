@@ -130,3 +130,76 @@ def prob_cum_demand_leq_cum_supply_w_scipy(
     log(DEBUG, "", integral_result=integral_result)
 
     return integral_result[0]
+
+
+def prob_cum_demand_leq_cum_supply_w_scipy_and_numba_for_exp_demand(
+    num_demands: int,
+    mu: float,
+    d: int,
+    span_size: float,
+    maximal_load: float = 1,
+) -> float:
+    import numba
+    import numpy
+
+    log(DEBUG, "Started",
+        num_demands=num_demands,
+        mu=mu,
+        d=d,
+        span_size=span_size,
+        maximal_load=maximal_load,
+    )
+
+    d_ = d * maximal_load
+    cum_supply_ = span_size * maximal_load
+
+    def jit_integrand_function(integrand_function):
+        jitted_function = numba.njit(integrand_function)
+
+        @numba.cfunc(
+            numba.types.float64(
+                numba.types.intc, numba.types.CPointer(numba.types.float64)
+            )
+        )
+        def wrapped(n, xx):
+            values = numba.carray(xx, n)
+            return jitted_function(values)
+
+        return scipy.LowLevelCallable(wrapped.ctypes)
+
+    @jit_integrand_function
+    # def func(*args) -> float:
+    def func(args) -> float:
+        # print(f"args= {args}")
+
+        # num_args = len(args)
+        # array = numpy.zeros(num_args)
+
+        # for i in range(num_args):
+        #     array[i] = numpy.exp(args[i])
+
+        # a = numpy.asarray(args, dtype=numpy.float32)
+        # a_ = numpy.exp(numpy.array([-arg for arg in args]))
+
+        # return numpy.prod(a_)
+
+        return numpy.prod(
+            numpy.exp(
+                numpy.array([-mu * arg for arg in args])
+            )
+        )
+
+    integral_result = scipy.integrate.nquad(
+        func=func,
+        ranges=[
+            lambda *args: [0, min(d_, cum_supply_ - sum(args))]
+            for i in range(num_demands)
+        ],
+        opts={
+            # "limit": 10,
+            "epsabs": 0.001
+        }
+    )
+    log(DEBUG, "", integral_result=integral_result)
+
+    return integral_result[0]
