@@ -48,22 +48,33 @@ def test_prob_cum_demand_leq_cum_supply_w_scipy(
 def test_prob_cum_demand_leq_cum_supply_w_scipy_and_numba(
     demand_rv: random_variable.RandomVariable,
 ):
+    import time
+
     num_demands = 2
     d = 2
     span_size = 3
 
+    start_time = time.time()
     prob = math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
         num_demands=num_demands,
         demand_pdf=demand_rv.pdf,
         d=d,
         span_size=span_size,
     )
+    exec_time = time.time() - start_time
 
+    start_time = time.time()
     prob_w_numba = math_utils.prob_cum_demand_leq_cum_supply_w_scipy_and_numba_for_exp_demand(
         num_demands=num_demands,
         mu=demand_rv.mu,
         d=d,
         span_size=span_size,
     )
+    exec_time_w_numba = time.time() - start_time
 
-    log(INFO, "", prob=prob, prob_w_numba=prob_w_numba)
+    log(INFO, "",
+        prob=prob,
+        prob_w_numba=prob_w_numba,
+        exec_time=exec_time,
+        exec_time_w_numba=exec_time_w_numba,
+    )
