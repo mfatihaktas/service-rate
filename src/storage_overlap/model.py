@@ -605,14 +605,14 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
 
         cum_supply = span_size * maximal_load
 
-        if isinstance(demand_rv, random_variable.Constant):
+        if False and isinstance(demand_rv, random_variable.Constant):
             return self.prob_cum_demand_leq_cum_supply_for_constant_demand(
                 combination_size=combination_size,
                 demand_rv=demand_rv,
                 cum_supply=cum_supply,
             )
 
-        elif isinstance(demand_rv, random_variable.Exponential):
+        elif False and isinstance(demand_rv, random_variable.Exponential):
             return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
                 combination_size=combination_size,
                 demand_rv=demand_rv,
@@ -648,11 +648,13 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
         #     maximal_load=maximal_load,
         # )
 
-        # span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
-        span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
-            combination_size=combination_size,
-            num_samples=1000,
-        )
+        if combination_size <= 2:
+            span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map(combination_size)
+        else:
+            span_size_to_freq_map = self.storage_design.get_span_size_to_freq_map_w_monte_carlo(
+                combination_size=combination_size,
+                num_samples=1000,
+            )
         # log(DEBUG, "",
         #     demand_rv=demand_rv,
         #     d=self.d,

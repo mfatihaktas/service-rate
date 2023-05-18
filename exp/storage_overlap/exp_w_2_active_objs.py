@@ -23,7 +23,7 @@ def plot_P_for_given_params(
     x_label: str,
     maximal_load: float,
     run_sim: bool = False,
-    plot_models: bool = True,
+    plot_model: bool = True,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
@@ -34,7 +34,7 @@ def plot_P_for_given_params(
         x_label=x_label,
         maximal_load=maximal_load,
         run_sim=run_sim,
-        plot_models=plot_models,
+        plot_model=plot_model,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
@@ -52,7 +52,7 @@ def plot_P_for_given_params(
         E_frac_of_demand_vectors_covered_list = []
         std_frac_of_demand_vectors_covered_list = []
 
-        P_ub_list = []
+        P_model_list = []
         P_lb_list = []
 
         for active_obj_demand_rv in active_obj_demand_rv_list:
@@ -85,7 +85,7 @@ def plot_P_for_given_params(
 
             # UB
             P_ub = None
-            if plot_models:
+            if plot_model:
                 # P_ub = None
                 P_ub = storage_model.prob_serving_upper_bound(
                     demand_rv=active_obj_demand_rv,
@@ -93,16 +93,7 @@ def plot_P_for_given_params(
                     max_combination_size=num_active_objs,
                     maximal_load=maximal_load,
                 )
-                P_ub_list.append(P_ub)
-
-                # P_lb = None
-                P_lb = storage_model.prob_serving_upper_bound(
-                    demand_rv=active_obj_demand_rv,
-                    num_active_objs=num_active_objs,
-                    max_combination_size=num_active_objs,
-                    maximal_load=maximal_load,
-                )
-                P_lb_list.append(P_lb)
+                P_model_list.append(P_ub)
 
             if (
                 (E_frac_of_demand_vectors_covered and E_frac_of_demand_vectors_covered < 0.01)
@@ -114,17 +105,15 @@ def plot_P_for_given_params(
             x_list=x_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
-            P_ub_list=P_ub_list,
-            P_lb_list=P_lb_list,
+            P_model_list=P_model_list,
         )
 
         color = next(dark_color_cycle)
         if run_sim:
-            plot.errorbar(x_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.errorbar(x_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
-        if plot_models:
-            plot.plot(x_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-            plot.plot(x_list, P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        if plot_model:
+            plot.plot(x_list, P_model_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
@@ -163,13 +152,13 @@ def plot_P(
     active_obj_demand_rv_list: list[random_variable.RandomVariable],
     func_active_obj_demand_to_x: Callable,
     x_label: str,
+    demand_dist: str,
     maximal_load: float,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
     k = 120
 
-    run_sim = True
     for d in d_list:
         plot_P_for_given_params(
             k=k,
@@ -178,8 +167,8 @@ def plot_P(
             func_active_obj_demand_to_x=func_active_obj_demand_to_x,
             x_label=x_label,
             maximal_load=1,
-            run_sim=run_sim,
-            plot_models=True,
+            run_sim=False,
+            plot_model=True,
             num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
@@ -191,7 +180,7 @@ def plot_P(
     plot.title(
         fr"$k= n= {k}$, "
         fr"$m= {maximal_load}$, "
-        fr"$\rho \sim {active_obj_demand_rv.to_latex()}$"
+        r"$\rho \sim {}$".format(demand_dist)
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -201,9 +190,8 @@ def plot_P(
     file_name = (
         "plots/plot_impact_of_demand_and_overlaps"
         + f"_k_{k}"
-        + f"_m_{maximal_load}"
-        + f"_active_obj_demand_{active_obj_demand}"
-        + f"_demand_dist_{active_obj_demand_rv.to_short_repr()}"
+        # + f"_m_{maximal_load}"
+        + f"_demand_dist_{demand_dist}"
         + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
@@ -220,28 +208,60 @@ def manage_plot_P_w_joblib():
         active_obj_demand_rv_list: list[random_variable.RandomVariable]
         func_active_obj_demand_to_x: Callable[[random_variable.RandomVariable], str]
         x_label: str
+        demand_dist: str
 
-    params_list = []
+    params_list = [
+        # Params(
+        #     active_obj_demand_rv_list=[
+        #         random_variable.Pareto(loc=1, a=a)
+        #         for a in range(1, 10)
+        #     ],
+        #     func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.a}",
+        #     x_label=r"$a$",
+        #     demand_dist="Pareto",
+        # ),
 
-    params = Params(
-        active_obj_demand_rv_list=[
-            random_variable.Pareto(loc=1, a=a)
-            for a in range(1, 10)
-        ],
-        func_active_obj_demand_to_x=lambda demand: f"{demand.a}",
-        x_label=r"$a$",
-    )
-    params_list.append(params)
+        # Params(
+        #     active_obj_demand_rv_list=[
+        #         random_variable.Exponential(mu=mu)
+        #         for mu in numpy.linspace(0.1, 5, 30)
+        #     ],
+        #     func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.mu}",
+        #     x_label=r"$\mu$",
+        #     demand_dist="Exp",
+        # ),
+
+        Params(
+            active_obj_demand_rv_list=[
+                random_variable.Bernoulli(p=p, D=2)
+                for p in numpy.linspace(0.1, 1, 20)
+            ],
+            func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.p}",
+            x_label=r"$p$",
+            demand_dist="Bern(D=2)",
+        ),
+
+        Params(
+            active_obj_demand_rv_list=[
+                random_variable.Bernoulli(p=p, D=2.5)
+                for p in numpy.linspace(0.1, 1, 20)
+            ],
+            func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.p}",
+            x_label=r"$p$",
+            demand_dist="Bern(D=2.5)",
+        ),
+    ]
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d_list=[2, 3, 4],
+            d_list=[3],
             # d_list=[2, 3],
+            # d_list=[2, 3, 4],
             # d_list=[5, 6],
-            # d_list=[3],
             active_obj_demand_rv_list=params.active_obj_demand_rv_list,
             func_active_obj_demand_to_x=params.func_active_obj_demand_to_x,
             x_label=params.x_label,
+            demand_dist=params.demand_dist,
             maximal_load=1,  # 0.7,
             num_samples=100,  # 300,
             # num_samples=1000,
