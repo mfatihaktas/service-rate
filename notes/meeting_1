@@ -1,0 +1,127 @@
+So far:
+Quantitatively/Mathematically understand the impact of
+- Amount of storage redundancy
+- Assignment of redundant data objects to nodes
+on the system's ability to cover object demands.
+
+Considered the following redundancy designs:
+- Clustering
+- Cyclic
+- Random (Approximating Block design)
+
+
+*** Clustering design:
+Replication factor r = 2
+[a, b]
+[b, a]
+[c, d]
+[d, c]
+
+r = 3
+[a, b, c]
+[a, b, c]
+[a, b, c]
+[d, e, f]
+[d, e, f]
+[d, e, f]
+
+
+*** Cyclic design:
+r = 3
+
+[a, d, c]
+[b, a, d]
+[c, b, a]
+[d, c, b]
+
+
+[a, e, d]
+[b, a, e]
+[c, b, a]
+[d, c, b, a]
+[e, d, c, b]
+
+Cassandra:
+
+insert(k, v)
+hash(k) on the ring --> Primary node n_i storing <k, v>
+Will store another copy of <k, v> on n_{i + 1}, n_{i + 2}, ...
+
+hash(k)-----------------
+		   | | |
+[x x x x x x x x x x x x X x x x x x x X]
+
+k1, k2, k3, ...
+
+
+*** Random design:
+r = 2
+
+[a, c, d]
+[b, d]
+[b, ]
+[a, c]
+
+
+*** Block design:
+r = 2
+
+[a, b]
+[]
+[]
+[]
+
+
+-- Model Interlude:
+Demands for objects are i.i.d. as X.
+Denoting demand for obj-i as Xi.
+E.g.,
+- X ~ D x Bernoulli(p)
+- X ~ D x Beta(a, b)
+- X ~ D + Exp(mu)
+- X ~ Pareto(lambda, a)
+- X ~ Zipf()
+
+
+Performance metric, P:
+Given i.i.d. samples Xi, what is the probability that system will cover the demands?
+
+
+E.g.,
+k = 3
+Xa, Xb, Xc
+X ~ Bernoulli(0.5)
+
+Xa = 1
+Xb = 0
+Xc = 1
+
+
+*** Sharding/Striping + Coding:
+
+a -- 3GB -- Takes X + Delta sec
+
+a1, a2, a3 -- 1GB -- Takes X/3 + Delta sec -- ?
+a1, a2, a3, a4 -- 3/4GB -- Takes X/4 + Delta sec -- ?
+
+a1, a2, a3 --> Replicate by 3 --> a1-1, a1-2, a1-3, a2-1, a2-2, a2-3, ...
+
+a1, a2, a3 --> MDS --> c1, c2, c3, c4, c5
+
+E.g.,
+
+[a1, b1]
+[a2, b2]
+[a1 + a2, b1 + b2]
+[]
+[]
+
+
+TODO:
+CEPH
+Azure storage
+use erasure coding
+
+INFOCOMM:
+Coding approach to significantly reduce the bandwidth used for data reconstruction.
+"Balancing Repair Bandwidth and Sub-packetization in Erasure-Coded Storage via Elastic Transformation"
