@@ -39,7 +39,7 @@ def plot_P_for_given_params(
         num_sim_run=num_sim_run,
     )
 
-    num_active_objs = 3
+    num_active_objs = 2
 
     def plot_(
         storage_design: design.StorageDesign,
@@ -233,20 +233,20 @@ def manage_plot_P_w_joblib():
     ]
 
     # Pareto
-    _D = 1.5
-    for D in numpy.arange(_D, _D + 1 + 0.1, 0.1):
-        params_list.append(
-            Params(
-                active_obj_demand_rv_list=[
-                    random_variable.Pareto(loc=D, a=a)
-                    for a in numpy.linspace(0.1, 10, 25)
-                    # for a in range(1, 10)
-                ],
-                func_active_obj_demand_to_x=lambda demand_rv: demand_rv.a,
-                x_label=r"$a$",
-                demand_dist=f"Pareto(D={round(D, 1)})",
-            ),
-        )
+    # _D = 1.5
+    # for D in numpy.arange(_D, _D + 1 + 0.1, 0.1):
+    #     params_list.append(
+    #         Params(
+    #             active_obj_demand_rv_list=[
+    #                 random_variable.Pareto(loc=D, a=a)
+    #                 for a in numpy.linspace(0.1, 10, 25)
+    #                 # for a in range(1, 10)
+    #             ],
+    #             func_active_obj_demand_to_x=lambda demand_rv: demand_rv.a,
+    #             x_label=r"$a$",
+    #             demand_dist=f"Pareto(D={round(D, 1)})",
+    #         ),
+    #     )
 
     # Bernoulli
     # _D = 7
@@ -262,6 +262,21 @@ def manage_plot_P_w_joblib():
     #             demand_dist=f"Bern(D={round(D, 1)})",
     #         )
     #     )
+
+    # Beta
+    _D = 1.5
+    for D in numpy.arange(_D, _D + 0 + 0.1, 0.1):
+        params_list.append(
+            Params(
+                active_obj_demand_rv_list=[
+                    random_variable.Beta(a=a, b=a, D=D)
+                    for a in numpy.linspace(0.1, 1, 10)
+                ],
+                func_active_obj_demand_to_x=lambda demand_rv: demand_rv.a,
+                x_label=r"$a = b$",
+                demand_dist=f"Beta(D={round(D, 1)})",
+            )
+        )
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
