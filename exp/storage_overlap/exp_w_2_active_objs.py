@@ -39,7 +39,7 @@ def plot_P_for_given_params(
         num_sim_run=num_sim_run,
     )
 
-    num_active_objs = 2
+    num_active_objs = 3
 
     def plot_(
         storage_design: design.StorageDesign,
@@ -53,7 +53,6 @@ def plot_P_for_given_params(
         std_frac_of_demand_vectors_covered_list = []
 
         P_model_list = []
-        P_lb_list = []
 
         for active_obj_demand_rv in active_obj_demand_rv_list:
             log(INFO, f"> active_obj_demand_rv= {active_obj_demand_rv}")
@@ -95,11 +94,11 @@ def plot_P_for_given_params(
                 )
                 P_model_list.append(P_ub)
 
-            if (
-                (E_frac_of_demand_vectors_covered and E_frac_of_demand_vectors_covered < 0.01)
-                or (P_ub and P_ub < 0.01)
-            ):
-                break
+            # if (
+            #     (E_frac_of_demand_vectors_covered and E_frac_of_demand_vectors_covered < 0.01)
+            #     or (P_ub and P_ub < 0.01)
+            # ):
+            #     break
 
         log(INFO, f"storage_design= {storage_design}",
             x_list=x_list,
@@ -206,57 +205,70 @@ def manage_plot_P_w_joblib():
     @dataclasses.dataclass
     class Params:
         active_obj_demand_rv_list: list[random_variable.RandomVariable]
-        func_active_obj_demand_to_x: Callable[[random_variable.RandomVariable], str]
+        func_active_obj_demand_to_x: Callable[[random_variable.RandomVariable], float]
         x_label: str
         demand_dist: str
 
     params_list = [
         # Params(
         #     active_obj_demand_rv_list=[
-        #         random_variable.Pareto(loc=1, a=a)
-        #         for a in range(1, 10)
-        #     ],
-        #     func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.a}",
-        #     x_label=r"$a$",
-        #     demand_dist="Pareto",
-        # ),
-
-        # Params(
-        #     active_obj_demand_rv_list=[
         #         random_variable.Exponential(mu=mu)
         #         for mu in numpy.linspace(0.1, 5, 30)
         #     ],
-        #     func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.mu}",
+        #     func_active_obj_demand_to_x=lambda demand_rv: demand_rv.mu,
         #     x_label=r"$\mu$",
         #     demand_dist="Exp",
         # ),
 
-        Params(
-            active_obj_demand_rv_list=[
-                random_variable.Bernoulli(p=p, D=2)
-                for p in numpy.linspace(0.1, 1, 20)
-            ],
-            func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.p}",
-            x_label=r"$p$",
-            demand_dist="Bern(D=2)",
-        ),
-
-        Params(
-            active_obj_demand_rv_list=[
-                random_variable.Bernoulli(p=p, D=2.5)
-                for p in numpy.linspace(0.1, 1, 20)
-            ],
-            func_active_obj_demand_to_x=lambda demand_rv: f"{demand_rv.p}",
-            x_label=r"$p$",
-            demand_dist="Bern(D=2.5)",
-        ),
+        # Params(
+        #     active_obj_demand_rv_list=[
+        #         random_variable.Normal(mu=mu, sigma=mu)
+        #         # for mu in numpy.linspace(0.1, 5, 30)
+        #         for mu in numpy.linspace(0.1, 5, 5)
+        #     ],
+        #     func_active_obj_demand_to_x=lambda demand_rv: demand_rv.mu,
+        #     x_label=r"$\mu = \sigma$",
+        #     demand_dist="Normal",
+        # ),
     ]
+
+    # Pareto
+    _D = 1.5
+    for D in numpy.arange(_D, _D + 1 + 0.1, 0.1):
+        params_list.append(
+            Params(
+                active_obj_demand_rv_list=[
+                    random_variable.Pareto(loc=D, a=a)
+                    for a in numpy.linspace(0.1, 10, 25)
+                    # for a in range(1, 10)
+                ],
+                func_active_obj_demand_to_x=lambda demand_rv: demand_rv.a,
+                x_label=r"$a$",
+                demand_dist=f"Pareto(D={round(D, 1)})",
+            ),
+        )
+
+    # Bernoulli
+    # _D = 7
+    # for D in numpy.arange(_D, _D + 1 + 0.1, 0.1):
+    #     params_list.append(
+    #         Params(
+    #             active_obj_demand_rv_list=[
+    #                 random_variable.Bernoulli(p=p, D=D)
+    #                 for p in numpy.linspace(0.1, 1, 20)
+    #             ],
+    #             func_active_obj_demand_to_x=lambda demand_rv: demand_rv.p,
+    #             x_label=r"$p$",
+    #             demand_dist=f"Bern(D={round(D, 1)})",
+    #         )
+    #     )
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d_list=[3],
+            # d_list=[3],
+            # d_list=[8, 10],
             # d_list=[2, 3],
-            # d_list=[2, 3, 4],
+            d_list=[2, 3, 4],
             # d_list=[5, 6],
             active_obj_demand_rv_list=params.active_obj_demand_rv_list,
             func_active_obj_demand_to_x=params.func_active_obj_demand_to_x,

@@ -28,6 +28,9 @@ class Normal(RandomVariable):
     def cdf(self, x: float) -> float:
         return self.dist.cdf(x)
 
+    def pdf(self, x: float) -> float:
+        return self.dist.pdf(x)
+
     def tail_prob(self, x: float) -> float:
         return 1 - self.cdf(x)
 
@@ -242,6 +245,32 @@ class Bernoulli(RandomVariable):
 
     def to_short_repr(self):
         return "Bernoulli"
+
+    def pdf(self, x: float):
+        return self.dist.pmf(x / self.D)
+
+    def sample(self) -> float:
+        return self.dist.rvs(size=1)[0] * self.D
+
+
+class Beta(RandomVariable):
+    def __init__(self, a: float, b: float, D: float):
+        super().__init__(min_value=0, max_value=D)
+
+        self.a = a
+        self.b = b
+        self.D = D
+
+        self.dist = scipy.stats.beta(a, b)
+
+    def __str__(self):
+        return f"{self.D} x Beta(a= {self.a}, b= {self.b})"
+
+    def to_latex(self):
+        return r"{} \times {}(a= {}, b= {})".format(self.D, r"\mathrm{Beta}", self.a, self.b)
+
+    def to_short_repr(self):
+        return "Beta"
 
     def pdf(self, x: float):
         return self.dist.pmf(x / self.D)
