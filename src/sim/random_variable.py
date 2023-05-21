@@ -1,3 +1,4 @@
+import abc
 import math
 import numpy
 import random
@@ -5,12 +6,21 @@ import scipy
 import scipy.stats
 
 from src.utils.debug import *
+from src.utils.plot import *
 
 
 class RandomVariable:
     def __init__(self, min_value: float, max_value: float):
         self.min_value = min_value
         self.max_value = max_value
+
+    @abc.abstractmethod
+    def pdf(self, x):
+        pass
+
+    def plot_pdf(self, x_list: list[float]):
+        y_list = [self.pdf(x) for x in x_list]
+        plot.plot(x_list, y_list, label=f"{self}", color=next(dark_color_cycle), marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
 
 class Normal(RandomVariable):

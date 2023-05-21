@@ -126,7 +126,7 @@ def prob_cum_demand_leq_cum_supply_w_scipy(
         ],
         opts={
             # "limit": 10,
-            "epsabs": 0.001
+            # "epsabs": 0.001
         }
     )
     log(DEBUG, "", integral_result=integral_result)
