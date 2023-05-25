@@ -150,12 +150,13 @@ def plot_P_w_pareto_demand_distribution(
 
         P_ub_list = []
 
-        for tail_index in range(8, 1, -1):
+        # for tail_index in range(8, 1, -1):
+        for tail_index in numpy.linspace(0.1, 3, 10):
             log(INFO, f"> tail_index= {tail_index}")
 
             tail_index_list.append(tail_index)
 
-            active_obj_demand_rv = random_variable.Pareto(loc=1, a=tail_index)
+            active_obj_demand_rv = random_variable.Pareto(loc=0.1, a=tail_index)
 
             demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
                 num_objs=storage_design.k,
@@ -209,10 +210,15 @@ def plot_P_w_pareto_demand_distribution(
     use_cvxpy = True
 
     storage_design_and_model_list = [
-        # (
-        #     design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-        #     model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        # ),
+        (
+            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
+
+        (
+            design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+            model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
 
         (
             design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
@@ -235,16 +241,7 @@ def plot_P(
     k = 120
 
     for d in d_list:
-        plot_P_w_exp_demand_distribution(
-            k=k,
-            d=d,
-            num_active_objs=num_active_objs,
-            maximal_load=maximal_load,
-            num_samples=num_samples,
-            num_sim_run=num_sim_run,
-        )
-
-        # plot_P_w_pareto_demand_distribution(
+        # plot_P_w_exp_demand_distribution(
         #     k=k,
         #     d=d,
         #     num_active_objs=num_active_objs,
@@ -252,6 +249,15 @@ def plot_P(
         #     num_samples=num_samples,
         #     num_sim_run=num_sim_run,
         # )
+
+        plot_P_w_pareto_demand_distribution(
+            k=k,
+            d=d,
+            num_active_objs=num_active_objs,
+            maximal_load=maximal_load,
+            num_samples=num_samples,
+            num_sim_run=num_sim_run,
+        )
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
@@ -262,7 +268,8 @@ def plot_P(
         fr"$k= n= {k}$, "
         fr"$m= {maximal_load}$, "
         r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
-        r"$\rho \sim$ Exp"
+        # r"$\rho \sim$ Exp"
+        r"$\rho \sim$ Pareto"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -287,9 +294,9 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
+            d_list=[2, 3, 4],
+            # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
-            # d_list=[2, 3],
-            d_list=[5, 6],
             num_active_objs=num_active_objs,
             maximal_load=1,  # 0.7,
             num_samples=100,  # 300,
