@@ -137,8 +137,8 @@ def plot_P_w_pareto_demand_distribution(
     )
 
     def plot_(
-        storage_design: design.CyclicDesign,
-        storage_model: model.CyclicDesignModelForGivenDemandDistribution,
+        storage_design: design.ReplicaDesign,
+        storage_model: model.StorageDesignModelForGivenDemandDistribution,
         run_sim: bool = False,
     ):
         log(INFO, f">> storage_design= {storage_design}")
@@ -156,12 +156,17 @@ def plot_P_w_pareto_demand_distribution(
 
             tail_index_list.append(tail_index)
 
-            active_obj_demand_rv = random_variable.Pareto(loc=0.1, a=tail_index)
+            # active_obj_demand_rv = random_variable.Pareto(loc=0.1, a=tail_index)
+            # demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
+            #     num_objs=storage_design.k,
+            #     num_active_objs=num_active_objs,
+            #     active_obj_demand_rv=active_obj_demand_rv,
+            # )
 
-            demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
+            demand_vector_sampler = demand.DemandVectorSamplerWithParetoObjDemands(
                 num_objs=storage_design.k,
-                num_active_objs=num_active_objs,
-                active_obj_demand_rv=active_obj_demand_rv,
+                min_value=0.1,
+                a=tail_index,
             )
 
             # Sim
@@ -180,20 +185,22 @@ def plot_P_w_pareto_demand_distribution(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-            P_ub = storage_model.prob_serving_upper_bound(
-                demand_rv=active_obj_demand_rv,
-                # max_combination_size=2,
-                max_combination_size=num_active_objs,
-                maximal_load=maximal_load,
-            )
+            P_ub = 0
+            # P_ub = storage_model.prob_serving_upper_bound(
+            #     demand_rv=active_obj_demand_rv,
+            #     num_active_objs=num_active_objs,
+            #     # max_combination_size=2,
+            #     max_combination_size=num_active_objs,
+            #     maximal_load=maximal_load,
+            # )
             P_ub_list.append(P_ub)
 
             # LB
             # if P_lb_list and P_lb_list[-1] < 0.01:
             #     P_lb = 0
 
-            if E_frac_of_demand_vectors_covered < 0.01:
-                break
+            # if E_frac_of_demand_vectors_covered < 0.01:
+            #     break
 
         log(INFO, f"storage_design= {storage_design}",
             tail_index_list=tail_index_list,
@@ -204,7 +211,7 @@ def plot_P_w_pareto_demand_distribution(
         color = next(dark_color_cycle)
         if run_sim:
             plot.errorbar(tail_index_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(tail_index_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.plot(tail_index_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
@@ -226,7 +233,7 @@ def plot_P_w_pareto_demand_distribution(
         ),
     ]
 
-    run_sim = False
+    run_sim = True
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 

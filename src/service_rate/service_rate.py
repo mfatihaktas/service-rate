@@ -52,6 +52,8 @@ class ServiceRateInspectorBase:
         """
         max_load = self.max_load(obj_demand_list)
         # log(DEBUG, "", max_load=max_load, obj_demand_list=obj_demand_list)
+        if max_load is None:
+            return False
 
         return max_load <= (maximal_load + 0.001)
 
