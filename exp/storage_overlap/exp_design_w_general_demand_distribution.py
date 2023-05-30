@@ -43,7 +43,8 @@ def plot_P_w_exp_demand_distribution(
 
         P_ub_list = []
 
-        for mean_obj_demand in numpy.linspace(0.1, 3, 10):
+        # for mean_obj_demand in numpy.linspace(0.1, 3, 10):
+        for mean_obj_demand in numpy.linspace(0.1, 2, 20):
             log(INFO, f"> mean_obj_demand= {mean_obj_demand}")
 
             mean_obj_demand_list.append(mean_obj_demand)
@@ -59,13 +60,16 @@ def plot_P_w_exp_demand_distribution(
             # Sim
             E_frac_of_demand_vectors_covered = 0.02
             if run_sim:
-                frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
-                    demand_vector_sampler=demand_vector_sampler,
-                    storage_design=storage_design,
-                    num_samples=num_samples,
-                    num_sim_run=num_sim_run,
-                    maximal_load=maximal_load,
-                )
+                if E_frac_of_demand_vectors_covered_list and E_frac_of_demand_vectors_covered_list[-1] <= 0.01:
+                    frac_of_demand_vectors_covered_list = [0.01]
+                else:
+                    frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
+                        demand_vector_sampler=demand_vector_sampler,
+                        storage_design=storage_design,
+                        num_samples=num_samples,
+                        num_sim_run=num_sim_run,
+                        maximal_load=maximal_load,
+                    )
 
                 E_frac_of_demand_vectors_covered = numpy.mean(frac_of_demand_vectors_covered_list)
                 E_frac_of_demand_vectors_covered_list.append(E_frac_of_demand_vectors_covered)
@@ -81,13 +85,14 @@ def plot_P_w_exp_demand_distribution(
             )
             P_ub_list.append(P_ub)
 
-            if E_frac_of_demand_vectors_covered < 0.01:
+            if E_frac_of_demand_vectors_covered <= 0.01 and P_ub <= 0.01:
                 break
 
         log(INFO, f"storage_design= {storage_design}",
             mean_obj_demand_list=mean_obj_demand_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+            P_ub_list=P_ub_list,
         )
 
         color = next(dark_color_cycle)
@@ -220,7 +225,7 @@ def plot_P_w_pareto_demand_distribution(
         color = next(dark_color_cycle)
         if run_sim:
             plot.errorbar(tail_index_list, E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        # plot.plot(tail_index_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        plot.plot(tail_index_list, P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
@@ -278,16 +283,17 @@ def plot_P(
         # )
 
     fontsize = 14
-    plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
+    plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.35, 0.75))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
     plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
 
     plot.title(
         fr"$k= n= {k}$, "
+        fr"$d= {d_list[0]}$, "
         fr"$m= {maximal_load}$, "
-        r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
+        # r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
         # r"$\rho \sim$ Exp"
-        r"$\rho \sim$ Pareto"
+        r"$\rho \sim$ Exp"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -312,13 +318,15 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d_list=[2],
+            # d_list=[2],
+            # d_list=[6],
+            d_list=[10],
             # d_list=[2, 3, 4],
             # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
             num_active_objs=num_active_objs,
             maximal_load=1,  # 0.7,
-            num_samples=100,  # 300,
+            num_samples=300,  # 300,
             # num_samples=1000,
             num_sim_run=3,
         )

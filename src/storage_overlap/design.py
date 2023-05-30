@@ -390,7 +390,8 @@ class ClusteringDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Clustering(k= {self.k}, n= {self.n}, d= {self.d})"
-        return r"$\textrm{Clustering}$" + fr", $d= {self.d}$"
+        # return r"$\textrm{Clustering}$" + fr", $d= {self.d}$"
+        return r"$\textrm{Clustering}$"
 
 
 @dataclasses.dataclass
@@ -422,7 +423,8 @@ class CyclicDesign(ReplicaDesign):
 
     def repr_for_plot(self):
         # return f"Cyclic(k= {self.k}, n= {self.n}, d= {self.d}, s= {self.shift_size})"
-        return r"$\textrm{Cyclic}$, " + fr"$d={self.d}$"
+        # return r"$\textrm{Cyclic}$" + fr", $d={self.d}$"
+        return r"$\textrm{Cyclic}$"
 
 
 @dataclasses.dataclass
@@ -496,7 +498,8 @@ class RandomBlockDesign(ReplicaDesign):
     def repr_for_plot(self):
         # return f"RandomBlockDesign(k= {self.k}, n= {self.n}, d= {self.d})"
         # return r"$\textrm{RandomBlockDesign}$"
-        return r"$\textrm{Block}$" + fr", $d= {self.d}$"
+        # return r"$\textrm{Block}$" + fr", $d= {self.d}$"
+        return r"$\textrm{Block}$"
 
 
 @dataclasses.dataclass
@@ -533,7 +536,8 @@ class RandomExpanderDesign(ReplicaDesign):
     def repr_for_plot(self):
         # return f"RandomExpanderDesign(k= {self.k}, n= {self.n}, d= {self.d})"
         # return r"$\textrm{RandomDesign}$" + fr", $d={self.d}$"
-        return r"$\textrm{Random}$" + fr", $d={self.d}$"
+        # return r"$\textrm{Random}$" + fr", $d={self.d}$"
+        return r"$\textrm{Random}$"
 
 
 @dataclasses.dataclass
