@@ -44,7 +44,7 @@ def plot_P_w_exp_demand_distribution(
         P_ub_list = []
 
         # for mean_obj_demand in numpy.linspace(0.1, 3, 10):
-        for mean_obj_demand in numpy.linspace(0.1, 2, 20):
+        for mean_obj_demand in numpy.linspace(0.1, 2, 30):
             log(INFO, f"> mean_obj_demand= {mean_obj_demand}")
 
             mean_obj_demand_list.append(mean_obj_demand)
@@ -168,6 +168,8 @@ def plot_P_w_pareto_demand_distribution(
             tail_index_list.append(tail_index)
 
             min_value = 0.1
+            active_obj_demand_rv = random_variable.Pareto(loc=min_value, a=tail_index)
+
             if num_active_objs == storage_design.k:
                 demand_vector_sampler = demand.DemandVectorSamplerWithParetoObjDemands(
                     num_objs=storage_design.k,
@@ -176,7 +178,6 @@ def plot_P_w_pareto_demand_distribution(
                 )
 
             else:
-                active_obj_demand_rv = random_variable.Pareto(loc=min_value, a=tail_index)
                 demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
                     num_objs=storage_design.k,
                     num_active_objs=num_active_objs,
@@ -199,27 +200,24 @@ def plot_P_w_pareto_demand_distribution(
                 std_frac_of_demand_vectors_covered_list.append(numpy.std(frac_of_demand_vectors_covered_list))
 
             # UB
-            P_ub = 0
-            # P_ub = storage_model.prob_serving_upper_bound(
-            #     demand_rv=active_obj_demand_rv,
-            #     num_active_objs=num_active_objs,
-            #     # max_combination_size=2,
-            #     max_combination_size=num_active_objs,
-            #     maximal_load=maximal_load,
-            # )
+            # P_ub = 0
+            P_ub = storage_model.prob_serving_upper_bound(
+                demand_rv=active_obj_demand_rv,
+                num_active_objs=num_active_objs,
+                # max_combination_size=2,
+                max_combination_size=num_active_objs,
+                maximal_load=maximal_load,
+            )
             P_ub_list.append(P_ub)
 
-            # LB
-            # if P_lb_list and P_lb_list[-1] < 0.01:
-            #     P_lb = 0
-
-            # if E_frac_of_demand_vectors_covered < 0.01:
+            # if E_frac_of_demand_vectors_covered <= 0.01 and P_ub <= 0.01:
             #     break
 
         log(INFO, f"storage_design= {storage_design}",
             tail_index_list=tail_index_list,
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
+            P_ub_list=P_ub_list,
         )
 
         color = next(dark_color_cycle)
@@ -264,16 +262,7 @@ def plot_P(
         num_active_objs = k
 
     for d in d_list:
-        plot_P_w_exp_demand_distribution(
-            k=k,
-            d=d,
-            num_active_objs=num_active_objs,
-            maximal_load=maximal_load,
-            num_samples=num_samples,
-            num_sim_run=num_sim_run,
-        )
-
-        # plot_P_w_pareto_demand_distribution(
+        # plot_P_w_exp_demand_distribution(
         #     k=k,
         #     d=d,
         #     num_active_objs=num_active_objs,
@@ -282,10 +271,20 @@ def plot_P(
         #     num_sim_run=num_sim_run,
         # )
 
+        plot_P_w_pareto_demand_distribution(
+            k=k,
+            d=d,
+            num_active_objs=num_active_objs,
+            maximal_load=maximal_load,
+            num_samples=num_samples,
+            num_sim_run=num_sim_run,
+        )
+
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.35, 0.75))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
-    plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
+    # plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
+    plot.xlabel(r"$\alpha$", fontsize=fontsize)
 
     plot.title(
         fr"$k= n= {k}$, "
@@ -293,7 +292,7 @@ def plot_P(
         fr"$m= {maximal_load}$, "
         # r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
         # r"$\rho \sim$ Exp"
-        r"$\rho \sim$ Exp"
+        r"$\rho \sim \textrm{Pareto}(\lambda=0.1, \alpha)$"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
