@@ -1,3 +1,4 @@
+import enum
 import joblib
 import numpy
 
@@ -261,38 +262,54 @@ def plot_P(
     if num_active_objs is None:
         num_active_objs = k
 
+    class DemandDistribution(enum.Enum):
+        Bernoulli = "Bernoulli"
+        Exp = "Exp"
+        Pareto = "Pareto"
+
+    demand_dist = DemandDistribution.Exp
+
     for d in d_list:
-        # plot_P_w_exp_demand_distribution(
-        #     k=k,
-        #     d=d,
-        #     num_active_objs=num_active_objs,
-        #     maximal_load=maximal_load,
-        #     num_samples=num_samples,
-        #     num_sim_run=num_sim_run,
-        # )
+        if demand_dist == DemandDistribution.Exp:
+            plot_P_w_exp_demand_distribution(
+                k=k,
+                d=d,
+                num_active_objs=num_active_objs,
+                maximal_load=maximal_load,
+                num_samples=num_samples,
+                num_sim_run=num_sim_run,
+            )
 
-        plot_P_w_pareto_demand_distribution(
-            k=k,
-            d=d,
-            num_active_objs=num_active_objs,
-            maximal_load=maximal_load,
-            num_samples=num_samples,
-            num_sim_run=num_sim_run,
-        )
+        elif demand_dist == DemandDistribution.Pareto:
+            plot_P_w_pareto_demand_distribution(
+                k=k,
+                d=d,
+                num_active_objs=num_active_objs,
+                maximal_load=maximal_load,
+                num_samples=num_samples,
+                num_sim_run=num_sim_run,
+            )
 
-    fontsize = 14
-    plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.35, 0.75))
+    if demand_dist == DemandDistribution.Exp:
+        xlabel = r"$E[\rho]$"
+        dist_in_title = r"\textrm{Exp}"
+    elif demand_dist == DemandDistribution.Pareto:
+        xlabel = r"$\alpha$"
+        dist_in_title = r"\textrm{Pareto}(\lambda=0.1, \alpha)"
+
+    fontsize = 16
+    plot.legend(fontsize=14, loc="upper right", bbox_to_anchor=(1.35, 0.75))
+    plot.xlabel(xlabel, fontsize=fontsize)
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
-    # plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
-    plot.xlabel(r"$\alpha$", fontsize=fontsize)
 
+    d = d_list[0]
     plot.title(
         fr"$k= n= {k}$, "
-        fr"$d= {d_list[0]}$, "
+        fr"$d= {d}$, "
         fr"$m= {maximal_load}$, "
         # r"$n_{\textrm{active}}= $" + fr"${num_active_objs}$, "
-        # r"$\rho \sim$ Exp"
-        r"$\rho \sim \textrm{Pareto}(\lambda=0.1, \alpha)$"
+        fr"$\rho \sim {dist_in_title}$"
+        # r"$\rho \sim \textrm{Pareto}(\lambda=0.1, \alpha)$"
         # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
         # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
     )
@@ -300,10 +317,11 @@ def plot_P(
     # Save the plot
     plot.gcf().set_size_inches(6, 4)
     file_name = (
-        "plots/plot_design_w_general_demand_distribution"
+        f"plots/plot_design_{demand_dist.value}_demand"
         + f"_k_{k}"
+        + f"_d_{d}"
         + f"_m_{maximal_load}"
-        + f"_n_active_{num_active_objs}"
+        # + f"_n_active_{num_active_objs}"
         + ".pdf"
     )
     plot.savefig(file_name, bbox_inches="tight")
