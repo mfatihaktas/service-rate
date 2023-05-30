@@ -612,7 +612,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 cum_supply=cum_supply,
             )
 
-        elif False and isinstance(demand_rv, random_variable.Exponential):
+        elif isinstance(demand_rv, random_variable.Exponential):
             return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
                 combination_size=combination_size,
                 demand_rv=demand_rv,

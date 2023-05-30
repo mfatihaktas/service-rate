@@ -106,10 +106,10 @@ def plot_w_exp_obj_demands(
         mean_obj_demand_list.append(mean_obj_demand)
 
         # frac_of_demand_vectors_covered_list = [0.02, 0.02]
-        demand_vector_sampler = demand.DemandVectorSamplerWithExpObjDemands(
-            num_objs=storage_design.k,
-            mean_obj_demand=mean_obj_demand,
-        )
+        # demand_vector_sampler = demand.DemandVectorSamplerWithExpObjDemands(
+        #     num_objs=storage_design.k,
+        #     mean_obj_demand=mean_obj_demand,
+        # )
 
         frac_of_demand_vectors_covered_list = [0, 0]
         # frac_of_demand_vectors_covered_list = sim.sim_frac_of_demand_vectors_covered(
@@ -286,8 +286,8 @@ def plot_frac_demand_vectors_covered_vs_d(
                 num_sim_run=num_sim_run,
             )
 
-    fontsize = 14
-    plot.legend(fontsize=fontsize)
+    fontsize = 16
+    plot.legend(fontsize=14)
     # plot.yscale("log")
     plot.ylabel(r"$\mathcal{P}$ with no redundancy", fontsize=fontsize)
     # plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
@@ -295,14 +295,17 @@ def plot_frac_demand_vectors_covered_vs_d(
     plot.xlabel(r"$E[\rho]$", fontsize=fontsize)
 
     plot.title(
-        rf"$k= {k}$, "
-        # rf"$k= n= {k}$, "
-        # f"$d= 1$, "
-        rf"$m= {maximal_load}$, "
-        r"$\rho \sim$ Exp"
-        # r"$\lambda= $" + fr"${mean_obj_demand}$, "
-        # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
-        # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$"
+        (
+            rf"$k= {k}$, "
+            # rf"$k= n= {k}$, "
+            # f"$d= 1$, "
+            rf"$m= {maximal_load}$, "
+            r"$\rho \sim$ Exp"
+            # r"$\lambda= $" + fr"${mean_obj_demand}$, "
+            # r"$N_{\textrm{sample}}= $" + fr"${num_samples}$, "
+            # r"$N_{\textrm{sim}}= $" + fr"${num_sim_run}$",
+        ),
+        fontsize=fontsize
     )
 
     # Save the plot

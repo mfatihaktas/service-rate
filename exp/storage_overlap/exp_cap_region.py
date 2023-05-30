@@ -46,7 +46,7 @@ def plot_capacity_region_w_varying_overlap_size():
 
     num_rows = len(conf_list)
     num_columns = len(overlap_size_list)
-    fig_size = (num_columns * 3, num_rows * 3)
+    fig_size = (num_columns * 2.5, num_rows * 2.5)
     fig, ax_list = plot.subplots(num_rows, num_columns, figsize=fig_size)
     if not isinstance(ax_list[0], list):
         ax_list = [ax_list]
@@ -72,24 +72,24 @@ def plot_capacity_region_w_varying_overlap_size():
                 obj_id_list=[0, 1],
             )
 
-            fontsize = 14
-            plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
-            plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
+            fontsize = 16
+            plot.xlabel(r"$\rho_0$", fontsize=fontsize)
+            plot.ylabel(r"$\rho_1$", fontsize=fontsize)
 
             title = (
                 fr"$d= {conf.d}$, "
                 # fr"$s= {conf.s}$, "
                 # r"$n_{overlap}=$" + fr" ${overlap_size}$"
-                r"$|span|=$" + fr" ${2*conf.d - overlap_size}$"
+                r"$\mathrm{span}=$" + fr" ${2*conf.d - overlap_size}$"
             )
             plot.title(title, fontsize=fontsize)
 
     for i in range(num_rows):
         plot_(row_index=i)
 
-    plot.subplots_adjust(wspace=0.3)
+    plot.subplots_adjust(wspace=0.4)
 
-    plot.savefig("plots/plot_capacity_region_w_varying_overlap_size.png", bbox_inches="tight")
+    plot.savefig("plots/plot_capacity_region_w_varying_overlap_size.pdf", bbox_inches="tight")
     plot.gcf().clear()
     log(INFO, "Done")
 

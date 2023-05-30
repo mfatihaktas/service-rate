@@ -175,7 +175,7 @@ def plot_capacity_region_2d_alternative_w_hull(
     if file_name_suffix is None:
         return
 
-    fontsize = 14
+    fontsize = 16
     plot.xlabel(r"$\lambda_a$", fontsize=fontsize)
     plot.ylabel(r"$\lambda_b$", fontsize=fontsize)
 

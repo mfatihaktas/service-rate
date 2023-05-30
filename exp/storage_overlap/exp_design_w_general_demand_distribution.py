@@ -74,6 +74,7 @@ def plot_P_w_exp_demand_distribution(
             # UB
             P_ub = storage_model.prob_serving_upper_bound(
                 demand_rv=active_obj_demand_rv,
+                num_active_objs=num_active_objs,
                 # max_combination_size=2,
                 max_combination_size=num_active_objs,
                 maximal_load=maximal_load,
@@ -98,15 +99,20 @@ def plot_P_w_exp_demand_distribution(
     use_cvxpy = True
 
     storage_design_and_model_list = [
-        # (
-        #     design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-        #     model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        # ),
+        (
+            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
 
-        # (
-        #     design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        #     model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        # ),
+        (
+            design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+            model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
+
+        (
+            design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
 
         (
             design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
@@ -114,7 +120,7 @@ def plot_P_w_exp_demand_distribution(
         ),
     ]
 
-    run_sim = False
+    run_sim = True
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 
@@ -156,18 +162,21 @@ def plot_P_w_pareto_demand_distribution(
 
             tail_index_list.append(tail_index)
 
-            # active_obj_demand_rv = random_variable.Pareto(loc=0.1, a=tail_index)
-            # demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
-            #     num_objs=storage_design.k,
-            #     num_active_objs=num_active_objs,
-            #     active_obj_demand_rv=active_obj_demand_rv,
-            # )
+            min_value = 0.1
+            if num_active_objs == storage_design.k:
+                demand_vector_sampler = demand.DemandVectorSamplerWithParetoObjDemands(
+                    num_objs=storage_design.k,
+                    min_value=min_value,
+                    a=tail_index,
+                )
 
-            demand_vector_sampler = demand.DemandVectorSamplerWithParetoObjDemands(
-                num_objs=storage_design.k,
-                min_value=0.1,
-                a=tail_index,
-            )
+            else:
+                active_obj_demand_rv = random_variable.Pareto(loc=min_value, a=tail_index)
+                demand_vector_sampler = demand.DemandVectorSamplerWithFixedNumActiveObjs(
+                    num_objs=storage_design.k,
+                    num_active_objs=num_active_objs,
+                    active_obj_demand_rv=active_obj_demand_rv,
+                )
 
             # Sim
             E_frac_of_demand_vectors_covered = 0.02
@@ -246,18 +255,11 @@ def plot_P(
     num_sim_run: int = 3,
 ):
     k = 120
+    if num_active_objs is None:
+        num_active_objs = k
 
     for d in d_list:
-        # plot_P_w_exp_demand_distribution(
-        #     k=k,
-        #     d=d,
-        #     num_active_objs=num_active_objs,
-        #     maximal_load=maximal_load,
-        #     num_samples=num_samples,
-        #     num_sim_run=num_sim_run,
-        # )
-
-        plot_P_w_pareto_demand_distribution(
+        plot_P_w_exp_demand_distribution(
             k=k,
             d=d,
             num_active_objs=num_active_objs,
@@ -265,6 +267,15 @@ def plot_P(
             num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
+
+        # plot_P_w_pareto_demand_distribution(
+        #     k=k,
+        #     d=d,
+        #     num_active_objs=num_active_objs,
+        #     maximal_load=maximal_load,
+        #     num_samples=num_samples,
+        #     num_sim_run=num_sim_run,
+        # )
 
     fontsize = 14
     plot.legend(fontsize=fontsize, loc="upper right", bbox_to_anchor=(1.25, 0.75))
@@ -301,7 +312,8 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d_list=[2, 3, 4],
+            d_list=[2],
+            # d_list=[2, 3, 4],
             # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
             num_active_objs=num_active_objs,
@@ -310,9 +322,10 @@ def manage_plot_P_w_joblib():
             # num_samples=1000,
             num_sim_run=3,
         )
+        for num_active_objs in [None]
         # for num_active_objs in [3]
         # for num_active_objs in [2, 3]
-        for num_active_objs in [4, 5]
+        # for num_active_objs in [4, 5]
     )
 
     log(INFO, "Done")
