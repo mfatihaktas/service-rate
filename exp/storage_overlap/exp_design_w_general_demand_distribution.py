@@ -119,10 +119,10 @@ def plot_P_w_exp_demand_distribution(
             model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
         ),
 
-        (
-            design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        ),
+        # (
+        #     design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
     ]
 
     run_sim = True
@@ -318,14 +318,14 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            # d_list=[2],
+            d_list=[3],
             # d_list=[6],
-            d_list=[10],
+            # d_list=[10],
             # d_list=[2, 3, 4],
             # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
             num_active_objs=num_active_objs,
-            maximal_load=1,  # 0.7,
+            maximal_load=0.7,  # 0.7,
             num_samples=300,  # 300,
             # num_samples=1000,
             num_sim_run=3,

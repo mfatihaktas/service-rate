@@ -589,6 +589,29 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
             if demand_rv.D * num_active_objs <= cum_supply
         )
 
+    def prob_cum_demand_leq_cum_supply_w_sim(
+        self,
+        combination_size: int,
+        demand_rv: random_variable.RandomVariable,
+        cum_supply: int,
+        num_sim_run: int,
+    ) -> float:
+        num_success = 0
+        for _ in range(num_sim_run):
+            demand_list = [
+                demand_rv.sample() for _ in range(combination_size)
+            ]
+
+            if max(demand_list) > self.d:
+                continue
+
+            if sum(demand_list) > cum_supply:
+                continue
+
+            num_success += 1
+
+        return num_success / num_sim_run
+
     def prob_cum_demand_leq_cum_supply(
         self,
         combination_size: int,
@@ -612,7 +635,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 cum_supply=cum_supply,
             )
 
-        elif isinstance(demand_rv, random_variable.Exponential):
+        elif False and isinstance(demand_rv, random_variable.Exponential):
             return self.prob_cum_demand_leq_cum_supply_for_exp_demand(
                 combination_size=combination_size,
                 demand_rv=demand_rv,
@@ -628,12 +651,19 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
 
         else:
             log(WARNING, "Using numeric integral")
-            return math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
-                num_demands=combination_size,
-                demand_pdf=demand_rv.pdf,
-                d=self.d,
-                span_size=span_size,
-                maximal_load=maximal_load,
+            # return math_utils.prob_cum_demand_leq_cum_supply_w_scipy(
+            #     num_demands=combination_size,
+            #     demand_pdf=demand_rv.pdf,
+            #     d=self.d,
+            #     span_size=span_size,
+            #     maximal_load=maximal_load,
+            # )
+
+            return self.prob_cum_demand_leq_cum_supply_w_sim(
+                combination_size=combination_size,
+                demand_rv=demand_rv,
+                cum_supply=cum_supply,
+                num_sim_run=100,
             )
 
     def prob_serving_upper_bound_for_given_combination_size(
