@@ -663,7 +663,7 @@ class StorageDesignModelForGivenDemandDistribution(ReplicaDesignModel):
                 combination_size=combination_size,
                 demand_rv=demand_rv,
                 cum_supply=cum_supply,
-                num_sim_run=100,
+                num_sim_run=200,
             )
 
     def prob_serving_upper_bound_for_given_combination_size(
