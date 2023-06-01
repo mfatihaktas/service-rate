@@ -107,8 +107,8 @@ def plot_P_vs_E_ro_for_given_d(
         design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=2, use_cvxpy=use_cvxpy),
         # design.CyclicDesign(k=k, n=n, d=d, shift_size=3, use_cvxpy=use_cvxpy),
-        design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
         # design.RandomExpanderDesign_wClusters(k=k, n=n, d=d, num_clusters=2, use_cvxpy=use_cvxpy),
         # design.TwoXORDesign(k=124, n=124, d=d, use_cvxpy=use_cvxpy),
     ]
