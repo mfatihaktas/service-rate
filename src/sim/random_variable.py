@@ -433,7 +433,7 @@ class TPareto(RandomVariable):  # Truncated
         else:
             return (
                 self.a * self.min_value ** k / (self.a - k)
-                * (1 - (self.min_value / self.u) ** (self.a - k))
+                * (1 - (self.min_value / self.max_value) ** (self.a - k))
                 / (1 - (self.min_value / self.max_value) ** self.a)
             )
 

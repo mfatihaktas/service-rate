@@ -216,6 +216,35 @@ class RandomExpanderDesignModel(ReplicaDesignModel):
 class ClusteringDesignModel(ReplicaDesignModel):
     b: int
 
+    def prob_serving_lower_bound_w_hoeffding(
+        self,
+        mean_obj_demand: float,
+        min_value: float,
+        max_value: float,
+        maximal_load: float,
+    ) -> float:
+        log(DEBUG, "Started",
+            mean_obj_demand=mean_obj_demand,
+            min_value=min_value,
+            max_value=max_value,
+            maximal_load=maximal_load,
+        )
+        check(self.b == 1, f"Defined for only b = 1 but b = {self.b}")
+
+        n, d = self.n, self.d
+        num_clusters = n / d
+
+        prob_single_cluster_is_stable = (
+            1 - math.exp(
+                -d * 2 * (
+                    (maximal_load - mean_obj_demand) ** 2
+                    / (max_value - min_value) ** 2
+                )
+            )
+        )
+
+        return prob_single_cluster_is_stable ** num_clusters
+
 
 @dataclasses.dataclass
 class ClusteringDesignModelForBernoulliObjDemands(ClusteringDesignModel):
@@ -330,29 +359,6 @@ class ClusteringDesignModelForExpObjDemands(ClusteringDesignModel):
             1 - math.exp(
                 -d * (
                     mu * maximal_load - b + b * math.log(b / mu / maximal_load)
-                )
-            )
-        )
-
-        return prob_single_cluster_is_stable ** num_clusters
-
-    def prob_serving_lower_bound_w_hoeffding(
-        self,
-        mean_obj_demand: float,
-        min_value: float,
-        max_value: float,
-        maximal_load: float,
-    ) -> float:
-        check(self.b == 1, f"Defined for only b = 1 but b = {self.b}")
-
-        n, d = self.n, self.d
-        num_clusters = n / d
-
-        prob_single_cluster_is_stable = (
-            1 - math.exp(
-                -d * 2 * (
-                    (maximal_load - mean_obj_demand) ** 2
-                    / (max_value - min_value) ** 2
                 )
             )
         )

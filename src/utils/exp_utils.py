@@ -15,7 +15,9 @@ from src.utils.plot import *
 class DemandDistribution(enum.Enum):
     Bernoulli = "Bernoulli"
     Exp = "Exp"
+    ExpBounded = "ExpBounded"
     Pareto = "Pareto"
+    TPareto = "TPareto"
 
 
 def plot_P_for_given_params(
@@ -25,6 +27,7 @@ def plot_P_for_given_params(
     maximal_load: float,
     demand_dist: DemandDistribution,
     plot_ub: bool = True,
+    plot_lb: bool = True,
     num_samples: int = 300,
     num_sim_run: int = 3,
 ):
@@ -35,6 +38,7 @@ def plot_P_for_given_params(
         maximal_load=maximal_load,
         demand_dist=demand_dist,
         plot_ub=plot_ub,
+        plot_lb=plot_lb,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
@@ -73,6 +77,19 @@ def plot_P_for_given_params(
         xlabel = r"$\alpha$"
         dist_in_title = r"\mathrm{Pareto}" + fr"(\lambda={min_value}, \alpha)"
 
+    elif demand_dist == DemandDistribution.TPareto:
+        min_value = 0.1
+        max_value = 100
+        tail_index_list = numpy.linspace(0.1, 3, 20)
+        active_obj_demand_rv_list = [
+            random_variable.TPareto(min_value=min_value, max_value=max_value, a=tail_index)
+            for tail_index in tail_index_list
+        ]
+
+        x_l = tail_index_list
+        xlabel = r"$\alpha$"
+        dist_in_title = r"\mathrm{TPareto}" + fr"(l={min_value}, u={max_value}, \alpha)"
+
     def plot_(
         storage_design: design.CyclicDesign,
         storage_model: model.CyclicDesignModelForGivenDemandDistribution,
@@ -84,6 +101,7 @@ def plot_P_for_given_params(
         std_frac_of_demand_vectors_covered_list = []
 
         P_ub_list = []
+        P_lb_list = []
 
         for active_obj_demand_rv in active_obj_demand_rv_list:
             log(INFO, f"> active_obj_demand_rv= {active_obj_demand_rv}")
@@ -120,6 +138,15 @@ def plot_P_for_given_params(
                 )
                 P_ub_list.append(P_ub)
 
+            if plot_lb:
+                P_lb = storage_model.prob_serving_lower_bound_w_hoeffding(
+                    mean_obj_demand=active_obj_demand_rv.mean(),
+                    min_value=active_obj_demand_rv.min_value,
+                    max_value=active_obj_demand_rv.max_value,
+                    maximal_load=maximal_load,
+                )
+                P_lb_list.append(P_lb)
+
             # if E_frac_of_demand_vectors_covered <= 0.01 and P_ub <= 0.01:
             #     break
 
@@ -135,6 +162,8 @@ def plot_P_for_given_params(
             plot.errorbar(x_l[:len(E_frac_of_demand_vectors_covered_list)], E_frac_of_demand_vectors_covered_list, yerr=std_frac_of_demand_vectors_covered_list, label=f"{storage_design.repr_for_plot()}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         if plot_ub:
             plot.plot(x_l[:len(P_ub_list)], P_ub_list, label=f"{storage_design.repr_for_plot()}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        if plot_lb:
+            plot.plot(x_l[:len(P_lb_list)], P_lb_list, label=f"{storage_design.repr_for_plot()}, LB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
     n = k
     use_cvxpy = True
@@ -142,23 +171,24 @@ def plot_P_for_given_params(
     storage_design_and_model_list = [
         (
             design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+            # model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+            model.ClusteringDesignModel(k=k, n=n, d=d, b=1)
         ),
 
-        (
-            design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
-            model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        ),
+        # (
+        #     design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
+        #     model.CyclicDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
 
-        (
-            design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        ),
+        # (
+        #     design.RandomExpanderDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
 
-        (
-            design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        ),
+        # (
+        #     design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        # ),
     ]
 
     run_sim = True
