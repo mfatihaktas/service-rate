@@ -40,9 +40,10 @@ def plot_P_for_given_params(
     )
 
     if demand_dist == DemandDistribution.Bernoulli:
-        # D = 2
-        D = 3
-        p_l = numpy.linspace(0.1, 0.8, 10)
+        D = 2
+        # D = 3
+        # D = 4
+        p_l = numpy.linspace(0.01, 0.2, 10)
         active_obj_demand_rv_list = [
             random_variable.Bernoulli(p=p, D=D) for p in p_l
         ]
@@ -52,7 +53,7 @@ def plot_P_for_given_params(
         dist_in_title = fr"{D}" + r" \times \mathrm{Bernoulli(p)}"
 
     elif demand_dist == DemandDistribution.Exp:
-        mu_list = numpy.linspace(0.1, 4, 15)
+        mu_list = numpy.linspace(0.1, 4, 25)
         active_obj_demand_rv_list = [
             random_variable.Exponential(mu=mu) for mu in mu_list
 
@@ -63,7 +64,7 @@ def plot_P_for_given_params(
 
     elif demand_dist == DemandDistribution.Pareto:
         min_value = 0.1
-        tail_index_list = numpy.linspace(0.1, 3, 10)
+        tail_index_list = numpy.linspace(0.1, 3, 20)
         active_obj_demand_rv_list = [
             random_variable.Pareto(loc=min_value, a=tail_index) for tail_index in tail_index_list
         ]

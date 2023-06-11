@@ -17,13 +17,13 @@
 # python exp/storage_overlap/exp_design.py
 # python exp/storage_overlap/exp_random_design.py
 # python exp/storage_overlap/exp_impact_of_b.py
-# python exp/storage_overlap/exp_impact_of_d_for_clustering.py
+python exp/storage_overlap/exp_impact_of_d_for_clustering.py
 # python exp/storage_overlap/exp_impact_of_d_for_cyclic.py
 # python exp/storage_overlap/exp_impact_of_d_for_random_design.py
 # python exp/storage_overlap/exp_design_w_arbitrary_ro.py
 # python exp/storage_overlap/exp_designs_w_tractable_demand.py
 # python exp/storage_overlap/exp_random_design_w_tractable_demand.py
-python exp/storage_overlap/exp_design_w_general_demand_distribution.py
+# python exp/storage_overlap/exp_design_w_general_demand_distribution.py
 # python exp/storage_overlap/exp_impact_of_demand_and_overlaps.py
 # python exp/storage_overlap/exp_w_2_active_objs.py
 

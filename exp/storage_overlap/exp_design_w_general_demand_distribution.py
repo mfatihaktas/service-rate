@@ -25,6 +25,7 @@ def plot_P(
             num_active_objs=num_active_objs,
             maximal_load=maximal_load,
             demand_dist=demand_dist,
+            plot_ub=plot_ub,
             num_samples=num_samples,
             num_sim_run=num_sim_run,
         )
@@ -60,16 +61,16 @@ def manage_plot_P_w_joblib():
             # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
             num_active_objs=None,
-            maximal_load=0.7,  # 0.7,
+            maximal_load=1,
             demand_dist=demand_dist,
-            plot_ub=True,  # False
+            plot_ub=False,  # False
             num_samples=300,  # 300,
             # num_samples=1000,
             num_sim_run=3,
         )
         for demand_dist in [
-            # exp_utils.DemandDistribution.Bernoulli,
-            exp_utils.DemandDistribution.Exp,
+            exp_utils.DemandDistribution.Bernoulli,
+            # exp_utils.DemandDistribution.Exp,
             # exp_utils.DemandDistribution.Pareto,
         ]
     )
