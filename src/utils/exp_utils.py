@@ -94,7 +94,7 @@ def plot_P_for_given_params(
 
     elif demand_dist == DemandDistribution.Uniform:
         min_value = 0.1
-        max_value_list = numpy.linspace(0.1, 30, 50)
+        max_value_list = numpy.linspace(0.1, 1000, 50)
         active_obj_demand_rv_list = [
             random_variable.Uniform(min_value=min_value, max_value=max_value)
             for max_value in max_value_list

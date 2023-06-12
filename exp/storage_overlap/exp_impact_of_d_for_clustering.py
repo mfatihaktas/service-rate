@@ -230,8 +230,7 @@ def plot_frac_demand_vectors_covered_vs_d(
 ):
     # k = 45
     # k = 111
-    # k = 120
-    k = 1200
+    k = 120
     # k = 24
     n = k
 
