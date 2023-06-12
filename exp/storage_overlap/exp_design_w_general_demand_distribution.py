@@ -16,6 +16,7 @@ def plot_P(
     num_sim_run: int = 3,
 ):
     k = 120
+    # k = 30
     if num_active_objs is None:
         num_active_objs = k
 
@@ -57,8 +58,9 @@ def manage_plot_P_w_joblib():
 
     joblib.Parallel(n_jobs=-1, prefer="processes")(
         joblib.delayed(plot_P)(
-            d_list=[3],
-            # d_list=[10],
+            # d_list=[3],
+            d_list=[5],
+            # d_list=[40],
             # d_list=[2, 3, 4],
             # d_list=[5, 6],
             # d_list=[2, 3, 4, 5],
@@ -67,15 +69,16 @@ def manage_plot_P_w_joblib():
             demand_dist=demand_dist,
             plot_ub=False,  # False
             plot_lb=True,  # False
-            num_samples=300,  # 300,
+            num_samples=100,  # 300,
             # num_samples=1000,
             num_sim_run=3,
         )
         for demand_dist in [
             # exp_utils.DemandDistribution.Bernoulli,
-            # exp_utils.DemandDistribution.Exp,
+            exp_utils.DemandDistribution.Exp,
             # exp_utils.DemandDistribution.Pareto,
-            exp_utils.DemandDistribution.TPareto,
+            # exp_utils.DemandDistribution.TPareto,
+            # exp_utils.DemandDistribution.Uniform,
         ]
     )
 

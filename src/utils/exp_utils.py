@@ -18,6 +18,7 @@ class DemandDistribution(enum.Enum):
     ExpBounded = "ExpBounded"
     Pareto = "Pareto"
     TPareto = "TPareto"
+    Uniform = "Uniform"
 
 
 def plot_P_for_given_params(
@@ -79,8 +80,9 @@ def plot_P_for_given_params(
 
     elif demand_dist == DemandDistribution.TPareto:
         min_value = 0.1
-        max_value = 100
-        tail_index_list = numpy.linspace(0.1, 3, 20)
+        max_value = 10
+        # tail_index_list = numpy.linspace(0.1, 3, 20)
+        tail_index_list = numpy.linspace(0.1, 30, 50)
         active_obj_demand_rv_list = [
             random_variable.TPareto(min_value=min_value, max_value=max_value, a=tail_index)
             for tail_index in tail_index_list
@@ -89,6 +91,18 @@ def plot_P_for_given_params(
         x_l = tail_index_list
         xlabel = r"$\alpha$"
         dist_in_title = r"\mathrm{TPareto}" + fr"(l={min_value}, u={max_value}, \alpha)"
+
+    elif demand_dist == DemandDistribution.Uniform:
+        min_value = 0.1
+        max_value_list = numpy.linspace(0.1, 30, 50)
+        active_obj_demand_rv_list = [
+            random_variable.Uniform(min_value=min_value, max_value=max_value)
+            for max_value in max_value_list
+        ]
+
+        x_l = max_value_list
+        xlabel = r"$u$"
+        dist_in_title = r"\mathrm{Uniform}" + fr"(l={min_value}, u)"
 
     def plot_(
         storage_design: design.CyclicDesign,
@@ -145,6 +159,7 @@ def plot_P_for_given_params(
                     max_value=active_obj_demand_rv.max_value,
                     maximal_load=maximal_load,
                 )
+                log(DEBUG, "", P_lb=P_lb, active_obj_demand_rv=active_obj_demand_rv)
                 P_lb_list.append(P_lb)
 
             # if E_frac_of_demand_vectors_covered <= 0.01 and P_ub <= 0.01:
@@ -191,7 +206,7 @@ def plot_P_for_given_params(
         # ),
     ]
 
-    run_sim = True
+    run_sim = False  # True
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 

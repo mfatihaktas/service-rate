@@ -152,6 +152,9 @@ class Uniform(RandomVariable):
     def __repr__(self):
         return f"Uniform({self.min_value}, {self.max_value})"
 
+    def mean(self) -> float:
+        return (self.max_value - self.min_value) / 2
+
     def sample(self) -> float:
         return self.dist.rvs()
 
@@ -385,7 +388,7 @@ class Pareto(RandomVariable):
 
 class TPareto(RandomVariable):  # Truncated
     def __init__(self, min_value, max_value, a):
-        super().__init__(min_value=min_value, max_value=float("inf"))
+        super().__init__(min_value=min_value, max_value=max_value)
 
         self.a = a  # Tail index
 
