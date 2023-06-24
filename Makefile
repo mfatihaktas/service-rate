@@ -9,8 +9,10 @@ env:
 	## Check if can link to libffi
 	# gcc -L/projects/community/libffi/3.4.2/gc563/lib/../lib64 -lffi
 	## Install Python
-	CFLAGS="$(pkg-config --cflags libffi)" \
-	LDFLAGS="$(pkg-config --libs libffi)" \
+	#
+	# Commenting out `CFLAGS` and `LDFLAGS` as they are not needed anymore.
+	# CFLAGS="$(pkg-config --cflags libffi)" \
+	# LDFLAGS="$(pkg-config --libs libffi)" \
 	pyenv install; \
 	direnv allow
 	# Ref:
