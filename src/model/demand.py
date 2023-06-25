@@ -115,6 +115,17 @@ class DemandVectorSampler:
 
 
 @dataclasses.dataclass
+class DemandVectorSamplerWithGeneralObjDemands(DemandVectorSampler):
+    num_objs: int
+    demand_rv: random_variable.RandomVariable
+
+    def sample_demand_vector(self) -> list[float]:
+        return [
+            self.demand_rv.sample() for _ in range(self.num_objs)
+        ]
+
+
+@dataclasses.dataclass
 class DemandVectorSamplerWithZipfLaw(DemandVectorSampler):
     num_objs: int
     num_popular_obj: int
