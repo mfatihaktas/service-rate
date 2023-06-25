@@ -23,9 +23,11 @@
 # python exp/storage_overlap/exp_design_w_arbitrary_ro.py
 # python exp/storage_overlap/exp_designs_w_tractable_demand.py
 # python exp/storage_overlap/exp_random_design_w_tractable_demand.py
-python exp/storage_overlap/exp_design_w_general_demand_distribution.py
+# python exp/storage_overlap/exp_design_w_general_demand_distribution.py
 # python exp/storage_overlap/exp_impact_of_demand_and_overlaps.py
 # python exp/storage_overlap/exp_w_2_active_objs.py
+
+python exp/storage_overlap/plot_P_vs_d_for_clustering.py
 
 # python exp/storage_search/exp_search_with_replicas_and_mds.py
 # python exp/storage_search/exp_storage_searcher.py
