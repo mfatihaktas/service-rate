@@ -34,17 +34,20 @@ def plot_P_vs_d(
         plot_model=plot_model,
     )
 
-    def plot_(demand_rv: random_variable.RandomVariable):
+    def plot_(
+        demand_rv: random_variable.RandomVariable,
+        label: str,
+    ):
         log(DEBUG, f"> demand_rv= {demand_rv}")
 
         d_list = []
         E_P_list, std_P_list = [], []
         P_model_list = []
 
-        label = rf"$\mu = {demand_rv.mean()}$"
         color = next(dark_color_cycle)
 
-        for d in range(1, math.ceil(math.log(n)) + 1):
+        # for d in range(1, math.ceil(math.log(n)) + 1 + 3):
+        for d in range(1, 11):
             if n % d != 0:
                 continue
 
@@ -64,6 +67,7 @@ def plot_P_vs_d(
                     storage_design=storage_design,
                     num_samples=num_samples,
                     num_sim_run=num_sim_run,
+                    maximal_load=maximal_load,
                 )
 
                 E_P = numpy.mean(P_list)
@@ -97,16 +101,19 @@ def plot_P_vs_d(
         )
 
         if plot_sim:
-            plot.errorbar(d_list, E_P_list, yerr=std_P_list, label=f"{label}, sim", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.errorbar(d_list, E_P_list, yerr=std_P_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
         if plot_model:
             plot.plot(d_list, P_model_list, label=f"{label}, model", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
+    # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    # for mu in numpy.linspace(0.1, 1, 10):
-    for mu in numpy.linspace(0.1, 1, 1):
-        demand_rv = random_variable.Exponential(mu)
-        plot_(demand_rv=demand_rv)
+    # for E_demand in numpy.linspace(1, 1, 1):
+    for E_demand in [0.2, 0.3, 0.4]:
+        demand_rv = random_variable.Exponential(mu=1 / E_demand)
+        # label = fr"$\mu = {mu}$"
+        label = r"$\mathrm{E}[\rho_i]=$" + fr"${E_demand}$"
+        plot_(demand_rv=demand_rv, label=label)
 
     fontsize = 16
     plot.legend(fontsize=14)
@@ -115,8 +122,8 @@ def plot_P_vs_d(
 
     plot.title(
         (
-            rf"$k= n= {n}$, "
-            rf"$m= {maximal_load}$, "
+            fr"$k= n= {n}$, "
+            fr"$m= {maximal_load}$, "
             fr"$\rho \sim {demand_dist}$"
         ),
         fontsize=fontsize
@@ -138,10 +145,10 @@ def plot_P_vs_d(
 
 if __name__ == "__main__":
     plot_P_vs_d(
-        n=100,
+        n=120,
         maximal_load=0.7,
         num_samples=3,
-        num_sim_run=100,
+        num_sim_run=1000,
         plot_sim=True,
         plot_model=False,
     )
