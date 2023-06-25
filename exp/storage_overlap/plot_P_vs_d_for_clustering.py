@@ -47,7 +47,8 @@ def plot_P_vs_d(
         color = next(dark_color_cycle)
 
         # for d in range(1, math.ceil(math.log(n)) + 1 + 3):
-        for d in range(1, 11):
+        for d in range(1, 5 * math.ceil(math.log(n))):
+        # for d in range(1, 11):
             if n % d != 0:
                 continue
 
@@ -75,22 +76,17 @@ def plot_P_vs_d(
                 std_P_list.append(numpy.std(P_list))
 
             if plot_model:
-                check(
-                    (
-                        isinstance(demand_rv, random_variable.Exponential)
-                        or isinstance(demand_rv, random_variable.Bernoulli)
-                    ),
-                    "Demand RV should be either Exponential or Bernoulli",
-                    demand_rv=demand_rv,
-                )
+                if isinstance(demand_rv, random_variable.Exponential):
+                    storage_model = model.ClusteringDesignModelForExpObjDemands(k=n, n=n, b=1, d=d)
+                    E_demand = 1 / demand_rv.mu
+                    P_model = storage_model.prob_serving(mean_obj_demand=E_demand, maximal_load=maximal_load)
 
-                # storage_model = model.ClusteringDesignModelForBernoulliObjDemands(k=n, n=n, b=1, d=d)
-                storage_model = model.ClusteringDesignModelForExpObjDemands(k=n, n=n, b=1, d=d)
+                elif isinstance(demand_rv, random_variable.Bernoulli):
+                    storage_model = model.ClusteringDesignModelForBernoulliObjDemands(k=n, n=n, b=1, d=d)
 
-                # P_model = storage_model.prob_serving(mu=mu)
-                P_model = storage_model.prob_serving_w_downscaling_mean_obj_demand_w_b(
-                    mean_obj_demand_b_1=mu, maximal_load=maximal_load
-                )
+                else:
+                    assert_("Demand RV should be either Exponential or Bernoulli")
+
                 P_model_list.append(P_model)
 
         log(INFO, f"demand_rv= {demand_rv}",
@@ -104,7 +100,16 @@ def plot_P_vs_d(
             plot.errorbar(d_list, E_P_list, yerr=std_P_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
 
         if plot_model:
-            plot.plot(d_list, P_model_list, label=f"{label}, model", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            # P_ip1_over_i_list = [
+            #     P_model_list[i] / P_model_list[i - 1] for i in range(1, len(P_model_list))
+            # ]
+            # log(DEBUG, "***", P_ip1_over_i_list=P_ip1_over_i_list)
+
+            plot.plot(d_list, P_model_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+
+        plot.xticks(d_list)
+
+    plot.axhline(y=1, color="k", linestyle="--", alpha=0.5)
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
@@ -112,13 +117,15 @@ def plot_P_vs_d(
     for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
         # label = fr"$\mu = {mu}$"
-        label = r"$\mathrm{E}[\rho_i]=$" + fr"${E_demand}$"
+        label = r"$\mathrm{E}[\rho]=$" + fr"${E_demand}$"
         plot_(demand_rv=demand_rv, label=label)
 
     fontsize = 16
     plot.legend(fontsize=14)
     plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
     plot.xlabel(r"$d$", fontsize=fontsize)
+    plot.yscale("log")
+    plot.yticks([y for y in plot.yticks()[0] if y < 1] + [1])
 
     plot.title(
         (
@@ -126,7 +133,7 @@ def plot_P_vs_d(
             fr"$m= {maximal_load}$, "
             fr"$\rho \sim {demand_dist}$"
         ),
-        fontsize=fontsize
+        fontsize=fontsize,
     )
 
     # Save the plot
@@ -148,7 +155,7 @@ if __name__ == "__main__":
         n=120,
         maximal_load=0.7,
         num_samples=3,
-        num_sim_run=1000,
-        plot_sim=True,
-        plot_model=False,
+        num_sim_run=100,
+        plot_sim=False,  # True,
+        plot_model=True,
     )
