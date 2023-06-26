@@ -1,8 +1,9 @@
 import abc
 import dataclasses
+import functools
 import joblib
 import math
-import numpy
+import methodtools
 import scipy.special
 import scipy.stats
 
@@ -883,14 +884,19 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
     def prob_serving_upper_bound_w_complexes(
         self,
         maximal_load: float = 1,
+        max_num_objs: int = None,
     ) -> float:
+        if max_num_objs is None:
+            # max_num_objs = self.k
+            # max_num_objs = self.k // 3
+            max_num_objs = 20
+
         return min(
             self.prob_serving_upper_bound_w_complexes_for_given_num_objs(
                 num_objs=num_objs,
                 maximal_load=maximal_load,
             )
-            # for num_objs in range(2, self.k)
-            for num_objs in range(2, self.k // 3)
+            for num_objs in range(2, max_num_objs + 1)
         )
 
     def prob_serving_upper_bound_w_complexes_for_given_num_objs(
@@ -898,7 +904,6 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         num_objs: int,
         maximal_load: float = 1,
     ) -> float:
-        term_list = []
         return sum(
             (
                 self.prob_span(num_objs=num_objs, span=span)
@@ -909,8 +914,6 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
             )
             for span in range(self.d, min(num_objs * self.d, self.n))
         )
-
-        return sum(term_list)
 
     def prob_span(self, num_objs: int, span: int) -> float:
         """Uses the following results:
@@ -945,6 +948,7 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         z_rv = random_variable.Normal(mu=E_z, sigma=math.sqrt(Var_z))
         return z_rv.pdf(self.n - span)
 
+    @methodtools.lru_cache()
     def prob_cum_demand_leq_cum_supply(
         self,
         num_objs: int,

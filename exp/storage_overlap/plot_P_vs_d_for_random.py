@@ -79,7 +79,10 @@ def plot_P_vs_d(
                 if isinstance(demand_rv, random_variable.Exponential):
                     E_demand = 1 / demand_rv.mu
                     storage_model = model.RandomDesignModelForExpDemand(k=n, n=n, d=d, average_object_demand=E_demand)
-                    P_upper_bound = storage_model.prob_serving_upper_bound_w_complexes(maximal_load=maximal_load)
+                    P_upper_bound = storage_model.prob_serving_upper_bound_w_complexes(
+                        maximal_load=maximal_load,
+                        max_num_objs=n // 3,
+                    )
 
                 elif isinstance(demand_rv, random_variable.Bernoulli):
                     pass
@@ -147,12 +150,12 @@ def plot_P_vs_d(
 
 
 if __name__ == "__main__":
-    # deneme
     plot_P_vs_d(
-        n=120,
+        # n=1200,
+        n=30,
         maximal_load=0.7,
         num_samples=3,
         num_sim_run=100,
-        plot_sim=True,
+        plot_sim=False,
         plot_model=True,
     )
