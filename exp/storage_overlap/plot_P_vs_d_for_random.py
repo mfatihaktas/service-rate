@@ -147,6 +147,7 @@ def plot_P_vs_d(
 
 
 if __name__ == "__main__":
+    # deneme
     plot_P_vs_d(
         n=120,
         maximal_load=0.7,
