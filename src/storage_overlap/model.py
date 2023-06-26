@@ -889,7 +889,8 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
                 num_objs=num_objs,
                 maximal_load=maximal_load,
             )
-            for num_objs in range(2, self.k)
+            # for num_objs in range(2, self.k)
+            for num_objs in range(2, self.k // 3)
         )
 
     def prob_serving_upper_bound_w_complexes_for_given_num_objs(
