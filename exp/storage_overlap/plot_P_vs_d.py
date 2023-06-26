@@ -47,8 +47,8 @@ def plot_P_vs_d(
         color = next(dark_color_cycle)
 
         # for d in range(1, math.ceil(math.log(n)) + 1 + 3):
-        for d in range(1, 5 * math.ceil(math.log(n))):
-        # for d in range(1, 11):
+        # for d in range(1, 5 * math.ceil(math.log(n))):
+        for d in range(1, 11):
             if n % d != 0:
                 continue
 
@@ -122,7 +122,8 @@ def plot_P_vs_d(
 
     fontsize = 16
     plot.legend(fontsize=14)
-    plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
+    plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
+    # plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
     plot.xlabel(r"$d$", fontsize=fontsize)
     plot.yscale("log")
     plot.yticks([y for y in plot.yticks()[0] if y < 1] + [1])
@@ -140,7 +141,7 @@ def plot_P_vs_d(
     # plot.gcf().set_size_inches(8, 6)
     plot.gcf().set_size_inches(6, 4)
     file_name = (
-        "plots/plot_P_vs_d_for_clustering"
+        "plots/plot_P_vs_d"
         + f"_n_{n}"
         + ".pdf"
     )
