@@ -874,3 +874,79 @@ class BlockDesignModelForGivenDemandDistribution(StorageDesignModelForGivenDeman
         self.storage_design = design.RandomBlockDesign(
             k=self.k, n=self.n, d=self.d, use_cvxpy=False
         )
+
+
+@dataclasses.dataclass
+class RandomDesignModelForExpDemand(ReplicaDesignModel):
+    average_object_demand: float
+
+    def prob_serving_upper_bound_w_complexes(
+        self,
+        maximal_load: float = 1,
+    ) -> float:
+        return min(
+            self.prob_serving_upper_bound_w_complexes_for_given_num_objs(
+                num_objs=num_objs,
+                maximal_load=maximal_load,
+            )
+            for num_objs in range(2, self.k)
+        )
+
+    def prob_serving_upper_bound_w_complexes_for_given_num_objs(
+        self,
+        num_objs: int,
+        maximal_load: float = 1,
+    ) -> float:
+        term_list = []
+        return sum(
+            (
+                self.prob_span(num_objs=num_objs, span=span)
+                * self.prob_cum_demand_leq_cum_supply(
+                    num_objs=num_objs,
+                    cum_supply=(span * maximal_load),
+                )
+            )
+            for span in range(self.d, min(num_objs * self.d, self.n))
+        )
+
+        return sum(term_list)
+
+    def prob_span(self, num_objs: int, span: int) -> float:
+        """Uses the following results:
+        * Let us distribute `N` balls uniformly at random among `n` boxes.
+        Let `z` denote the number of boxes which remain empty. Weiss [1] proved:
+        If `N(n)/n to alpha > 0` as `n to infty`, then `z` is Gaussian in the limit with
+        `E[z] = n * exp{-N/n}`,
+        `Var[z] = E[z] * (1 - (1 + N/n)exp{-N/n})`.
+
+        * Let us repeat the above experimenting by distributing `n^` groups of `m` particles
+        over `N` cells. Let `z^` be the counterpart of `z`. Sevast’yanov [2] proved:
+        `z^ to z` in distribution as `n = n^ * m to infty`.
+
+        Refs:
+        [1] Weiss, "Limiting Distributions in Some Occupancy Problems", 1956.
+        [2] Sevast’yanov, "Limit Theorems in a Scheme for Allocation of Particles in Cells", 1966.
+
+        Note: Mapping of vars in code to vars in math:
+        num_objs -> n^
+        d -> m  (group size)
+        n -> N
+        """
+
+        if num_objs == 0 or span < self.d or span > self.n:
+            return 0
+
+        N_over_n = num_objs * self.d / self.n
+        exp_N_over_n = math.exp(-N_over_n)
+        E_z = self.n * exp_N_over_n
+        Var_z = E_z * (1 - (1 + N_over_n) * exp_N_over_n)
+
+        z_rv = random_variable.Normal(mu=E_z, sigma=math.sqrt(Var_z))
+        return z_rv.pdf(self.n - span)
+
+    def prob_cum_demand_leq_cum_supply(
+        self,
+        num_objs: int,
+        cum_supply: float,
+    ) -> float:
+        return scipy.stats.erlang.cdf(cum_supply, a=num_objs, loc=0, scale=self.average_object_demand)
