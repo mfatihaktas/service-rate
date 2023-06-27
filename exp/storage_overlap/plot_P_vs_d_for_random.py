@@ -55,7 +55,8 @@ def plot_P_vs_d(
         # for d in range(1, 11):
         # for d in range(1, 21):
         # for d in numpy.linspace(1, 20, 10):
-        for d in [1, 2, 3, 5, 8, 12, 20, 30]:
+        for d in [1, 2, 3, 5, 8, 12, 20]:
+        # for d in [1, 2, 3, 5, 8, 12, 20, 30]:
             d = int(d)
             log(DEBUG, f">> d= {d}")
 
@@ -99,8 +100,8 @@ def plot_P_vs_d(
                     P_upper_bound_approx = storage_model.prob_serving_upper_bound_w_complexes(
                         maximal_load=maximal_load,
                         # max_num_objs=n // 3,
-                        # max_num_objs=n,
-                        max_num_objs=30,
+                        max_num_objs=n,
+                        # max_num_objs=30,
                         # max_num_objs=2,
                     )
 
@@ -127,7 +128,7 @@ def plot_P_vs_d(
 
         if plot_model:
             plot.plot(d_list, P_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-            plot.plot(d_list, P_upper_bound_approx_list, label=f"{label}, ~UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.plot(d_list, P_upper_bound_approx_list, label=f"{label}, UB-approx", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
             min_P = min(min_P, min(P_upper_bound_list))
             min_P = min(min_P, min(P_upper_bound_approx_list))
 
@@ -137,7 +138,7 @@ def plot_P_vs_d(
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    for E_demand in numpy.linspace(0.1, 1, 10):
+    for E_demand in numpy.linspace(0.1, 0.6, 5):
     # for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
         # label = fr"$\mu = {mu}$"
@@ -145,7 +146,7 @@ def plot_P_vs_d(
         plot_(demand_rv=demand_rv, label=label)
 
     fontsize = 16
-    plot.legend(fontsize=14, framealpha=0.5, bbox_to_anchor=(1.25, 0.75))
+    plot.legend(fontsize=14, framealpha=0.5, loc="upper left", bbox_to_anchor=(1, 1))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
     # plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
     plot.xlabel(r"$d$", fontsize=fontsize)
@@ -179,12 +180,12 @@ def plot_P_vs_d(
 if __name__ == "__main__":
     plot_P_vs_d(
         # n=30,
-        # n=120,
-        n=500,
+        n=120,
+        # n=500,
         # n=1200,
         maximal_load=0.7,
         num_samples=3,
         num_sim_run=100,
-        plot_sim=False,
+        plot_sim=True,
         plot_model=True,
     )
