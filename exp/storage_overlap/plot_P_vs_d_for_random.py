@@ -34,24 +34,29 @@ def plot_P_vs_d(
         plot_model=plot_model,
     )
 
+    min_P = float("Inf")
+
     def plot_(
         demand_rv: random_variable.RandomVariable,
         label: str,
     ):
+        nonlocal min_P
         log(DEBUG, f"> demand_rv= {demand_rv}")
 
         d_list = []
         E_P_list, std_P_list = [], []
         P_upper_bound_list = []
+        P_upper_bound_approx_list = []
 
         color = next(dark_color_cycle)
 
         # for d in range(1, math.ceil(math.log(n)) + 1 + 3):
         # for d in range(1, 5 * math.ceil(math.log(n))):
-        for d in range(1, 11):
-            if n % d != 0:
-                continue
-
+        # for d in range(1, 11):
+        # for d in range(1, 21):
+        # for d in numpy.linspace(1, 20, 10):
+        for d in [1, 2, 3, 5, 8, 12, 20, 30]:
+            d = int(d)
             log(DEBUG, f">> d= {d}")
 
             d_list.append(d)
@@ -78,10 +83,25 @@ def plot_P_vs_d(
             if plot_model:
                 if isinstance(demand_rv, random_variable.Exponential):
                     E_demand = 1 / demand_rv.mu
+
+                    # Model with complexes
                     storage_model = model.RandomDesignModelForExpDemand(k=n, n=n, d=d, average_object_demand=E_demand)
                     P_upper_bound = storage_model.prob_serving_upper_bound_w_complexes(
                         maximal_load=maximal_load,
-                        max_num_objs=n // 3,
+                        # max_num_objs=n // 3,
+                        # max_num_objs=n,
+                        max_num_objs=30,
+                        # max_num_objs=2,
+                    )
+
+                    # Approx
+                    storage_model = model.RandomDesignModelForExpDemand_wApprox(k=n, n=n, d=d, average_object_demand=E_demand)
+                    P_upper_bound_approx = storage_model.prob_serving_upper_bound_w_complexes(
+                        maximal_load=maximal_load,
+                        # max_num_objs=n // 3,
+                        # max_num_objs=n,
+                        max_num_objs=30,
+                        # max_num_objs=2,
                     )
 
                 elif isinstance(demand_rv, random_variable.Bernoulli):
@@ -91,19 +111,25 @@ def plot_P_vs_d(
                     assert_("Demand RV should be either Exponential or Bernoulli")
 
                 P_upper_bound_list.append(P_upper_bound)
+                P_upper_bound_approx_list.append(P_upper_bound_approx)
 
         log(INFO, f"demand_rv= {demand_rv}",
             d_list=d_list,
             E_P_list=E_P_list,
             std_P_list=std_P_list,
             P_upper_bound_list=P_upper_bound_list,
+            P_upper_bound_approx_list=P_upper_bound_approx_list,
         )
 
         if plot_sim:
             plot.errorbar(d_list, E_P_list, yerr=std_P_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            min_P = min(min_P, min(E_P_list))
 
         if plot_model:
             plot.plot(d_list, P_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            plot.plot(d_list, P_upper_bound_approx_list, label=f"{label}, ~UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            min_P = min(min_P, min(P_upper_bound_list))
+            min_P = min(min_P, min(P_upper_bound_approx_list))
 
         plot.xticks(d_list)
 
@@ -111,20 +137,21 @@ def plot_P_vs_d(
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    # for E_demand in numpy.linspace(1, 1, 1):
-    for E_demand in [0.2, 0.3, 0.4]:
+    for E_demand in numpy.linspace(0.1, 1, 10):
+    # for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
         # label = fr"$\mu = {mu}$"
-        label = r"$\mathrm{E}[\rho]=$" + fr"${E_demand}$"
+        label = r"$\mathrm{E}[\rho]=$" + fr"${round(E_demand, 2)}$"
         plot_(demand_rv=demand_rv, label=label)
 
     fontsize = 16
-    plot.legend(fontsize=14)
+    plot.legend(fontsize=14, framealpha=0.5, bbox_to_anchor=(1.25, 0.75))
     plot.ylabel(r"$\mathcal{P}$", fontsize=fontsize)
     # plot.ylabel(r"$\mathcal{P}$ for clustering design", fontsize=fontsize)
     plot.xlabel(r"$d$", fontsize=fontsize)
+    plot.xscale("log")
     plot.yscale("log")
-    plot.yticks([y for y in plot.yticks()[0] if y < 1] + [1])
+    plot.yticks([y for y in plot.yticks()[0] if min_P <= y <= 1] + [1])
 
     plot.title(
         (
@@ -151,8 +178,10 @@ def plot_P_vs_d(
 
 if __name__ == "__main__":
     plot_P_vs_d(
+        # n=30,
+        # n=120,
+        n=500,
         # n=1200,
-        n=30,
         maximal_load=0.7,
         num_samples=3,
         num_sim_run=100,

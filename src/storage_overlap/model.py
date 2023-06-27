@@ -887,9 +887,9 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         max_num_objs: int = None,
     ) -> float:
         if max_num_objs is None:
-            # max_num_objs = self.k
+            max_num_objs = self.k
             # max_num_objs = self.k // 3
-            max_num_objs = 20
+            # max_num_objs = 20
 
         return min(
             self.prob_serving_upper_bound_w_complexes_for_given_num_objs(
@@ -897,6 +897,7 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
                 maximal_load=maximal_load,
             )
             for num_objs in range(2, max_num_objs + 1)
+            # for num_objs in range(max_num_objs, max_num_objs + 1)
         )
 
     def prob_serving_upper_bound_w_complexes_for_given_num_objs(
@@ -904,6 +905,34 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         num_objs: int,
         maximal_load: float = 1,
     ) -> float:
+        # cum_prob_span = 0
+        # cum_prob_span_times_prob_cum_demand_leq_cum_supply = 0
+        # for span in range(self.d, min(num_objs * self.d, self.n) + 1):
+        # # for span in range(self.d, num_objs * self.d):
+        #     prob_span = self.prob_span(num_objs=num_objs, span=span)
+        #     cum_prob_span += prob_span
+
+        #     prob_cum_demand_leq_cum_supply = self.prob_cum_demand_leq_cum_supply(
+        #         num_objs=num_objs,
+        #         cum_supply=(span * maximal_load),
+        #     )
+
+        #     cum_prob_span_times_prob_cum_demand_leq_cum_supply += prob_span * prob_cum_demand_leq_cum_supply
+
+        #     log(DEBUG, "",
+        #         prob_span=prob_span,
+        #         prob_cum_demand_leq_cum_supply=prob_cum_demand_leq_cum_supply,
+        #     )
+
+        # log(DEBUG, "",
+        #     num_objs=num_objs,
+        #     d=self.d,
+        #     cum_prob_span=cum_prob_span,
+        #     cum_prob_span_times_prob_cum_demand_leq_cum_supply=cum_prob_span_times_prob_cum_demand_leq_cum_supply,
+        # )
+
+        # return cum_prob_span_times_prob_cum_demand_leq_cum_supply
+
         return sum(
             (
                 self.prob_span(num_objs=num_objs, span=span)
@@ -912,7 +941,7 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
                     cum_supply=(span * maximal_load),
                 )
             )
-            for span in range(self.d, min(num_objs * self.d, self.n))
+            for span in range(self.d, min(num_objs * self.d, self.n) + 1)
         )
 
     def prob_span(self, num_objs: int, span: int) -> float:
@@ -946,7 +975,67 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         Var_z = E_z * (1 - (1 + N_over_n) * exp_N_over_n)
 
         z_rv = random_variable.Normal(mu=E_z, sigma=math.sqrt(Var_z))
+
         return z_rv.pdf(self.n - span)
+        # non_empty_cells = self.n - span
+        # # log(DEBUG, "", z_rv=z_rv, non_empty_cells=non_empty_cells)
+        # return z_rv.cdf(non_empty_cells + 0.5) - z_rv.cdf(non_empty_cells - 0.5)
+        # return z_rv.cdf(non_empty_cells + 0.99) - z_rv.cdf(non_empty_cells)
+        # return z_rv.cdf(non_empty_cells + 1) - z_rv.cdf(non_empty_cells)
+        # return z_rv.cdf(non_empty_cells + 0.1) - z_rv.cdf(non_empty_cells - 0.1)
+
+    @methodtools.lru_cache()
+    def prob_cum_demand_leq_cum_supply(
+        self,
+        num_objs: int,
+        cum_supply: float,
+    ) -> float:
+        return scipy.stats.erlang.cdf(cum_supply, a=num_objs, loc=0, scale=self.average_object_demand)
+
+
+@dataclasses.dataclass
+class RandomDesignModelForExpDemand_wApprox(ReplicaDesignModel):
+    average_object_demand: float
+
+    def prob_serving_upper_bound_w_complexes(
+        self,
+        maximal_load: float = 1,
+        max_num_objs: int = None,
+    ) -> float:
+        if max_num_objs is None:
+            max_num_objs = self.k
+            # max_num_objs = self.k // 3
+            # max_num_objs = 20
+
+        return min(
+            self.prob_serving_upper_bound_w_complexes_for_given_num_objs(
+                num_objs=num_objs,
+                maximal_load=maximal_load,
+            )
+            for num_objs in range(2, max_num_objs + 1)
+            # for num_objs in range(max_num_objs, max_num_objs + 1)
+        )
+
+    def prob_serving_upper_bound_w_complexes_for_given_num_objs(
+        self,
+        num_objs: int,
+        maximal_load: float = 1,
+    ) -> float:
+        N_over_n = num_objs * self.d / self.n
+        exp_N_over_n = math.exp(-N_over_n)
+        E_num_empty_cells = self.n * exp_N_over_n
+        E_span = self.n - E_num_empty_cells
+
+        # log(DEBUG, "",
+        #     num_objs=num_objs,
+        #     d=self.d,
+        #     E_span=E_span,
+        # )
+
+        return self.prob_cum_demand_leq_cum_supply(
+            num_objs=num_objs,
+            cum_supply=(E_span * maximal_load),
+        )
 
     @methodtools.lru_cache()
     def prob_cum_demand_leq_cum_supply(
