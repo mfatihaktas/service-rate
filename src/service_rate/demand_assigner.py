@@ -10,21 +10,21 @@ class DemandAssigner:
     demand_delta: float
 
     def __post_init__(self):
-        node_id_set = set()
+        self.node_id_set = set()
         for node_id_set_ in self.obj_id_to_node_id_set_map.values():
-            node_id_set |= node_id_set_
-        log(DEBUG, "", node_id_set=node_id_set)
-
-        self.node_id_to_assigned_demand_map = {
-            node_id: 1
-            for node_id in node_id_set
-        }
+            self.node_id_set |= node_id_set_
+        # log(DEBUG, "", node_id_set=self.node_id_set)
 
     def is_in_cap_region(
         self,
         obj_demand_list: list[float],
         maximal_load: float = 1,
     ) -> bool:
+        node_id_to_assigned_demand_map = {
+            node_id: 0
+            for node_id in self.node_id_set
+        }
+
         # obj_id_list = list(range(len(obj_demand_list)))
         obj_id_to_demand_map = {
             obj_id: demand
@@ -44,7 +44,7 @@ class DemandAssigner:
             node_id_set = self.obj_id_to_node_id_set_map[obj_id]
             assigned_demand_and_node_id_list = sorted(
                 [
-                    (self.node_id_to_assigned_demand_map[node_id], node_id)
+                    (node_id_to_assigned_demand_map[node_id], node_id)
                     for node_id in node_id_set
                 ]
             )
@@ -52,6 +52,7 @@ class DemandAssigner:
             if assigned_demand + demand_to_assign > maximal_load:
                 return False
 
-            self.node_id_to_assigned_demand_map[node_id] += demand_to_assign
+            node_id_to_assigned_demand_map[node_id] += demand_to_assign
 
+        # log(DEBUG, "", node_id_to_assigned_demand_map=node_id_to_assigned_demand_map)
         return True

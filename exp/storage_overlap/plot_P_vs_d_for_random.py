@@ -16,7 +16,9 @@ from src.sim import random_variable
 from src.utils.plot import *
 
 
-STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.demand_assigner
+STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.cvxpy
+# STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.service_choice_union
+# STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.demand_assigner
 
 
 def plot_P_vs_d(
@@ -70,7 +72,7 @@ def plot_P_vs_d(
                     n=n,
                     d=d,
                     use_cvxpy=USE_CVXPY,
-                    use_demand_assigner=USE_DEMAND_ASSIGNER,
+                    strategy_to_check_if_demand_covered=STRATEGY_TO_CHECK_IF_DEMAND_COVERED,
                 )
 
                 demand_vector_sampler = demand.DemandVectorSamplerWithGeneralObjDemands(
@@ -223,17 +225,17 @@ def plot_P_vs_d_as_n_gets_large(
 
         color = next(dark_color_cycle)
 
-        # for n in [10, 100, 200, 500]:
+        for n in [10, 100, 200, 500]:
         # for n in [10, 100, 200, 500, 1000, 2000, 5000, 8000, 10000]:
-        for n in [10 ** p for p in range(2, 6)]:
+        # for n in [10 ** p for p in range(2, 6)]:
             d = max(1, d_func(n))
             log(DEBUG, ">>", n=n, d=d)
 
             n_list.append(n)
 
             if plot_sim:
-                # storage_design = design.RandomExpanderDesign(
-                storage_design = design.RandomBlockDesign(
+                # storage_design = design.RandomBlockDesign(
+                storage_design = design.RandomExpanderDesign(
                     k=n,
                     n=n,
                     d=d,
@@ -305,10 +307,11 @@ def plot_P_vs_d_as_n_gets_large(
             plot.errorbar(n_list, E_P_list, yerr=std_P_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
             min_P = min(min_P, min(E_P_list))
 
-        plot.plot(n_list, P_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        # plot.plot(n_list, P_upper_bound_approx_list, label=f"{label}, UB-approx", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        min_P = min(min_P, min(P_upper_bound_list))
-        # min_P = min(min_P, min(P_upper_bound_approx_list))
+        if plot_model:
+            plot.plot(n_list, P_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            # plot.plot(n_list, P_upper_bound_approx_list, label=f"{label}, UB-approx", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            min_P = min(min_P, min(P_upper_bound_list))
+            # min_P = min(min_P, min(P_upper_bound_approx_list))
 
         plot.xticks(n_list)
 
@@ -378,7 +381,7 @@ if __name__ == "__main__":
     # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
     # d_func_label = r"\log(n)^{1/2}"
 
-    power = 0.8
+    power = 2
     d_func = lambda n : math.floor(math.log(n) ** power)
     d_func_label = fr"\log(n)^{power}"
 

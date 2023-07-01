@@ -22,6 +22,7 @@ from src.utils.debug import *
 
 class StrategyToCheckIfDemandCovered(enum.Enum):
     cvxpy = "cvxpy"
+    service_choice_union = "service_choice_union"
     demand_assigner = "demand_assigner"
 
 
@@ -37,6 +38,7 @@ class StorageDesign:
         log(WARNING, "", strategy_to_check_if_demand_covered=self.strategy_to_check_if_demand_covered)
         if self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.cvxpy:
             self.service_rate_inspector = self.get_service_rate_inspector()
+
         elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.demand_assigner:
             self.demand_assigner = demand_assigner.DemandAssigner(
                 obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
@@ -117,9 +119,10 @@ class StorageDesign:
                 maximal_load=maximal_load,
             )
 
-        return self.is_demand_vector_covered_w_service_choice_union(
-            demand_vector=demand_vector, maximal_load=maximal_load, max_combination_size=5,
-        )
+        elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.service_choice_union:
+            return self.is_demand_vector_covered_w_service_choice_union(
+                demand_vector=demand_vector, maximal_load=maximal_load,
+            )
 
     def is_demand_vector_covered_w_service_choice_union(
         self,
@@ -535,7 +538,7 @@ class RandomExpanderDesign(ReplicaDesign):
             for obj_id in range(self.k)
         }
 
-        log(DEBUG, "Constructed", obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map)
+        # log(DEBUG, "Constructed", obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map)
 
         super().__post_init__()
 
