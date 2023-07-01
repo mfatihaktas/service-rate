@@ -100,29 +100,34 @@ class StorageDesign:
             )
 
         return self.is_demand_vector_covered_w_service_choice_union(
-            demand_vector=demand_vector, maximal_load=maximal_load
+            demand_vector=demand_vector, maximal_load=maximal_load, max_combination_size=5,
         )
 
     def is_demand_vector_covered_w_service_choice_union(
         self,
         demand_vector: list[float],
+        maximal_load: float,
+        max_combination_size: int = float("Inf"),
     ) -> bool:
         nonneg_demand_index_list = []
         for i, d in enumerate(demand_vector):
             if d > 0:
                 nonneg_demand_index_list.append(i)
 
-        for combination_size in range(1, len(nonneg_demand_index_list) + 1):
+        max_combination_size_ = min(len(nonneg_demand_index_list), max_combination_size)
+        for combination_size in range(1, max_combination_size_ + 1):
             if self.is_demand_vector_covered_for_given_combination_size(
                 demand_vector=demand_vector,
                 combination_size=combination_size,
+                maximal_load=maximal_load,
                 nonneg_demand_index_list=nonneg_demand_index_list,
             ) is False:
-                # log(WARNING, "Not covered",
-                #     demand_vector=demand_vector,
-                #     combination_size=combination_size,
-                #     nonneg_demand_index_list=nonneg_demand_index_list,
-                # )
+                log(WARNING, "Not covered",
+                    storage_design=self,
+                    # demand_vector=demand_vector,
+                    combination_size=combination_size,
+                    # nonneg_demand_index_list=nonneg_demand_index_list,
+                )
                 return False
 
         return True
@@ -131,6 +136,7 @@ class StorageDesign:
         self,
         demand_vector: list[float],
         combination_size: int,
+        maximal_load: float,
         nonneg_demand_index_list: list[float] = None,
     ) -> bool:
         """Implements a "looser" version of is_demand_vector_covered().
@@ -148,13 +154,13 @@ class StorageDesign:
                 node_id_set |= self.obj_id_to_node_id_set_map[i]
                 cum_demand += demand_vector[i]
 
-            if len(node_id_set) < math.ceil(cum_demand):
-                # log(WARNING, "Not covered",
-                #     demand_vector=demand_vector,
-                #     cum_demand=cum_demand,
-                #     index_combination=index_combination,
-                #     node_id_set=node_id_set,
-                # )
+            if len(node_id_set) * maximal_load < math.ceil(cum_demand):
+                log(WARNING, "Not covered",
+                    # demand_vector=demand_vector,
+                    cum_demand=cum_demand,
+                    index_combination=index_combination,
+                    node_id_set=node_id_set,
+                )
                 return False
 
         return True

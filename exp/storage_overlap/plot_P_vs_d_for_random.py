@@ -16,7 +16,7 @@ from src.sim import random_variable
 from src.utils.plot import *
 
 
-USE_CVXPY = True  # False
+USE_CVXPY = False
 
 
 def plot_P_vs_d(
@@ -184,6 +184,7 @@ def plot_P_vs_d_as_n_gets_large(
     d_func_label: str,
     maximal_load: float,
     plot_sim: bool,
+    plot_model: bool,
     num_samples: int = None,
     num_sim_run: int = None,
 ):
@@ -192,6 +193,7 @@ def plot_P_vs_d_as_n_gets_large(
         d_func_label=d_func_label,
         maximal_load=maximal_load,
         plot_sim=plot_sim,
+        plot_model=plot_model,
         num_samples=num_samples,
         num_sim_run=num_sim_run,
     )
@@ -215,16 +217,17 @@ def plot_P_vs_d_as_n_gets_large(
 
         color = next(dark_color_cycle)
 
-        for n in [10, 100, 200, 500]:
+        # for n in [10, 100, 200, 500]:
         # for n in [10, 100, 200, 500, 1000, 2000, 5000, 8000, 10000]:
-        # for n in [10 ** p for p in range(2, 6)]:
+        for n in [10 ** p for p in range(2, 6)]:
             d = max(1, d_func(n))
             log(DEBUG, ">>", n=n, d=d)
 
             n_list.append(n)
 
             if plot_sim:
-                storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
+                # storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
+                storage_design = design.RandomBlockDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
 
                 demand_vector_sampler = demand.DemandVectorSamplerWithGeneralObjDemands(
                     num_objs=n,
@@ -241,6 +244,9 @@ def plot_P_vs_d_as_n_gets_large(
                 E_P = numpy.mean(P_list)
                 E_P_list.append(E_P)
                 std_P_list.append(numpy.std(P_list))
+
+            if plot_model is False:
+                continue
 
             if isinstance(demand_rv, random_variable.Exponential):
                 E_demand = 1 / demand_rv.mu
@@ -299,8 +305,8 @@ def plot_P_vs_d_as_n_gets_large(
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    # for E_demand in numpy.linspace(0.1, maximal_load, 3):
-    for E_demand in numpy.linspace(maximal_load * 0.9, maximal_load, 3):
+    for E_demand in numpy.linspace(0.1, maximal_load, 3):
+    # for E_demand in numpy.linspace(maximal_load * 0.9, maximal_load, 3):
     # for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
         # label = fr"$\mu = {mu}$"
@@ -361,7 +367,7 @@ if __name__ == "__main__":
     # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
     # d_func_label = r"\log(n)^{1/2}"
 
-    power = 0.7
+    power = 0.8
     d_func = lambda n : math.floor(math.log(n) ** power)
     d_func_label = fr"\log(n)^{power}"
 
@@ -379,6 +385,7 @@ if __name__ == "__main__":
         d_func_label=d_func_label,
         maximal_load=0.7,
         num_samples=3,
-        num_sim_run=30,
+        num_sim_run=50,
         plot_sim=True,
+        plot_model=False,
     )
