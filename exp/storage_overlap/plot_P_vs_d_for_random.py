@@ -16,7 +16,7 @@ from src.sim import random_variable
 from src.utils.plot import *
 
 
-USE_CVXPY = False
+STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.demand_assigner
 
 
 def plot_P_vs_d(
@@ -65,7 +65,13 @@ def plot_P_vs_d(
             d_list.append(d)
 
             if plot_sim:
-                storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
+                storage_design = design.RandomExpanderDesign(
+                    k=n,
+                    n=n,
+                    d=d,
+                    use_cvxpy=USE_CVXPY,
+                    use_demand_assigner=USE_DEMAND_ASSIGNER,
+                )
 
                 demand_vector_sampler = demand.DemandVectorSamplerWithGeneralObjDemands(
                     num_objs=n,
@@ -226,8 +232,13 @@ def plot_P_vs_d_as_n_gets_large(
             n_list.append(n)
 
             if plot_sim:
-                # storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
-                storage_design = design.RandomBlockDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
+                # storage_design = design.RandomExpanderDesign(
+                storage_design = design.RandomBlockDesign(
+                    k=n,
+                    n=n,
+                    d=d,
+                    strategy_to_check_if_demand_covered=STRATEGY_TO_CHECK_IF_DEMAND_COVERED,
+                )
 
                 demand_vector_sampler = demand.DemandVectorSamplerWithGeneralObjDemands(
                     num_objs=n,

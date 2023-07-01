@@ -1,6 +1,7 @@
 import abc
 import collections
 import dataclasses
+import enum
 import itertools
 import joblib
 import math
@@ -9,6 +10,7 @@ import random
 from typing import Generator
 
 from src.service_rate import (
+    demand_assigner,
     service_rate,
     service_rate_w_replica,
     storage_scheme as storage_scheme_module,
@@ -18,18 +20,28 @@ from src.utils import storage_object
 from src.utils.debug import *
 
 
+class StrategyToCheckIfDemandCovered(enum.Enum):
+    cvxpy = "cvxpy"
+    demand_assigner = "demand_assigner"
+
+
 @dataclasses.dataclass
 class StorageDesign:
     k: int
     n: int
 
-    use_cvxpy: bool
+    strategy_to_check_if_demand_covered: StrategyToCheckIfDemandCovered
     obj_id_to_node_id_set_map: dict[int, set[int]] = dataclasses.field(init=False)
 
     def __post_init__(self):
-        log(WARNING, "", use_cvxpy=self.use_cvxpy)
-        if self.use_cvxpy:
+        log(WARNING, "", strategy_to_check_if_demand_covered=self.strategy_to_check_if_demand_covered)
+        if self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.cvxpy:
             self.service_rate_inspector = self.get_service_rate_inspector()
+        elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.demand_assigner:
+            self.demand_assigner = demand_assigner.DemandAssigner(
+                obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
+                demand_delta=0.01,
+            )
 
     def frac_of_demand_vectors_covered(
         self,
@@ -91,12 +103,18 @@ class StorageDesign:
     ) -> bool:
         # log(DEBUG, "Started", demand_vector=demand_vector)
 
-        if self.use_cvxpy:
+        if self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.cvxpy:
             # log(DEBUG, "Will use service_rate_inspector.is_in_cap_region()")
             # load_across_nodes = self.service_rate_inspector.load_across_nodes(demand_vector)
             # log(DEBUG, "", load_across_nodes=load_across_nodes)
             return self.service_rate_inspector.is_in_cap_region(
                 obj_demand_list=demand_vector, maximal_load=maximal_load
+            )
+
+        elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.demand_assigner:
+            return self.demand_assigner.is_in_cap_region(
+                obj_demand_list=demand_vector,
+                maximal_load=maximal_load,
             )
 
         return self.is_demand_vector_covered_w_service_choice_union(
