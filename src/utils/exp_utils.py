@@ -170,6 +170,7 @@ def plot_P_for_given_params(
             E_frac_of_demand_vectors_covered_list=E_frac_of_demand_vectors_covered_list,
             std_frac_of_demand_vectors_covered_list=std_frac_of_demand_vectors_covered_list,
             P_ub_list=P_ub_list,
+            P_lb_list=P_lb_list,
         )
 
         color = next(dark_color_cycle)
@@ -184,11 +185,11 @@ def plot_P_for_given_params(
     use_cvxpy = True
 
     storage_design_and_model_list = [
-        (
-            design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-            # model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-            model.ClusteringDesignModel(k=k, n=n, d=d, b=1)
-        ),
+        # (
+        #     design.ClusteringDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+        #     # model.ClusteringDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        #     model.ClusteringDesignModel(k=k, n=n, d=d, b=1)
+        # ),
 
         # (
         #     design.CyclicDesign(k=k, n=n, d=d, shift_size=1, use_cvxpy=use_cvxpy),
@@ -200,13 +201,13 @@ def plot_P_for_given_params(
         #     model.RandomDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
         # ),
 
-        # (
-        #     design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
-        #     model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
-        # ),
+        (
+            design.RandomBlockDesign(k=k, n=n, d=d, use_cvxpy=use_cvxpy),
+            model.BlockDesignModelForGivenDemandDistribution(k=k, n=n, d=d)
+        ),
     ]
 
-    run_sim = False  # True
+    run_sim = True
     for storage_design, storage_model in storage_design_and_model_list:
         plot_(storage_design=storage_design, storage_model=storage_model, run_sim=run_sim)
 

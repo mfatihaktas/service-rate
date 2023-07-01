@@ -67,17 +67,17 @@ def manage_plot_P_w_joblib():
             maximal_load=1,
             demand_dist=demand_dist,
             plot_ub=False,  # False
-            plot_lb=True,  # False
+            plot_lb=False,  # False
             num_samples=100,  # 300,
             # num_samples=1000,
             num_sim_run=3,
         )
         for demand_dist in [
             # exp_utils.DemandDistribution.Bernoulli,
-            # exp_utils.DemandDistribution.Exp,
+            exp_utils.DemandDistribution.Exp,
             # exp_utils.DemandDistribution.Pareto,
             # exp_utils.DemandDistribution.TPareto,
-            exp_utils.DemandDistribution.Uniform,
+            # exp_utils.DemandDistribution.Uniform,
         ]
     )
 
