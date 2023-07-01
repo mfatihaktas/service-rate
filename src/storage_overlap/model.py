@@ -935,14 +935,14 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
 
         return sum(
             (
-                self.prob_span(num_objs=num_objs, span=span) ** (self.n / num_objs)
+                self.prob_span(num_objs=num_objs, span=span)
                 * self.prob_cum_demand_leq_cum_supply(
                     num_objs=num_objs,
                     cum_supply=(span * maximal_load),
                 )
             )
             for span in range(self.d, min(num_objs * self.d, self.n) + 1)
-        )
+        ) ** (self.n / num_objs)
 
     def prob_span(self, num_objs: int, span: int) -> float:
         """Uses the following results:
@@ -985,6 +985,19 @@ class RandomDesignModelForExpDemand(ReplicaDesignModel):
         # return z_rv.cdf(non_empty_cells + 0.1) - z_rv.cdf(non_empty_cells - 0.1)
 
     @methodtools.lru_cache()
+    def prob_span_for_two_objs(self, span: int) -> float:
+        n_ = mp.mpf(f"{self.n}")
+        d_ = mp.mpf(f"{self.d}")
+        span_ = mp.mpf(f"{span}")
+
+        x = span_ - d_
+        return (
+            mp.binomial(d_, d_ - x)
+            * mp.binomial(n_ - d_, x)
+            / mp.binomial(n_, d_)
+        )
+
+    @methodtools.lru_cache()
     def prob_cum_demand_leq_cum_supply(
         self,
         num_objs: int,
@@ -999,20 +1012,27 @@ class RandomDesignModelForExpDemand_w2objs(RandomDesignModelForExpDemand):
         self,
         maximal_load: float = 1,
     ) -> float:
+        # cum_prob_span_for_two_objs = sum(
+        #     self.prob_span_for_two_objs(span=span)
+        #     for span in range(self.d, 2 * self.d + 1)
+        # )
+        # log(DEBUG, "", cum_prob_span_for_two_objs=cum_prob_span_for_two_objs)
+
         num_objs = 2
         return sum(
             (
                 min(
                     1,
-                    self.prob_span(num_objs=num_objs, span=span)
+                    # self.prob_span(num_objs=num_objs, span=span)
+                    self.prob_span_for_two_objs(span=span)
                     * self.prob_cum_demand_leq_cum_supply(
                         num_objs=num_objs,
                         cum_supply=(span * maximal_load),
                     )
-                ) ** (self.n / num_objs)
+                )
             )
             for span in range(self.d, 2 * self.d + 1)
-        )
+        ) ** (self.n / num_objs)
 
 
 @dataclasses.dataclass

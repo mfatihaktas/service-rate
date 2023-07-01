@@ -183,11 +183,17 @@ def plot_P_vs_d_as_n_gets_large(
     d_func: Callable[[int], int],
     d_func_label: str,
     maximal_load: float,
+    plot_sim: bool,
+    num_samples: int = None,
+    num_sim_run: int = None,
 ):
     log(INFO, "Started",
         d_func=d_func,
         d_func_label=d_func_label,
         maximal_load=maximal_load,
+        plot_sim=plot_sim,
+        num_samples=num_samples,
+        num_sim_run=num_sim_run,
     )
 
     min_P = float("Inf")
@@ -197,27 +203,52 @@ def plot_P_vs_d_as_n_gets_large(
         label: str,
     ):
         nonlocal min_P
-        log(DEBUG, f"> demand_rv= {demand_rv}")
+        log(DEBUG, ">",
+            demand_rv=demand_rv,
+            average_demand=demand_rv.mean(),
+        )
 
         n_list = []
+        E_P_list, std_P_list = [], []
         P_upper_bound_list = []
         P_upper_bound_approx_list = []
 
         color = next(dark_color_cycle)
 
-        for n in [10, 100, 200, 500, 1000, 2000, 5000, 8000, 10000]:
+        for n in [10, 100, 200, 500]:
+        # for n in [10, 100, 200, 500, 1000, 2000, 5000, 8000, 10000]:
+        # for n in [10 ** p for p in range(2, 6)]:
             d = max(1, d_func(n))
             log(DEBUG, ">>", n=n, d=d)
 
             n_list.append(n)
+
+            if plot_sim:
+                storage_design = design.RandomExpanderDesign(k=n, n=n, d=d, use_cvxpy=USE_CVXPY)
+
+                demand_vector_sampler = demand.DemandVectorSamplerWithGeneralObjDemands(
+                    num_objs=n,
+                    demand_rv=demand_rv,
+                )
+                P_list = sim.sim_frac_of_demand_vectors_covered(
+                    demand_vector_sampler=demand_vector_sampler,
+                    storage_design=storage_design,
+                    num_samples=num_samples,
+                    num_sim_run=num_sim_run,
+                    maximal_load=maximal_load,
+                )
+
+                E_P = numpy.mean(P_list)
+                E_P_list.append(E_P)
+                std_P_list.append(numpy.std(P_list))
 
             if isinstance(demand_rv, random_variable.Exponential):
                 E_demand = 1 / demand_rv.mu
 
                 # Model with complexes
                 # storage_model = model.RandomDesignModelForExpDemand(k=n, n=n, d=d, average_object_demand=E_demand)
-                # storage_model = model.RandomDesignModelForExpDemand_w2objs(k=n, n=n, d=d, average_object_demand=E_demand)
-                storage_model = model.RandomDesignModelForExpDemand_wApprox_w2objs(k=n, n=n, d=d, average_object_demand=E_demand)
+                storage_model = model.RandomDesignModelForExpDemand_w2objs(k=n, n=n, d=d, average_object_demand=E_demand)
+                # storage_model = model.RandomDesignModelForExpDemand_wApprox_w2objs(k=n, n=n, d=d, average_object_demand=E_demand)
 
                 P_upper_bound = storage_model.prob_serving_upper_bound_w_complexes(
                     maximal_load=maximal_load,
@@ -227,14 +258,15 @@ def plot_P_vs_d_as_n_gets_large(
                 )
 
                 # Approx
-                storage_model = model.RandomDesignModelForExpDemand_wApprox(k=n, n=n, d=d, average_object_demand=E_demand)
-                P_upper_bound_approx = storage_model.prob_serving_upper_bound_w_complexes(
-                    maximal_load=maximal_load,
-                    # max_num_objs=n // 3,
-                    max_num_objs=n,
-                    # max_num_objs=30,
-                    # max_num_objs=2,
-                )
+                P_upper_bound_approx = 0
+                # storage_model = model.RandomDesignModelForExpDemand_wApprox(k=n, n=n, d=d, average_object_demand=E_demand)
+                # P_upper_bound_approx = storage_model.prob_serving_upper_bound_w_complexes(
+                #     maximal_load=maximal_load,
+                #     # max_num_objs=n // 3,
+                #     max_num_objs=n,
+                #     # max_num_objs=30,
+                #     # max_num_objs=2,
+                # )
 
             elif isinstance(demand_rv, random_variable.Bernoulli):
                 pass
@@ -247,14 +279,19 @@ def plot_P_vs_d_as_n_gets_large(
 
         log(INFO, f"demand_rv= {demand_rv}",
             n_list=n_list,
+            E_P_list=E_P_list,
             P_upper_bound_list=P_upper_bound_list,
             P_upper_bound_approx_list=P_upper_bound_approx_list,
         )
 
+        if plot_sim:
+            plot.errorbar(n_list, E_P_list, yerr=std_P_list, label=f"{label}", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+            min_P = min(min_P, min(E_P_list))
+
         plot.plot(n_list, P_upper_bound_list, label=f"{label}, UB", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
-        plot.plot(n_list, P_upper_bound_approx_list, label=f"{label}, UB-approx", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
+        # plot.plot(n_list, P_upper_bound_approx_list, label=f"{label}, UB-approx", color=color, marker=next(marker_cycle), linestyle="dotted", lw=2, mew=3, ms=5)
         min_P = min(min_P, min(P_upper_bound_list))
-        min_P = min(min_P, min(P_upper_bound_approx_list))
+        # min_P = min(min_P, min(P_upper_bound_approx_list))
 
         plot.xticks(n_list)
 
@@ -262,7 +299,8 @@ def plot_P_vs_d_as_n_gets_large(
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    for E_demand in numpy.linspace(0.1, maximal_load, 5):
+    # for E_demand in numpy.linspace(0.1, maximal_load, 3):
+    for E_demand in numpy.linspace(maximal_load * 0.9, maximal_load, 3):
     # for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
         # label = fr"$\mu = {mu}$"
@@ -317,14 +355,21 @@ if __name__ == "__main__":
     # d_func = lambda n : math.ceil(math.log(math.log(math.log(n))))
     # d_func_label = r"\log(\log(\log(n)))"
 
-    d_func = lambda n : math.ceil(math.log(math.log(n)))
-    d_func_label = r"\log(\log(n))"
+    # d_func = lambda n : math.ceil(math.log(math.log(n)))
+    # d_func_label = r"\log(\log(n))"
+
+    # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
+    # d_func_label = r"\log(n)^{1/2}"
+
+    power = 0.7
+    d_func = lambda n : math.floor(math.log(n) ** power)
+    d_func_label = fr"\log(n)^{power}"
 
     # d_func = lambda n : math.ceil(math.log(n))
     # d_func_label = r"\log(n)"
 
-    # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
-    # d_func_label = r"\log(n)^{1/2}"
+    # d_func = lambda n : math.ceil(math.log(n)**2)
+    # d_func_label = r"\log(n)^2"
 
     # d_func = lambda n : math.ceil(n / 2)
     # d_func_label = r"n / 2"
@@ -333,4 +378,7 @@ if __name__ == "__main__":
         d_func=d_func,
         d_func_label=d_func_label,
         maximal_load=0.7,
+        num_samples=3,
+        num_sim_run=30,
+        plot_sim=True,
     )
