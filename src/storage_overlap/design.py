@@ -472,8 +472,9 @@ class RandomBlockDesign(ReplicaDesign):
             ]
         )
 
-        for obj_id in obj_id_queue:
-            # log(DEBUG, f"> obj_id= {obj_id}, rep_id= {rep_id}")
+        while obj_id_queue:
+            obj_id = obj_id_queue.pop()
+            # log(DEBUG, f"> obj_id= {obj_id}")
 
             node_id = random.randint(0, self.n - 1)
             # log(DEBUG, f"node_id= {node_id}")
@@ -496,22 +497,31 @@ class RandomBlockDesign(ReplicaDesign):
                     #       obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
                     # )
 
-                    for node_id in range(self.n):
-                        if node_id in self.obj_id_to_node_id_set_map[obj_id]:
+                    for node_id_ in range(self.n):
+                        if node_id_ in self.obj_id_to_node_id_set_map[obj_id]:
                             continue
 
+                        node_id = node_id_
                         obj_id_to_swap_set = node_id_to_obj_id_set_map[node_id]
                         obj_id_to_swap = next(iter(obj_id_to_swap_set))
 
                         self.obj_id_to_node_id_set_map[obj_id_to_swap].remove(node_id)
-                        self.obj_id_to_node_id_set_map[obj_id].add(node_id)
+                        node_id_to_obj_id_set_map[node_id].remove(obj_id_to_swap)
 
-                        obj_id_queue.append(obj_id_to_swap)
+                        obj_id_queue.appendleft(obj_id_to_swap)
+
+                        break
+
+                    break
 
             self.obj_id_to_node_id_set_map[obj_id].add(node_id)
             node_id_to_obj_id_set_map[node_id].add(obj_id)
 
         super().__post_init__()
+
+        # log(DEBUG, "",
+        #     obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
+        # )
 
     def __repr__(self):
         return (
