@@ -28,7 +28,8 @@
 # python exp/storage_overlap/exp_w_2_active_objs.py
 
 # python exp/storage_overlap/plot_P_vs_d.py
-python exp/storage_overlap/plot_P_vs_d_for_random.py
+# python exp/storage_overlap/plot_P_vs_d_for_random.py
+python exp/storage_overlap/plot_overlap_size_dist.py
 
 # python exp/storage_search/exp_search_with_replicas_and_mds.py
 # python exp/storage_search/exp_storage_searcher.py

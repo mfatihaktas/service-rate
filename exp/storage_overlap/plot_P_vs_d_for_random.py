@@ -234,8 +234,8 @@ def plot_P_vs_d_as_n_gets_large(
             n_list.append(n)
 
             if plot_sim:
-                # storage_design = design.RandomBlockDesign(
-                storage_design = design.RandomExpanderDesign(
+                # storage_design = design.RandomExpanderDesign(
+                storage_design = design.RandomBlockDesign(
                     k=n,
                     n=n,
                     d=d,
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
     # d_func_label = r"\log(n)^{1/2}"
 
-    power = 1
+    power = 0.9
     d_func = lambda n : math.floor(math.log(n) ** power)
     d_func_label = fr"\log(n)^{power}"
 
