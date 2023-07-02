@@ -12,6 +12,12 @@ def get_node_overlap_size_to_E_and_std_frac_map(
     d: int,
     num_samples: int,
 ):
+    log(INFO, "Started",
+        n=n,
+        d=d,
+        num_samples=num_samples,
+    )
+
     overlap_size_to_frac_list_map = collections.defaultdict(list)
     for _ in range(num_samples):
         storage_design = design.RandomBlockDesign(
@@ -26,6 +32,7 @@ def get_node_overlap_size_to_E_and_std_frac_map(
         for overlap_size, count in overlap_size_to_count_map.items():
             overlap_size_to_frac_list_map[overlap_size].append(count / total_count)
 
+    log(INFO, "Done")
     return {
         overlap_size: (numpy.mean(frac_list), numpy.std(frac_list))
         for overlap_size, frac_list in overlap_size_to_frac_list_map.items()
@@ -90,9 +97,48 @@ def plot_overlap_size_dist_for_random_block_design(
     log(INFO, "Done")
 
 
+def print_overlap_size_dist_for_random_block_design(
+    num_samples: int,
+):
+    log(INFO, "Started",
+        num_samples=num_samples,
+    )
+
+    n_and_d_list = [
+        (n, d)
+        for n in [100, 500]
+        # for d in range(2, 11)
+        for d in range(2, 6)
+    ]
+
+    n_and_d_to_overlap_size_to_E_and_std_frac_map = {}
+    for (n, d) in n_and_d_list:
+        log(DEBUG, f"> n= {n}, d= {d}")
+
+        overlap_size_to_E_and_std_frac_map = get_node_overlap_size_to_E_and_std_frac_map(
+            n=n,
+            d=d,
+            num_samples=num_samples,
+        )
+
+        log(INFO, f"> n= {n}, d= {d}",
+            overlap_size_to_E_and_std_frac_map=overlap_size_to_E_and_std_frac_map,
+        )
+
+        n_and_d_to_overlap_size_to_E_and_std_frac_map[(n, d)] = overlap_size_to_E_and_std_frac_map
+
+    log(INFO, "Done",
+        n_and_d_to_overlap_size_to_E_and_std_frac_map=n_and_d_to_overlap_size_to_E_and_std_frac_map,
+    )
+
+
 if __name__ == "__main__":
-    plot_overlap_size_dist_for_random_block_design(
-        n=1000,
-        d=5,
+    # plot_overlap_size_dist_for_random_block_design(
+    #     n=1000,
+    #     d=5,
+    #     num_samples=50,
+    # )
+
+    print_overlap_size_dist_for_random_block_design(
         num_samples=50,
     )
