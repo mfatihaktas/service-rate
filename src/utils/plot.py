@@ -1,3 +1,12 @@
+"""
+Note:
+  lifetime_l = numpy.sort(lifetime_l)
+  print("len(lifetime_l)= {}".format(len(lifetime_l) ) )
+  # plot.hist(lifetime_l, bins=100, histtype='step', normed=True, lw=2)
+  x_l = lifetime_l[::-1]
+  y_l = numpy.arange(lifetime_l.size)/lifetime_l.size
+"""
+
 import colorsys
 import itertools
 import matplotlib.colors as matplotlib_colors
