@@ -42,7 +42,7 @@ class StorageDesign:
         elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.demand_assigner:
             self.demand_assigner = demand_assigner.DemandAssigner(
                 obj_id_to_node_id_set_map=self.obj_id_to_node_id_set_map,
-                demand_delta=0.01,
+                demand_delta=0.1,
             )
 
     def frac_of_demand_vectors_covered(
@@ -114,7 +114,7 @@ class StorageDesign:
             )
 
         elif self.strategy_to_check_if_demand_covered == StrategyToCheckIfDemandCovered.demand_assigner:
-            return self.demand_assigner.is_in_cap_region(
+            return self.demand_assigner.is_in_cap_region_faster(
                 obj_demand_list=demand_vector,
                 maximal_load=maximal_load,
             )

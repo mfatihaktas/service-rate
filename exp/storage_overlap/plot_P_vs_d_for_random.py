@@ -16,9 +16,9 @@ from src.sim import random_variable
 from src.utils.plot import *
 
 
-STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.cvxpy
+# STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.cvxpy
 # STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.service_choice_union
-# STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.demand_assigner
+STRATEGY_TO_CHECK_IF_DEMAND_COVERED = design.StrategyToCheckIfDemandCovered.demand_assigner
 
 
 def plot_P_vs_d(
@@ -225,9 +225,9 @@ def plot_P_vs_d_as_n_gets_large(
 
         color = next(dark_color_cycle)
 
-        for n in [10, 100, 200, 500]:
+        # for n in [10, 100, 200, 500]:
         # for n in [10, 100, 200, 500, 1000, 2000, 5000, 8000, 10000]:
-        # for n in [10 ** p for p in range(2, 6)]:
+        for n in [10 ** p for p in range(2, 6)]:
             d = max(1, d_func(n))
             log(DEBUG, ">>", n=n, d=d)
 
@@ -319,7 +319,7 @@ def plot_P_vs_d_as_n_gets_large(
 
     # rho ~ Exp
     demand_dist = "\mathrm{Exp}"
-    for E_demand in numpy.linspace(0.1, maximal_load, 3):
+    for E_demand in numpy.linspace(0.1, maximal_load * 0.5, 3):
     # for E_demand in numpy.linspace(maximal_load * 0.9, maximal_load, 3):
     # for E_demand in [0.2, 0.3, 0.4]:
         demand_rv = random_variable.Exponential(mu=1 / E_demand)
@@ -381,7 +381,7 @@ if __name__ == "__main__":
     # d_func = lambda n : math.ceil(math.sqrt(math.log(n)))
     # d_func_label = r"\log(n)^{1/2}"
 
-    power = 2
+    power = 1
     d_func = lambda n : math.floor(math.log(n) ** power)
     d_func_label = fr"\log(n)^{power}"
 
